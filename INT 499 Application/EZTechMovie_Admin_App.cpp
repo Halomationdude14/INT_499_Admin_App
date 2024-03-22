@@ -2,7 +2,7 @@
 /*
 INT 499 Capstone for Information Technology
 Week 3 - Interactive Assignment
-Date: 2024-03-21
+Date: 2024-03-22
 Author: Paul Oram
 */
 
@@ -17,7 +17,7 @@ using namespace std;
 
 // Default constructor
 EZTechMovie_Admin_App::EZTechMovie_Admin_App() {
-	name = "none";
+	title = "none";
 	castSize = 0;
 	rating = "";
 	answer = 'a';
@@ -74,7 +74,7 @@ void EZTechMovie_Admin_App::SetAnswer() {
 void EZTechMovie_Admin_App::SetMovieTitle() {
 	cout << "\nMovie Title: ";
 	cin.ignore();
-	getline(cin, name);
+	getline(cin, title);
 }
 
 // Purpose: Obtains user's input and sets the number of main cast members in the movie.
@@ -123,6 +123,7 @@ void EZTechMovie_Admin_App::SetRating() {
 		cin >> rating;
 		rating = strToUpperCase(rating); // This is done to ensure that all letters in the user's input are converted to CAPITALS to be compatible with the vector "movieRatings".
 
+		// Can improve this segment of code. Something similar to "for (a in b)" which resolves to true/false.
 		for (int i = 0; i < movieRatings.size(); ++i) {
 			if (rating == movieRatings.at(i)) {
 				isTrue = true;
@@ -141,30 +142,53 @@ void EZTechMovie_Admin_App::SetRating() {
 	}
 }
 
+// Purpose: To add a movie to the vector of movie objects.
+void EZTechMovie_Admin_App::addMovie(EZTechMovie_Admin_App movie) {
+	movieList.push_back(movie);
+}
+
 // Purpose: To display a movie's information in the terminal output.
-void EZTechMovie_Admin_App::displayMovie() {
-	castSize = cast.size();
-	cout << "\n-----" << "\nYou entered..." << endl;
-	cout << "\nMovie Title: " << name;
-	cout << "\nMain Cast: " << castSize;
-	cout << "\nCast Members: ";
+void EZTechMovie_Admin_App::displayMovies() {
+	for (int i = 0; i << movieList.size(); ++i) {
+		cout << "\n-----" << "\nYou entered..." << endl;
+		cout << "\nMovie Title: " << movieList[i].title;
+		cout << "\nMain Cast: " << movieList[i].castSize;
+		cout << "\nCast Members: ";
 
-	for (int i = 0; i < castSize; ++i) {
-		cout << "\n\t" << (i + 1) << ". " << cast[i];
+		for (int i = 0; i < movieList[i].castSize; ++i) {
+			cout << "\n\t" << (i + 1) << ". " << movieList[i].cast[i];
+		}
+		cout << "\nRating: " << movieList[i].rating << "\n-----" << endl;
 	}
-
-	cout << "\nRating: " << rating << "\n-----" << endl;
 }
 
 // Purpose: Recursive main method used to run app. If user's input is "Y", program executes. If "N", program terminates.
-void EZTechMovie_Admin_App::storeMovie() {
+/*
+void EZTechMovie_Admin_App::run() {
 	SetAnswer();
-	if (answer == 'Y') {
+	while (answer == 'Y') {
 		SetMovieTitle();
 		SetCastSize();
 		SetCastMembers();
 		SetRating();
-		displayMovie();
-		return storeMovie(); // Recalls this function to ask for user input again
+		SetAnswer();
+		//return run(); // Recalls this function to ask for user input again
 	}
+	displayMovies();
+}
+*/
+
+// Purpose: Recursive main method used to run app. If user's input is "Y", program executes. If "N", program terminates.
+void EZTechMovie_Admin_App::run() {
+	EZTechMovie_Admin_App newMovie;
+	newMovie.SetAnswer();
+	while (newMovie.answer == 'Y') {
+		newMovie.SetMovieTitle();
+		newMovie.SetCastSize();
+		newMovie.SetCastMembers();
+		newMovie.SetRating();
+		newMovie.SetAnswer();
+		//return run(); // Recalls this function to ask for user input again
+	}
+	newMovie.displayMovies();
 }

@@ -2,7 +2,7 @@
 /*
 INT 499 Capstone for Information Technology
 Week 3 - Interactive Assignment
-Date: 2024-03-21
+Date: 2024-03-22
 Author: Paul Oram
 */ 
 
@@ -16,6 +16,6 @@ using namespace std;
 int main() {
 	EZTechMovie_Admin_App newMovie;
 	cout << "\nThank you for choosing EZTechMovie!" << endl;
-	newMovie.storeMovie();
+	newMovie.run();
 	return 0;
 }

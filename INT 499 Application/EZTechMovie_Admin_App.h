@@ -2,7 +2,7 @@
 /*
 INT 499 Capstone for Information Technology
 Week 3 - Interactive Assignment
-Date: 2024-03-21
+Date: 2024-03-22
 Author: Paul Oram
 */
 
@@ -20,16 +20,18 @@ class EZTechMovie_Admin_App {
 		void SetCastSize();
 		void SetCastMembers();
 		void SetRating();
-		void displayMovie();
-		void storeMovie();
+		void addMovie(EZTechMovie_Admin_App movie);
+		void displayMovies();
+		void run();
+		char answer;
+		vector<EZTechMovie_Admin_App> movieList; // Stores all movies that the user adds to the DB
 
 	protected:
-		string name;
+		string title;
 		int castSize;
 		vector<string> cast;
 		string rating;
-		char answer;
 		string userInput;
-		vector<string> movieRatings;
+		vector<string> movieRatings; // Stores all acceptable values for a movie's rating
 };
 
