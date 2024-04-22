@@ -21,6 +21,9 @@
     <ClCompile Include="EZTechMovie_Admin_App.cpp">
       <Filter>Resource Files</Filter>
     </ClCompile>
+    <ClCompile Include="EZTechMovie_Add_New_Movie.cpp">
+      <Filter>Resource Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="EZTechMovie_Admin_App.h">

@@ -1,10 +1,11 @@
 
 /*
 INT 499 Capstone for Information Technology
-Week 3 - Interactive Assignment
-Date: 2024-03-22
+Interactive Assignment
+Date: 2024-04-22
 Author: Paul Oram
-*/ 
+NOTE: This is a modified version of the original code that has been reworked to integrate into the final project (MySQL DB).
+*/
 
 #include <iostream>
 using namespace std;
@@ -14,8 +15,8 @@ using namespace std;
 
 // Purpose: Main Function
 int main() {
-	EZTechMovie_Admin_App newMovie;
+	EZTechMovie_Admin_App newInstance;
 	cout << "\nThank you for choosing EZTechMovie!" << endl;
-	newMovie.run();
+	newInstance.run();
 	return 0;
 }

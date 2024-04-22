@@ -128,6 +128,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="EZTechMovie_Add_New_Movie.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="EZTechMovie_Admin_App.cpp" />
   </ItemGroup>
