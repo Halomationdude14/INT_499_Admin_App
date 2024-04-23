@@ -135,6 +135,9 @@
   <ItemGroup>
     <ClInclude Include="EZTechMovie_Admin_App.h" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\..\..\..\!Temp Folder!\Notepad++ Files\Admin App Overview.txt" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
