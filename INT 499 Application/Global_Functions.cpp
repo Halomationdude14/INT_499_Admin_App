@@ -18,15 +18,39 @@ using namespace std;
 
 // Default Constructor
 Global_Functions::Global_Functions() {
-	// Add variables
+	string tempStr = ""; //general use string
 }
 
-// Purpose: a
+// Purpose: Convert all chars in a string to UPPER case.
 string Global_Functions::strToUpperCase(string str) {
-	//Add content
+	tempStr = "";
+	char c;
+
+	for (int i = 0; i < str.size(); ++i) {
+		c = str.at(i);
+		if (isalpha(c) and islower(c)) {
+			tempStr.push_back(toupper(c));
+		}
+		else {
+			tempStr.push_back(c);
+		}
+	}
+	return tempStr;
 }
 
-// Purpose: a
+// Purpose: Convert all chars in a string to LOWER case.
 string Global_Functions::strToLowerCase(string str) {
-	//Add content
+	tempStr = "";
+	char c;
+
+	for (int i = 0; i < str.size(); ++i) {
+		c = str.at(i);
+		if (isalpha(c) and isupper(c)) {
+			tempStr.push_back(tolower(c));
+		}
+		else {
+			tempStr.push_back(c);
+		}
+	}
+	return tempStr;
 }

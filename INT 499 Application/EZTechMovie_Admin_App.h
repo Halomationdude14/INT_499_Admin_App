@@ -21,10 +21,9 @@ class Global_Functions {
 		Global_Functions();
 		string strToUpperCase(string);
 		string strToLowerCase(string);
-		// void a();
 
 	private:
-		// enter here
+		string tempStr;
 };
 
 /*
@@ -34,11 +33,13 @@ class Initialize_Program {
 
 	public:
 		Initialize_Program();
-		void run();
-		void login(string, string);
+		bool run();
+		bool verifyLogin(string, string);
 
 	protected:
-		// enter here
+		string Username;
+		string Password;
+		bool valid;
 };
 
 /*
@@ -52,10 +53,13 @@ class Main_Menu {
 
 	public:
 		Main_Menu();
+		bool validateInput(int);
 		void run();
 
 	protected:
-		// enter here
+		int userInput;
+		vector<int> menu_options;
+		bool valid;
 };
 
 /*

@@ -18,15 +18,39 @@ using namespace std;
 
 // Default Constructor
 Initialize_Program::Initialize_Program() {
-	// Add variables
+	string Username = "";
+	string Password = "";
+	bool valid = false;
 }
 
-// Purpose: a
-void Initialize_Program::run() {
-	//Add content
+/*
+* Purpose: Called from main.cpp to begin the program.Displays the initial greeting screen.
+* Takes in user credentials and passes it through a validation method.
+*/
+bool Initialize_Program::run() {
+	cout << endl << "####################################################################" << endl;
+	cout << "## Welcome to the EZTechMovie Database Administration Application ##" << endl;
+	cout << "####################################################################" << endl << endl;
+	cout << "\nEnter Admin Credentials to Log Into the Console -->" << endl;
+
+	cout << "Username: ";
+	cin >> Username;
+	cout << "Password: ";
+	cin >> Password;
+
+	valid = verifyLogin(Username, Password);
+
+	if (valid = true) {
+		return true;
+	}
+	return false;
 }
 
-// Purpose: a
-void Initialize_Program::login(string str_User, string str_Pass) {
-	//Add content
+// Purpose: Verifies user login credentials against DB records.
+bool Initialize_Program::verifyLogin(string user, string pass) {
+	// Future implementation
+	// Requires setup in DB
+	// Error handling: ensure more than 1 char
+
+	return true; //change to "false" after implementation
 }

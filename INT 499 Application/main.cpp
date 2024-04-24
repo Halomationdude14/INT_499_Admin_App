@@ -16,18 +16,21 @@ using namespace std;
 
 // Purpose: Main Function
 int main() {
+	Global_Functions fct;
 	Initialize_Program newInstance;
+	string userInput = "";
+	bool validLogin = false;
 
-	// Admin credentials will be verified through the DB*
-	auto User = ""; // Note that the user can login using either their Username or Email address.
-	auto Pass = "";
+	while (userInput != "exit") {
+		userInput = "";
+		validLogin = false;
 
-	cout << endl << "####################################################################" << endl;
-	cout << "## Welcome to the EZTechMovie Database Administration Application ##" << endl;
-	cout << "####################################################################" << endl;
-	cout << "\nEnter Admin Credentials to Log Into the Console -->" << endl;
+		while (validLogin = false) {
+			validLogin = newInstance.run();
+		}
 
-	newInstance.login(User, Pass);
+		// enter main menu.
+	}
 
 	return 0;
 }
