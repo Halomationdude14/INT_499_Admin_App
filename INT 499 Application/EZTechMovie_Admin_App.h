@@ -11,16 +11,34 @@ NOTE: This is a modified version of the original code that has been reworked to 
 #include <vector>
 #pragma once
 
+
+/*
+* Contains generic user defined methods/functions
+*/
+class Global_Functions {
+
+	public:
+		Global_Functions();
+		string strToUpperCase(string);
+		string strToLowerCase(string);
+		// void a();
+
+	private:
+		// enter here
+};
+
 /*
 * Handles user login and links to primary application.
 */
-class EZTechMovie_Admin_App {
+class Initialize_Program {
 
 	public:
+		Initialize_Program();
 		void run();
+		void login(string, string);
 
 	protected:
-
+		// enter here
 };
 
 /*
@@ -32,15 +50,16 @@ class EZTechMovie_Admin_App {
 */
 class Main_Menu {
 
-public:
-	void run();
+	public:
+		Main_Menu();
+		void run();
 
-protected:
-
+	protected:
+		// enter here
 };
 
 /*
-* 
+* Handles...
 */
 class Add_Movie {
 	
@@ -68,7 +87,33 @@ class Add_Movie {
 };
 
 /*
-* 
+* Hanldes all opperations found within the "[1] Display Data" option in the Main Menu
+*/
+class Display_Mode {
+
+	public:
+		Display_Mode();
+		void run();
+
+	protected:
+		// enter here
+};
+
+/*
+* Hanldes all opperations found within the "[2] Modify Data" option in the Main Menu
+*/
+class Edit_Mode {
+
+	public:
+		Edit_Mode();
+		void run();
+
+	protected:
+		// enter here
+};
+
+/*
+* Handles...
 */
 class a {
 
@@ -78,10 +123,6 @@ class a {
 	protected:
 
 };
-
-
-
-
 
 
 

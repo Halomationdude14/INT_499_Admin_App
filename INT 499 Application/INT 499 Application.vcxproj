@@ -128,9 +128,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="EZTechMovie_Add_New_Movie.cpp" />
+    <ClCompile Include="Add_Movie.cpp" />
+    <ClCompile Include="Display_Mode.cpp" />
+    <ClCompile Include="Edit_Mode.cpp" />
+    <ClCompile Include="Initialize_Program.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="EZTechMovie_Admin_App.cpp" />
+    <ClCompile Include="Global_Functions.cpp" />
+    <ClCompile Include="Main_Menu.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="EZTechMovie_Admin_App.h" />

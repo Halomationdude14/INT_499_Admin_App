@@ -13,16 +13,31 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Notes and Documentation">
+      <UniqueIdentifier>{99fcf2f5-62d9-4e32-a42d-78bd1ed4b29f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="EZTechMovie_Admin_App.cpp">
-      <Filter>Resource Files</Filter>
+    <ClCompile Include="Add_Movie.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="EZTechMovie_Add_New_Movie.cpp">
-      <Filter>Resource Files</Filter>
+    <ClCompile Include="Global_Functions.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Initialize_Program.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Main_Menu.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Display_Mode.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Edit_Mode.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -32,7 +47,7 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\..\..\..\!Temp Folder!\Notepad++ Files\Admin App Overview.txt">
-      <Filter>Source Files</Filter>
+      <Filter>Notes and Documentation</Filter>
     </Text>
   </ItemGroup>
 </Project>

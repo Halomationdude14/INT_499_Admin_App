@@ -8,6 +8,7 @@ NOTE: This is a modified version of the original code that has been reworked to 
 */
 
 #include <iostream>
+#include <string>
 using namespace std;
 
 #include "EZTechMovie_Admin_App.h"
@@ -15,8 +16,18 @@ using namespace std;
 
 // Purpose: Main Function
 int main() {
-	EZTechMovie_Admin_App newInstance;
-	cout << "\nThank you for choosing EZTechMovie!" << endl;
-	newInstance.run();
+	Initialize_Program newInstance;
+
+	// Admin credentials will be verified through the DB*
+	auto User = ""; // Note that the user can login using either their Username or Email address.
+	auto Pass = "";
+
+	cout << endl << "####################################################################" << endl;
+	cout << "## Welcome to the EZTechMovie Database Administration Application ##" << endl;
+	cout << "####################################################################" << endl;
+	cout << "\nEnter Admin Credentials to Log Into the Console -->" << endl;
+
+	newInstance.login(User, Pass);
+
 	return 0;
 }
