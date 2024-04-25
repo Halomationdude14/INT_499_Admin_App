@@ -16,21 +16,9 @@ using namespace std;
 
 // Purpose: Main Function
 int main() {
-	Global_Functions fct;
 	Initialize_Program newInstance;
-	string userInput = "";
-	bool validLogin = false;
-
-	while (userInput != "exit") {
-		userInput = "";
-		validLogin = false;
-
-		while (validLogin = false) {
-			validLogin = newInstance.run();
-		}
-
-		// enter main menu.
-	}
+	newInstance.run();
+	cout << "\n\nTest Run Complete";
 
 	return 0;
 }

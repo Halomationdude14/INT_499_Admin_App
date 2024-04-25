@@ -18,7 +18,7 @@ using namespace std;
 
 // Default Constructor
 Display_Mode::Display_Mode() {
-	// Add variables
+	Global_Functions fct;
 }
 
 // Purpose: a

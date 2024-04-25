@@ -9,7 +9,7 @@ NOTE: This is a modified version of the original code that has been reworked to 
 
 #include <iostream>
 #include <string>
-#include <exception>
+//#include <exception>
 #include <vector>
 using namespace std;
 
@@ -18,7 +18,7 @@ using namespace std;
 
 // Default Constructor
 Global_Functions::Global_Functions() {
-	string tempStr = ""; //general use string
+	tempStr = ""; //general use string
 }
 
 // Purpose: Convert all chars in a string to UPPER case.
@@ -54,3 +54,15 @@ string Global_Functions::strToLowerCase(string str) {
 	}
 	return tempStr;
 }
+
+// Purpose: Validate user input when navigating the menus.
+bool Global_Functions::validate_UserOption(vector<int> list, int num) {
+
+	for (auto& i : list) {
+		if (num == i) {
+			return true;
+		}
+	}
+	return false;
+}
+

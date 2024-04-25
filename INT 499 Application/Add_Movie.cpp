@@ -17,7 +17,7 @@ using namespace std;
 
 
 // Default constructor
-EZTechMovie_Admin_App::EZTechMovie_Admin_App() {
+Add_Movie::Add_Movie() {
 	title = "none";
 	castSize = 0;
 	rating = "";
@@ -32,7 +32,7 @@ EZTechMovie_Admin_App::EZTechMovie_Admin_App() {
 
 
 // Purpose: Converts all letters in a given string "str" to uppercase letters and ignores all other chars.
-string EZTechMovie_Admin_App::strToUpperCase(string str) {
+string Add_Movie::strToUpperCase(string str) {
 	string tempStr = "";
 	char c;
 
@@ -49,7 +49,7 @@ string EZTechMovie_Admin_App::strToUpperCase(string str) {
 }
 
 // Purpose: Get's the user's input as to whether to add a movie or not. Shall be in a "Y" or "N" format.
-void EZTechMovie_Admin_App::SetAnswer() {
+void Add_Movie::SetAnswer() {
 	answer = 'a';
 
 	try {
@@ -72,14 +72,14 @@ void EZTechMovie_Admin_App::SetAnswer() {
 }
 
 // Purpose: Obtain's the user's input and sets the title of the movie.
-void EZTechMovie_Admin_App::SetMovieTitle() {
+void Add_Movie::SetMovieTitle() {
 	cout << "\nMovie Title: ";
 	cin.ignore();
 	getline(cin, title);
 }
 
 // Purpose: Obtains user's input and sets the number of main cast members in the movie.
-void EZTechMovie_Admin_App::SetCastSize() {
+void Add_Movie::SetCastSize() {
 	userInput = "";
 
 	try {
@@ -103,7 +103,7 @@ void EZTechMovie_Admin_App::SetCastSize() {
 }
 
 // Purpose: Obtains user's input(s) based on how many cast members there are. Input format = First Name + Last Name.
-void EZTechMovie_Admin_App::SetCastMembers() {
+void Add_Movie::SetCastMembers() {
 	cast.resize(castSize);
 	cout << "\nCast Members (First & Last Names):" << endl;
 	cin.ignore(); // Closes previous getlin() to allow for more further inputs
@@ -115,7 +115,7 @@ void EZTechMovie_Admin_App::SetCastMembers() {
 }
 
 // Purpose: Obtains the user's input for the movie's rating.
-void EZTechMovie_Admin_App::SetRating() {
+void Add_Movie::SetRating() {
 	rating = "";
 	bool isTrue = false;
 
@@ -144,12 +144,12 @@ void EZTechMovie_Admin_App::SetRating() {
 }
 
 // Purpose: To add a movie to the vector of movie objects.
-void EZTechMovie_Admin_App::addMovie(EZTechMovie_Admin_App movie) {
+void Add_Movie::addMovie(Add_Movie movie) {
 	movieList.push_back(movie);
 }
 
 // Purpose: To display a movie's information in the terminal output.
-void EZTechMovie_Admin_App::displayMovies() {
+void Add_Movie::displayMovies() {
 	for (int i = 0; i << movieList.size(); ++i) {
 		cout << "\n-----" << "\nYou entered..." << endl;
 		cout << "\nMovie Title: " << movieList[i].title;
@@ -165,7 +165,7 @@ void EZTechMovie_Admin_App::displayMovies() {
 
 // Purpose: Recursive main method used to run app. If user's input is "Y", program executes. If "N", program terminates.
 /*
-void EZTechMovie_Admin_App::run() {
+void Add_Movie::run() {
 	SetAnswer();
 	while (answer == 'Y') {
 		SetMovieTitle();
@@ -180,8 +180,8 @@ void EZTechMovie_Admin_App::run() {
 */
 
 // Purpose: Recursive main method used to run app. If user's input is "Y", program executes. If "N", program terminates.
-void EZTechMovie_Admin_App::run() {
-	EZTechMovie_Admin_App newMovie;
+void Add_Movie::run() {
+	Add_Movie newMovie;
 	newMovie.SetAnswer();
 	while (newMovie.answer == 'Y') {
 		newMovie.SetMovieTitle();

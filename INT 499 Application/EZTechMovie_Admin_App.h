@@ -21,6 +21,7 @@ class Global_Functions {
 		Global_Functions();
 		string strToUpperCase(string);
 		string strToLowerCase(string);
+		bool validate_UserOption(vector<int>, int);
 
 	private:
 		string tempStr;
@@ -33,21 +34,30 @@ class Initialize_Program {
 
 	public:
 		Initialize_Program();
-		bool run();
+		void run();
+		void login();
 		bool verifyLogin(string, string);
+		bool verifyUsername();
+		bool verifyPassword();
 
 	protected:
+		Global_Functions fct;
+		bool runInstance;
+		int userInput;
+		vector<int> user_options;
 		string Username;
 		string Password;
-		bool valid;
+		bool validLogin;
 };
 
 /*
 * Links to all other classes.
 * Responsible for displaying all possible options to admin user in list format.
 * List -->
-*	1. Movie Manager
-*	2. 
+*	1. Display Data
+*	2. Modify Data
+*	3. Admin Account
+*	4. Sign Out
 */
 class Main_Menu {
 
@@ -57,8 +67,10 @@ class Main_Menu {
 		void run();
 
 	protected:
+		Global_Functions fct;
+		bool runInstance;
 		int userInput;
-		vector<int> menu_options;
+		vector<int> user_options;
 		bool valid;
 };
 
@@ -90,6 +102,7 @@ class Add_Movie {
 		vector<string> movieRatings; // Stores all acceptable values for a movie's rating
 };
 
+
 /*
 * Hanldes all opperations found within the "[1] Display Data" option in the Main Menu
 */
@@ -100,7 +113,7 @@ class Display_Mode {
 		void run();
 
 	protected:
-		// enter here
+		Global_Functions fct;
 };
 
 /*
@@ -113,12 +126,13 @@ class Edit_Mode {
 		void run();
 
 	protected:
-		// enter here
+		Global_Functions fct;
 };
 
 /*
 * Handles...
 */
+/*
 class a {
 
 	public:
@@ -127,6 +141,7 @@ class a {
 	protected:
 
 };
+*/
 
 
 

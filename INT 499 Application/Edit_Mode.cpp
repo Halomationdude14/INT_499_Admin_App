@@ -18,7 +18,7 @@ using namespace std;
 
 // Default Constructor
 Edit_Mode::Edit_Mode() {
-	// Add variables
+	Global_Functions fct;
 }
 
 // Purpose: a
