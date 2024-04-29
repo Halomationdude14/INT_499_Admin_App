@@ -19,6 +19,7 @@ using namespace std;
 // Default Constructor
 Initialize_Program::Initialize_Program() {
 	Global_Functions fct;
+	sys_msg = "";
 	runInstance = true;
 	userInput = 0;
 	user_options = {1,2};
@@ -34,14 +35,12 @@ void Initialize_Program::run() {
 	Main_Menu menu;
 	
 	while (runInstance) {
-		cout << "\n##############################################################################" << endl;
-		cout << "####### Welcome to the EZTechMovie Database Administration Application #######" << endl;
-		cout << "##############################################################################" << endl << endl;
-		cout << " [1] Sign In" << endl;
-		cout << " [2] Exit Application" << endl;
-
 		userInput = 0;
+		
 		while (true) {
+			fct.clearScreen();
+			displayWelcomeScreen();
+
 			try {
 				cout << "\nUser Input: ";
 				cin >> userInput;
@@ -54,13 +53,15 @@ void Initialize_Program::run() {
 				}
 			}
 			catch (exception& e) {
-				cout << e.what() << endl;
+				//cout << e.what() << endl;
+				sys_msg = e.what();
 				cin.clear(); // clears the error flags
 				cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // this line discards all the input waiting in the stream
 			}
 		}
 		
 		if (userInput == 1) {
+			sys_msg = "";
 			login();
 			if (validLogin) {
 				menu.run();
@@ -72,14 +73,33 @@ void Initialize_Program::run() {
 	}
 }
 
+void Initialize_Program::displayWelcomeScreen() {
+	cout << "\n##############################################################################" << endl;
+	cout << "####### Welcome to the EZTechMovie Database Administration Application #######" << endl;
+	cout << "##############################################################################" << endl << endl;
+
+	if (sys_msg.length() > 0) {
+		cout << sys_msg << endl << endl;
+	}
+
+	cout << " [1] Sign In" << endl;
+	cout << " [2] Exit Application" << endl;
+}
+
 // Purpose: Takes in user credentials and passes it through a validation method.
 void Initialize_Program::login() {
 	validLogin = false;
 	Username = "";
 	Password = "";
-	cout << "\nEnter Admin Credentials to Log Into the Console -->" << endl;
 
 	while (validLogin == false) {
+		fct.clearScreen();
+		cout << "\nEnter Admin Credentials to Log Into the Console -->" << endl;
+
+		if (sys_msg.length() > 0) {
+			cout << endl << sys_msg << endl;
+		}
+
 		// Rework: Verify username first, and then password after implementation.
 		try {
 			cout << "  Username: ";
@@ -97,7 +117,8 @@ void Initialize_Program::login() {
 			validLogin = verifyLogin(Username, Password);
 		}
 		catch (exception& e) {
-			cout << e.what() << endl;
+			//cout << e.what() << endl;
+			sys_msg = e.what();
 			cin.clear(); // clears the error flags
 			cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // this line discards all the input waiting in the stream
 		}
@@ -107,7 +128,7 @@ void Initialize_Program::login() {
 // Purpose: Verifies user login credentials against DB records.
 bool Initialize_Program::verifyLogin(string user, string pass) {
 	// Future implementation of user/pass verification requires additional setup in DB
-	cout << "Login Successful!" << endl; //remove
+	// cout << "Login Successful!" << endl;
 	
 	return true; //change to "false" after implementation
 }

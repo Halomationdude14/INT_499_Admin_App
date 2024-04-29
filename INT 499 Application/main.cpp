@@ -18,7 +18,7 @@ using namespace std;
 int main() {
 	Initialize_Program newInstance;
 	newInstance.run();
-	cout << "\n\nTest Run Complete";
+	cout << "\n\n***** [ Closing Application ] *****";
 
 	return 0;
 }

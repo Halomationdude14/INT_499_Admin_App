@@ -11,6 +11,7 @@ NOTE: This is a modified version of the original code that has been reworked to 
 #include <string>
 //#include <exception>
 #include <vector>
+#include <cstdlib>
 using namespace std;
 
 #include "EZTechMovie_Admin_App.h"
@@ -19,6 +20,11 @@ using namespace std;
 // Default Constructor
 Global_Functions::Global_Functions() {
 	tempStr = ""; //general use string
+}
+
+// Purpose: Clear the terminal screen.
+void Global_Functions::clearScreen() {
+	system("cls");
 }
 
 // Purpose: Convert all chars in a string to UPPER case.

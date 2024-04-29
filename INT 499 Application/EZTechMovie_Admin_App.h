@@ -19,6 +19,7 @@ class Global_Functions {
 
 	public:
 		Global_Functions();
+		void clearScreen();
 		string strToUpperCase(string);
 		string strToLowerCase(string);
 		bool validate_UserOption(vector<int>, int);
@@ -35,6 +36,7 @@ class Initialize_Program {
 	public:
 		Initialize_Program();
 		void run();
+		void displayWelcomeScreen();
 		void login();
 		bool verifyLogin(string, string);
 		bool verifyUsername();
@@ -42,6 +44,7 @@ class Initialize_Program {
 
 	protected:
 		Global_Functions fct;
+		string sys_msg;
 		bool runInstance;
 		int userInput;
 		vector<int> user_options;
@@ -65,9 +68,11 @@ class Main_Menu {
 		Main_Menu();
 		bool validateInput(int);
 		void run();
+		void displayMainMenu();
 
 	protected:
 		Global_Functions fct;
+		string sys_msg;
 		bool runInstance;
 		int userInput;
 		vector<int> user_options;
