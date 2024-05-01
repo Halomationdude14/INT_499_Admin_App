@@ -23,6 +23,8 @@ Initialize_Program::Initialize_Program() {
 	runInstance = true;
 	userInput = 0;
 	user_options = {1,2};
+	initial_menu = {" [1] Sign In", " [2] Exit Application"};
+	login_menu = {"Enter Admin Credentials to Log Into the Console -->"};
 	Username = "";
 	Password = "";
 	validLogin = false;
@@ -38,8 +40,7 @@ void Initialize_Program::run() {
 		userInput = 0;
 		
 		while (true) {
-			fct.clearScreen();
-			displayWelcomeScreen();
+			fct.displayHeader(sys_msg, initial_menu);
 
 			try {
 				cout << "\nUser Input: ";
@@ -53,7 +54,6 @@ void Initialize_Program::run() {
 				}
 			}
 			catch (exception& e) {
-				//cout << e.what() << endl;
 				sys_msg = e.what();
 				cin.clear(); // clears the error flags
 				cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // this line discards all the input waiting in the stream
@@ -73,19 +73,6 @@ void Initialize_Program::run() {
 	}
 }
 
-void Initialize_Program::displayWelcomeScreen() {
-	cout << "\n##############################################################################" << endl;
-	cout << "####### Welcome to the EZTechMovie Database Administration Application #######" << endl;
-	cout << "##############################################################################" << endl << endl;
-
-	if (sys_msg.length() > 0) {
-		cout << sys_msg << endl << endl;
-	}
-
-	cout << " [1] Sign In" << endl;
-	cout << " [2] Exit Application" << endl;
-}
-
 // Purpose: Takes in user credentials and passes it through a validation method.
 void Initialize_Program::login() {
 	validLogin = false;
@@ -93,12 +80,7 @@ void Initialize_Program::login() {
 	Password = "";
 
 	while (validLogin == false) {
-		fct.clearScreen();
-		cout << "\nEnter Admin Credentials to Log Into the Console -->" << endl;
-
-		if (sys_msg.length() > 0) {
-			cout << endl << sys_msg << endl;
-		}
+		fct.displayHeader(sys_msg, login_menu);
 
 		// Rework: Verify username first, and then password after implementation.
 		try {
@@ -117,7 +99,6 @@ void Initialize_Program::login() {
 			validLogin = verifyLogin(Username, Password);
 		}
 		catch (exception& e) {
-			//cout << e.what() << endl;
 			sys_msg = e.what();
 			cin.clear(); // clears the error flags
 			cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // this line discards all the input waiting in the stream

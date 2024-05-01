@@ -61,6 +61,28 @@ string Global_Functions::strToLowerCase(string str) {
 	return tempStr;
 }
 
+/*
+* Purpose: Takes in a system/error message + a list of menu options for the user to choose from.
+* Prints out a standard header. Then, if 'msg' is not empty, print that. Then, print the menu options.
+*/
+void Global_Functions::displayHeader(string msg, vector<string> menu) {
+	clearScreen();
+
+	cout << "\n##############################################################################" << endl;
+	cout << "####### Welcome to the EZTechMovie Database Administration Application #######" << endl;
+	cout << "##############################################################################" << endl << endl;
+
+	// Display sys/err msg if not empty.
+	if (msg.length() > 0) {
+		cout << msg << endl << endl;
+	}
+
+	// Display menu options.
+	for (auto& i : menu) {
+		cout << i << endl;
+	}
+}
+
 // Purpose: Validate user input when navigating the menus.
 bool Global_Functions::validate_UserOption(vector<int> list, int num) {
 
