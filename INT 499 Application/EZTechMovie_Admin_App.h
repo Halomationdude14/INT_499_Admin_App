@@ -9,6 +9,11 @@ NOTE: This is a modified version of the original code that has been reworked to 
 
 #include <string>
 #include <vector>
+#include <cppconn/driver.h> 
+#include <cppconn/exception.h> 
+#include <cppconn/statement.h> 
+#include <mysql_connection.h> 
+#include <mysql_driver.h> 
 #pragma once
 
 
@@ -25,8 +30,27 @@ class Global_Functions {
 		void displayHeader(string, vector<string>);
 		bool validate_UserOption(vector<int>, int);
 
-	private:
+	protected:
 		string tempStr;
+};
+
+/*
+* Establishes the connection to the locally stored MySQL database.
+* Contains functions used to execute queries against the database.
+*/
+class MySQL_Connection {
+
+	public:
+		MySQL_Connection();
+		bool establishConnection();
+		void closeConnection();
+
+	protected:
+		sql::Driver* driver;
+		sql::Connection* con;
+		sql::Statement* stmt;
+		sql::ResultSet* res;
+		string selectQuery;
 };
 
 /*
@@ -44,6 +68,8 @@ class Initialize_Program {
 
 	protected:
 		Global_Functions fct;
+		MySQL_Connection db;
+		Main_Menu menu;
 		string sys_msg;
 		bool runInstance;
 		int userInput;
@@ -58,11 +84,6 @@ class Initialize_Program {
 /*
 * Links to all other classes.
 * Responsible for displaying all possible options to admin user in list format.
-* List -->
-*	1. Display Data
-*	2. Modify Data
-*	3. Admin Account
-*	4. Sign Out
 */
 class Main_Menu {
 

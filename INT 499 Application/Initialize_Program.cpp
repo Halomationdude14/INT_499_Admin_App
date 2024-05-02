@@ -19,6 +19,8 @@ using namespace std;
 // Default Constructor
 Initialize_Program::Initialize_Program() {
 	Global_Functions fct;
+	MySQL_Connection db;
+	Main_Menu menu;
 	sys_msg = "";
 	runInstance = true;
 	userInput = 0;
@@ -34,10 +36,10 @@ Initialize_Program::Initialize_Program() {
 * Purpose: Called from main.cpp to begin the program. Displays the initial greeting screen.
 */
 void Initialize_Program::run() {
-	Main_Menu menu;
-	
 	while (runInstance) {
 		userInput = 0;
+
+		db.establishConnection(); //establish connection to MySQL database.
 		
 		while (true) {
 			fct.displayHeader(sys_msg, initial_menu);

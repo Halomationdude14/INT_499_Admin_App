@@ -19,6 +19,5 @@ int main() {
 	Initialize_Program newInstance;
 	newInstance.run();
 	cout << "\n\n***** [ Closing Application ] *****";
-
 	return 0;
 }
