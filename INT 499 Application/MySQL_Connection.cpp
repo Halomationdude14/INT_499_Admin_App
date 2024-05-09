@@ -7,42 +7,52 @@ Author: Paul Oram
 NOTE: This is a modified version of the original code that has been reworked to integrate into the final project (MySQL DB).
 */
 
+#include <stdlib.h>
 #include <iostream>
-#include <string>
-#include <cppconn/driver.h> 
-#include <cppconn/exception.h>
-#include <cppconn/statement.h>
-#include <mysql_connection.h>
-#include <mysql_driver.h>
-using namespace std;
-
+#include <exception>
+#include <mysqlx/xdevapi.h>
+#include <mysql.h>
 #include "EZTechMovie_Admin_App.h"
+using namespace std;
+int qstate;
+
 
 /*
 * Default Constructor
 */
-MySQL_Connection::MySQL_Connection() {
-    driver(nullptr);
-    con(nullptr);
-    stmt(nullptr);
-    res(nullptr);
-    selectQuery = "";
+MySQL_Conn::MySQL_Conn() {
+    query = "";
 }
 
 /*
 * Purpose: Create the connection to a locally stored MySQL database.
 * NOTE: If reusing my code, don't forget to update the connection info to match your own local MySQL database.
 */
-bool MySQL_Connection::establishConnection() {
+bool MySQL_Conn::establishConn() {
     try {
-        driver = get_driver_instance();
-        con = driver->connect("tcp://localhost:3306", "root", "Inferno24/7!"); //connect(host, user, password);
-        con->setSchema("eztechmoviedb");
-        stmt = con->createStatement(); //initialize "Statement* stmt" now that the connection has been established
-        cout << "Connected to MySQL database successfully!" << endl;
+        conn = mysql_init(0);
+        conn = mysql_real_connect(conn, "localhost", "root", "Inferno24/7!", "eztechmoviedb", 3306, NULL, 0);
+
+        if (conn) {
+            puts("\nSuccessful connection to database!\n");
+
+            query = "SELECT * FROM tbl_custdata";
+            const char* q = query.c_str();
+            qstate = mysql_query(conn, q);
+            if (!qstate) {
+                res = mysql_store_result(conn);
+                while (row = mysql_fetch_row(res)) {
+                    printf("custID: %s, User: %s, Pass: %s, Email: %s, planID: %s, Activity: %s, payType: %s, Start Date: %s\n", row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7]);
+                }
+            }
+            else {
+                cout << "Query failed: " << mysql_error(conn) << endl;
+            }
+        }
+
         return true;
     }
-    catch (SQLException& e) {
+    catch (exception& e) {
         cerr << "Error connecting to MySQL: " << e.what() << endl;
         return false;
     }
@@ -52,13 +62,10 @@ bool MySQL_Connection::establishConnection() {
 /*
 * Purpose: Close the connection to the MySQL database.
 */
-void MySQL_Connection::closeConnection() {
-    if (con) {
-        delete con;
-        con = nullptr;
+void MySQL_Conn::closeConn() {
+    if (conn) {
+        delete conn;
     }
-    driver = nullptr;
-    stmt = nullptr;
-    selectQuery = "";
+    query = "";
 }
 

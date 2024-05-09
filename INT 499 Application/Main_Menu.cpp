@@ -11,9 +11,8 @@ NOTE: This is a modified version of the original code that has been reworked to 
 #include <string>
 #include <exception>
 #include <vector>
-using namespace std;
-
 #include "EZTechMovie_Admin_App.h"
+using namespace std;
 
 
 // Default Constructor
@@ -52,7 +51,7 @@ void Main_Menu::run() {
 			catch (exception& e) {
 				sys_msg = e.what();
 				cin.clear(); // clears the error flags
-				cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // this line discards all the input waiting in the stream
+				cin.ignore(numeric_limits<streamsize>::max(), '\n'); // this line discards all the input waiting in the stream
 			}
 		}
 

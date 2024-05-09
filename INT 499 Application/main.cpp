@@ -9,9 +9,8 @@ NOTE: This is a modified version of the original code that has been reworked to 
 
 #include <iostream>
 #include <string>
-using namespace std;
-
 #include "EZTechMovie_Admin_App.h"
+using namespace std;
 
 
 // Purpose: Main Function

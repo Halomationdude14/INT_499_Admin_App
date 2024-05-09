@@ -13,9 +13,6 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Notes and Documentation">
-      <UniqueIdentifier>{99fcf2f5-62d9-4e32-a42d-78bd1ed4b29f}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -44,10 +41,5 @@
     <ClInclude Include="EZTechMovie_Admin_App.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="..\..\..\..\!Temp Folder!\Notepad++ Files\Admin App Overview.txt">
-      <Filter>Notes and Documentation</Filter>
-    </Text>
   </ItemGroup>
 </Project>
