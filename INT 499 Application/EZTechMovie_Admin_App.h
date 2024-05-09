@@ -24,7 +24,6 @@ class Global_Functions {
 		void clearScreen();
 		string strToUpperCase(string);
 		string strToLowerCase(string);
-		void displayHeader(string, vector<string>);
 		bool validate_UserOption(vector<int>, int);
 
 	protected:
@@ -57,6 +56,7 @@ class Initialize_Program {
 	public:
 		Initialize_Program();
 		void run();
+		void displayWelcomeScreen();
 		void login();
 		bool verifyLogin(string, string);
 		bool verifyUsername();
@@ -70,8 +70,6 @@ class Initialize_Program {
 		bool runInstance;
 		int userInput;
 		vector<int> user_options;
-		vector<string> initial_menu;
-		vector<string> login_menu;
 		string Username;
 		string Password;
 		bool validLogin;
@@ -86,6 +84,7 @@ class Main_Menu {
 	public:
 		Main_Menu();
 		void run();
+		void displayMainMenu();
 
 	protected:
 		Global_Functions fct;
@@ -93,7 +92,6 @@ class Main_Menu {
 		bool runInstance;
 		int userInput;
 		vector<int> user_options;
-		vector<string> main_menu;
 		bool valid;
 };
 
@@ -124,6 +122,7 @@ class Add_Movie {
 		string userInput;
 		vector<string> movieRatings; // Stores all acceptable values for a movie's rating
 };
+
 
 /*
 * Hanldes all opperations found within the "[1] Display Data" option in the Main Menu
@@ -164,4 +163,6 @@ class a {
 
 };
 */
+
+
 

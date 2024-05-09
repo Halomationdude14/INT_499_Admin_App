@@ -22,7 +22,6 @@ Main_Menu::Main_Menu() {
 	runInstance = true;
 	userInput = 0;
 	user_options = {1,2,3,4};
-	main_menu = {" [1] Display Data", " [2] Modify Data", " [3] Admin Account", " [4] Sign Out"};
 	valid = false;
 }
 
@@ -34,10 +33,11 @@ void Main_Menu::run() {
 		valid = false;
 		while (valid == false) {
 			userInput = 0;
-			fct.displayHeader(sys_msg, main_menu);
+			fct.clearScreen();
+			displayMainMenu();
 
 			try {
-				cout << "\nUser Input: ";
+				cout << "User Input: ";
 				cin >> userInput;
 
 				if (fct.validate_UserOption(user_options, userInput) == false) {
@@ -49,6 +49,7 @@ void Main_Menu::run() {
 				}
 			}
 			catch (exception& e) {
+				//cout << e.what() << endl;
 				sys_msg = e.what();
 				cin.clear(); // clears the error flags
 				cin.ignore(numeric_limits<streamsize>::max(), '\n'); // this line discards all the input waiting in the stream
@@ -68,5 +69,20 @@ void Main_Menu::run() {
 			runInstance = false;
 		}
 	}
+}
+
+void Main_Menu::displayMainMenu() {
+	cout << "\n##############################################################################" << endl;
+	cout << "####### Welcome to the EZTechMovie Database Administration Application #######" << endl;
+	cout << "##############################################################################" << endl << endl;
+
+	if (sys_msg.length() > 0) {
+		cout << sys_msg << endl << endl;
+	}
+
+	cout << " [1] Display Data" << endl;
+	cout << " [2] Modify Data" << endl;
+	cout << " [3] Admin Account" << endl;
+	cout << " [4] Sign Out" << endl << endl;
 }
 
