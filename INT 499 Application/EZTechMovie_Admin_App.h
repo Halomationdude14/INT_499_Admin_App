@@ -9,11 +9,15 @@ NOTE: This is a modified version of the original code that has been reworked to 
 
 #include <string>
 #include <vector>
+#include <mysqlx/xdevapi.h>
+#include <mysql.h>
+/*
 #include <cppconn/driver.h> 
 #include <cppconn/exception.h> 
 #include <cppconn/statement.h> 
 #include <mysql_connection.h> 
 #include <mysql_driver.h> 
+*/
 #pragma once
 
 
@@ -38,19 +42,18 @@ class Global_Functions {
 * Establishes the connection to the locally stored MySQL database.
 * Contains functions used to execute queries against the database.
 */
-class MySQL_Connection {
+class MySQL_Conn {
 
 	public:
-		MySQL_Connection();
-		bool establishConnection();
-		void closeConnection();
+		MySQL_Conn();
+		bool startConn();
+		void closeConn();
 
 	protected:
-		sql::Driver* driver;
-		sql::Connection* con;
-		sql::Statement* stmt;
-		sql::ResultSet* res;
-		string selectQuery;
+		MYSQL* conn;
+		MYSQL_ROW row;
+		MYSQL_RES* res;
+		string query;
 };
 
 /*
@@ -68,7 +71,7 @@ class Initialize_Program {
 
 	protected:
 		Global_Functions fct;
-		MySQL_Connection db;
+		MySQL_Conn db;
 		Main_Menu menu;
 		string sys_msg;
 		bool runInstance;
@@ -89,7 +92,6 @@ class Main_Menu {
 
 	public:
 		Main_Menu();
-		bool validateInput(int);
 		void run();
 
 	protected:
