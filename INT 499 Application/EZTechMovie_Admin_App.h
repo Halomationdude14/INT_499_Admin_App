@@ -9,7 +9,7 @@ NOTE: This is a modified version of the original code that has been reworked to 
 
 #include <string>
 #include <vector>
-#include <mysqlx/xdevapi.h>
+//#include <mysqlx/xdevapi.h>
 #include <mysql.h>
 #pragma once
 
@@ -35,12 +35,12 @@ class Global_Functions {
 * Establishes the connection to the locally stored MySQL database.
 * Contains functions used to execute queries against the database.
 */
-class MySQL_Connection {
+class MySQL_Conn {
 
 	public:
-		MySQL_Connection();
-		bool establishConnection();
-		void closeConnection();
+		MySQL_Conn();
+		bool startConn();
+		void closeConn();
 
 	protected:
 		MYSQL* conn;
@@ -48,7 +48,6 @@ class MySQL_Connection {
 		MYSQL_RES* res;
 		string query;
 };
-*/
 
 /*
 * Handles user login and links to primary application.
@@ -65,7 +64,7 @@ class Initialize_Program {
 
 	protected:
 		Global_Functions fct;
-		MySQL_Connection db;
+		MySQL_Conn db;
 		Main_Menu menu;
 		string sys_msg;
 		bool runInstance;

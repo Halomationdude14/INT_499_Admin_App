@@ -7,15 +7,14 @@ Author: Paul Oram
 NOTE: This is a modified version of the original code that has been reworked to integrate into the final project (MySQL DB).
 */
 
-#include <stdlib.h>
 #include <iostream>
 #include <exception>
-#include <mysqlx/xdevapi.h>
+//#include <mysqlx/xdevapi.h>
 #include <mysql.h>
-#include "EZTechMovie_Admin_App.h"
 using namespace std;
 int qstate;
 
+#include "EZTechMovie_Admin_App.h"
 
 /*
 * Default Constructor
@@ -28,7 +27,7 @@ MySQL_Conn::MySQL_Conn() {
 * Purpose: Create the connection to a locally stored MySQL database.
 * NOTE: If reusing my code, don't forget to update the connection info to match your own local MySQL database.
 */
-bool MySQL_Conn::establishConn() {
+bool MySQL_Conn::startConn() {
     try {
         conn = mysql_init(0);
         conn = mysql_real_connect(conn, "localhost", "root", "Inferno24/7!", "eztechmoviedb", 3306, NULL, 0);
@@ -49,7 +48,6 @@ bool MySQL_Conn::establishConn() {
                 cout << "Query failed: " << mysql_error(conn) << endl;
             }
         }
-
         return true;
     }
     catch (exception& e) {

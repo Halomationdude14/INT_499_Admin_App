@@ -18,7 +18,7 @@ using namespace std;
 // Default Constructor
 Initialize_Program::Initialize_Program() {
 	Global_Functions fct;
-	//MySQL_Conn db;
+	MySQL_Conn db;
 	Main_Menu menu;
 	sys_msg = "";
 	runInstance = true;
@@ -38,7 +38,7 @@ void Initialize_Program::run() {
 	while (runInstance) {
 		userInput = 0;
 
-		//db.establishConn(); //establish connection to MySQL database.
+		db.startConn(); //establish connection to MySQL database.
 		
 		while (true) {
 			fct.displayHeader(sys_msg, initial_menu);

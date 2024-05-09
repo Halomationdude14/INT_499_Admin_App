@@ -109,12 +109,13 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Program Files\MySQL\mysql-connector-c++-8.4.0-winx64\include\jdbc</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Program Files\MySQL\MySQL Server 8.3\include;C:\Program Files\MySQL\mysql-connector-c++-8.4.0-winx64-debug\mysql-connector-c++-8.4.0-winx64\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>mysqlcppconn.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>vs14\debug\mysqlcppconn8.lib\;libmysql.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Program Files\MySQL\MySQL Server 8.3\lib;C:\Program Files\MySQL\mysql-connector-c++-8.4.0-winx64-debug\mysql-connector-c++-8.4.0-winx64\lib64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -136,13 +137,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Add_Movie.cpp" />
     <ClCompile Include="Display_Mode.cpp" />
     <ClCompile Include="Edit_Mode.cpp" />
     <ClCompile Include="Initialize_Program.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Global_Functions.cpp" />
     <ClCompile Include="Main_Menu.cpp" />
+    <ClCompile Include="MySQL_Conn.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="EZTechMovie_Admin_App.h" />
