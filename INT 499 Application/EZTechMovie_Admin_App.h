@@ -35,13 +35,12 @@ class Global_Functions {
 * Establishes the connection to the locally stored MySQL database.
 * Contains functions used to execute queries against the database.
 */
-/*
-class MySQL_Conn {
+class MySQL_Connection {
 
 	public:
-		MySQL_Conn();
-		bool establishConn();
-		void closeConn();
+		MySQL_Connection();
+		bool establishConnection();
+		void closeConnection();
 
 	protected:
 		MYSQL* conn;
@@ -66,7 +65,7 @@ class Initialize_Program {
 
 	protected:
 		Global_Functions fct;
-		//MySQL_Conn db;
+		MySQL_Connection db;
 		Main_Menu menu;
 		string sys_msg;
 		bool runInstance;
@@ -87,7 +86,6 @@ class Main_Menu {
 
 	public:
 		Main_Menu();
-		bool validateInput(int);
 		void run();
 
 	protected:
