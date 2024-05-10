@@ -11,7 +11,6 @@ NOTE: This is a modified version of the original code that has been reworked to 
 #include <string>
 #include <exception>
 #include <mysqlx/xdevapi.h>
-//#include <mysql.h>
 
 using namespace std;
 using namespace mysqlx;
@@ -24,6 +23,12 @@ int qstate;
 * Default Constructor
 */
 MySQL_Conn::MySQL_Conn() {
+    hostname = "localhost";
+    port = 3306;
+    dbName = "eztechmoviedb";
+    user = "root";
+    pass = "Inferno24/7!";
+    dbTables = {}; //holds a list of all tables in the database
     query = "";
 }
 
@@ -55,15 +60,26 @@ bool MySQL_Conn::startConn() {
         }
         */
 
+        // Alter how "sys_msg" is handled. Make it a global variable that can be set by any class.
 
+        // There are multiple ways of inputting data into the "Session()" function, but this one is straight forward.
+        // Session s1("localhost", 3306, "user", "pass");
+        Session sess(hostname, port, user, pass); // Establish connection
+        Schema db = sess.getSchema(dbName); // Points to specific database
 
-        return true;
+        // If the schema "eztechmoviedb" exists in the database, return true, else return false.
+        if (db.existsInDatabase()) {
+            return true;
+        }
+        else {
+            return false;
+        }
     }
     catch (const mysqlx::Error& err) {
         cout << "ERROR: " << err << endl;
         return false;
     }
-    catch (exception& ex) {
+    catch (std::exception& ex) {
         cout << "STD EXCEPTION: " << ex.what() << endl;
         return false;
     }
@@ -71,18 +87,13 @@ bool MySQL_Conn::startConn() {
         cout << "EXCEPTION: " << ex << endl;
         return false;
     }
-    return false;
 }
 
 /*
 * Purpose: Close the connection to the MySQL database.
 */
 void MySQL_Conn::closeConn() {
-    /*
-    if (conn) {
-        delete conn;
-    }
-    */
+    dbTables = {};
     query = "";
 }
 

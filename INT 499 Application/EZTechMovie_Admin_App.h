@@ -42,14 +42,14 @@ class MySQL_Conn {
 		void closeConn();
 
 	protected:
-		const char* url;
-		//Schema sch;
-		//Collection coll;
+		mysqlx::Session sess;
+		mysqlx::Schema db;
 		std::string hostname;
 		int port;
 		std::string dbName;
 		std::string user;
 		std::string pass;
+		vector<std::string> dbTables;
 		std::string query;
 };
 
@@ -62,7 +62,6 @@ class Main_Menu {
 	public:
 		Main_Menu();
 		void run();
-		void displayMainMenu();
 
 	protected:
 		Global_Functions fct;
@@ -70,6 +69,7 @@ class Main_Menu {
 		bool runInstance;
 		int userInput;
 		vector<int> user_options;
+		vector<std::string> menu_options;
 		bool valid;
 };
 
@@ -130,12 +130,11 @@ class Edit_Mode {
 /*
 * Handles user login and links to primary application.
 */
-class Initialize_Program {
+class Start_Program {
 
 public:
-	Initialize_Program();
+	Start_Program();
 	void run();
-	void displayWelcomeScreen();
 	void login();
 	bool verifyLogin(std::string, std::string);
 	bool verifyUsername();
@@ -143,14 +142,16 @@ public:
 
 protected:
 	Global_Functions fct;
-	//MySQL_Conn db;
+	MySQL_Conn db;
 	Main_Menu menu;
 	std::string sys_msg;
 	bool runInstance;
 	int userInput;
 	vector<int> user_options;
+	vector<std::string> menu_options;
 	std::string Username;
 	std::string Password;
+	bool dbConn;
 	bool validLogin;
 };
 

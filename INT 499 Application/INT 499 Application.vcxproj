@@ -140,7 +140,7 @@
   <ItemGroup>
     <ClCompile Include="Display_Mode.cpp" />
     <ClCompile Include="Edit_Mode.cpp" />
-    <ClCompile Include="Initialize_Program.cpp" />
+    <ClCompile Include="Start_Program.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Global_Functions.cpp" />
     <ClCompile Include="Main_Menu.cpp" />

@@ -17,28 +17,39 @@ using namespace std;
 
 
 // Default Constructor
-Initialize_Program::Initialize_Program() {
+Start_Program::Start_Program() {
 	sys_msg = "";
 	runInstance = true;
 	userInput = 0;
 	user_options = {1,2};
+	menu_options = {" [1] Sign In"," [2] Exit Application"};
 	Username = "";
 	Password = "";
+	dbConn = false;
 	validLogin = false;
 }
 
 /*
 * Purpose: Called from main.cpp to begin the program. Displays the initial greeting screen.
 */
-void Initialize_Program::run() {
+void Start_Program::run() {
 	while (runInstance) {
 		userInput = 0;
 
-		//db.startConn(); //establish connection to MySQL database.
+		/*
+		* Establish connection to MySQL database.
+		* NOTE: Currently, this program is designed to connect to a specific database with specific credentials.
+		*		If the connection is unsuccessful, the next "if" stmt will prevent this program from crashing and will close the program with no errors.
+		*/
+		dbConn = db.startConn();
+		// Delete this stmt once better functionality is implemented.
+		if (dbConn == false) {
+			runInstance = false;
+		}
 		
-		while (true) {
-			fct.clearScreen();
-			displayWelcomeScreen();
+		// While there exists a successful connection to the database...
+		while (dbConn) {
+			fct.displayHeader(sys_msg, menu_options);
 
 			try {
 				cout << "\nUser Input: ";
@@ -71,32 +82,16 @@ void Initialize_Program::run() {
 	}
 }
 
-void Initialize_Program::displayWelcomeScreen() {
-	cout << "\n##############################################################################" << endl;
-	cout << "####### Welcome to the EZTechMovie Database Administration Application #######" << endl;
-	cout << "##############################################################################" << endl << endl;
-
-	if (sys_msg.length() > 0) {
-		cout << sys_msg << endl << endl;
-	}
-
-	cout << " [1] Sign In" << endl;
-	cout << " [2] Exit Application" << endl;
-}
-
 // Purpose: Takes in user credentials and passes it through a validation method.
-void Initialize_Program::login() {
+void Start_Program::login() {
 	validLogin = false;
 	Username = "";
 	Password = "";
 
 	while (validLogin == false) {
-		fct.clearScreen();
+		vector<string> empty = {};
+		fct.displayHeader(sys_msg, empty);
 		cout << "\nEnter Admin Credentials to Log Into the Console -->" << endl;
-
-		if (sys_msg.length() > 0) {
-			cout << endl << sys_msg << endl;
-		}
 
 		// Rework: Verify username first, and then password after implementation.
 		try {
@@ -115,7 +110,6 @@ void Initialize_Program::login() {
 			validLogin = verifyLogin(Username, Password);
 		}
 		catch (exception& e) {
-			//cout << e.what() << endl;
 			sys_msg = e.what();
 			cin.clear(); // clears the error flags
 			cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // this line discards all the input waiting in the stream
@@ -124,7 +118,7 @@ void Initialize_Program::login() {
 }
 
 // Purpose: Verifies user login credentials against DB records.
-bool Initialize_Program::verifyLogin(string user, string pass) {
+bool Start_Program::verifyLogin(string user, string pass) {
 	// Future implementation of user/pass verification requires additional setup in DB
 	// cout << "Login Successful!" << endl;
 	
@@ -132,13 +126,13 @@ bool Initialize_Program::verifyLogin(string user, string pass) {
 }
 
 // Purpose: Verifies that the username is valid/exists in the DB.
-bool Initialize_Program::verifyUsername() {
+bool Start_Program::verifyUsername() {
 	//a
 	return true;
 }
 
 // Purpose: Verifies that the password matches the username.
-bool Initialize_Program::verifyPassword() {
+bool Start_Program::verifyPassword() {
 	//a
 	return true;
 }
