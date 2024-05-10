@@ -18,9 +18,6 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Add_Movie.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Global_Functions.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -34,6 +31,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Edit_Mode.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MySQL_Conn.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

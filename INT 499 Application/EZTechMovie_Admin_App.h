@@ -9,8 +9,7 @@ NOTE: This is a modified version of the original code that has been reworked to 
 
 #include <string>
 #include <vector>
-//#include <mysqlx/xdevapi.h>
-#include <mysql.h>
+#include <mysqlx/xdevapi.h>
 #pragma once
 
 
@@ -22,12 +21,13 @@ class Global_Functions {
 	public:
 		Global_Functions();
 		void clearScreen();
-		string strToUpperCase(string);
-		string strToLowerCase(string);
+		void displayHeader(std::string, vector<std::string>);
 		bool validate_UserOption(vector<int>, int);
+		std::string strToUpperCase(std::string);
+		std::string strToLowerCase(std::string);
 
 	protected:
-		string tempStr;
+		std::string tempStr;
 };
 
 /*
@@ -42,37 +42,15 @@ class MySQL_Conn {
 		void closeConn();
 
 	protected:
-		MYSQL* conn;
-		MYSQL_ROW row;
-		MYSQL_RES* res;
-		string query;
-};
-
-/*
-* Handles user login and links to primary application.
-*/
-class Initialize_Program {
-
-	public:
-		Initialize_Program();
-		void run();
-		void displayWelcomeScreen();
-		void login();
-		bool verifyLogin(string, string);
-		bool verifyUsername();
-		bool verifyPassword();
-
-	protected:
-		Global_Functions fct;
-		MySQL_Conn db;
-		Main_Menu menu;
-		string sys_msg;
-		bool runInstance;
-		int userInput;
-		vector<int> user_options;
-		string Username;
-		string Password;
-		bool validLogin;
+		const char* url;
+		//Schema sch;
+		//Collection coll;
+		std::string hostname;
+		int port;
+		std::string dbName;
+		std::string user;
+		std::string pass;
+		std::string query;
 };
 
 /*
@@ -88,7 +66,7 @@ class Main_Menu {
 
 	protected:
 		Global_Functions fct;
-		string sys_msg;
+		std::string sys_msg;
 		bool runInstance;
 		int userInput;
 		vector<int> user_options;
@@ -102,7 +80,7 @@ class Add_Movie {
 	
 	public:
 		Add_Movie();
-		string strToUpperCase(string);
+		std::string strToUpperCase(std::string);
 		void SetAnswer();
 		void SetMovieTitle();
 		void SetCastSize();
@@ -115,14 +93,13 @@ class Add_Movie {
 		vector<Add_Movie> movieList; // Stores all movies that the user adds to the DB
 
 	protected:
-		string title;
+		std::string title;
 		int castSize;
-		vector<string> cast;
-		string rating;
-		string userInput;
-		vector<string> movieRatings; // Stores all acceptable values for a movie's rating
+		vector<std::string> cast;
+		std::string rating;
+		std::string userInput;
+		vector<std::string> movieRatings; // Stores all acceptable values for a movie's rating
 };
-
 
 /*
 * Hanldes all opperations found within the "[1] Display Data" option in the Main Menu
@@ -151,6 +128,33 @@ class Edit_Mode {
 };
 
 /*
+* Handles user login and links to primary application.
+*/
+class Initialize_Program {
+
+public:
+	Initialize_Program();
+	void run();
+	void displayWelcomeScreen();
+	void login();
+	bool verifyLogin(std::string, std::string);
+	bool verifyUsername();
+	bool verifyPassword();
+
+protected:
+	Global_Functions fct;
+	//MySQL_Conn db;
+	Main_Menu menu;
+	std::string sys_msg;
+	bool runInstance;
+	int userInput;
+	vector<int> user_options;
+	std::string Username;
+	std::string Password;
+	bool validLogin;
+};
+
+/*
 * Handles...
 */
 /*
@@ -163,6 +167,5 @@ class a {
 
 };
 */
-
 
 

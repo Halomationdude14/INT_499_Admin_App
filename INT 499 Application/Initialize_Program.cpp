@@ -11,15 +11,13 @@ NOTE: This is a modified version of the original code that has been reworked to 
 #include <string>
 #include <exception>
 #include <vector>
-#include "EZTechMovie_Admin_App.h"
 using namespace std;
+
+#include "EZTechMovie_Admin_App.h"
 
 
 // Default Constructor
 Initialize_Program::Initialize_Program() {
-	Global_Functions fct;
-	MySQL_Conn db;
-	Main_Menu menu;
 	sys_msg = "";
 	runInstance = true;
 	userInput = 0;
@@ -36,7 +34,7 @@ void Initialize_Program::run() {
 	while (runInstance) {
 		userInput = 0;
 
-		db.startConn(); //establish connection to MySQL database.
+		//db.startConn(); //establish connection to MySQL database.
 		
 		while (true) {
 			fct.clearScreen();
@@ -54,7 +52,6 @@ void Initialize_Program::run() {
 				}
 			}
 			catch (exception& e) {
-				//cout << e.what() << endl;
 				sys_msg = e.what();
 				cin.clear(); // clears the error flags
 				cin.ignore(numeric_limits<streamsize>::max(), '\n'); // this line discards all the input waiting in the stream

@@ -8,13 +8,17 @@ NOTE: This is a modified version of the original code that has been reworked to 
 */
 
 #include <iostream>
+#include <string>
 #include <exception>
-//#include <mysqlx/xdevapi.h>
-#include <mysql.h>
+#include <mysqlx/xdevapi.h>
+//#include <mysql.h>
+
 using namespace std;
+using namespace mysqlx;
 int qstate;
 
 #include "EZTechMovie_Admin_App.h"
+
 
 /*
 * Default Constructor
@@ -29,6 +33,7 @@ MySQL_Conn::MySQL_Conn() {
 */
 bool MySQL_Conn::startConn() {
     try {
+        /*
         conn = mysql_init(0);
         conn = mysql_real_connect(conn, "localhost", "root", "Inferno24/7!", "eztechmoviedb", 3306, NULL, 0);
 
@@ -48,10 +53,22 @@ bool MySQL_Conn::startConn() {
                 cout << "Query failed: " << mysql_error(conn) << endl;
             }
         }
+        */
+
+
+
         return true;
     }
-    catch (exception& e) {
-        cerr << "Error connecting to MySQL: " << e.what() << endl;
+    catch (const mysqlx::Error& err) {
+        cout << "ERROR: " << err << endl;
+        return false;
+    }
+    catch (exception& ex) {
+        cout << "STD EXCEPTION: " << ex.what() << endl;
+        return false;
+    }
+    catch (const char* ex) {
+        cout << "EXCEPTION: " << ex << endl;
         return false;
     }
     return false;
@@ -61,9 +78,11 @@ bool MySQL_Conn::startConn() {
 * Purpose: Close the connection to the MySQL database.
 */
 void MySQL_Conn::closeConn() {
+    /*
     if (conn) {
         delete conn;
     }
+    */
     query = "";
 }
 

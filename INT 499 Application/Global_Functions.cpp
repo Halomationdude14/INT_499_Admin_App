@@ -9,11 +9,11 @@ NOTE: This is a modified version of the original code that has been reworked to 
 
 #include <iostream>
 #include <string>
-//#include <exception>
 #include <vector>
 #include <cstdlib>
-#include "EZTechMovie_Admin_App.h"
 using namespace std;
+
+#include "EZTechMovie_Admin_App.h"
 
 
 // Default Constructor
@@ -91,16 +91,5 @@ string Global_Functions::strToLowerCase(string str) {
 		}
 	}
 	return tempStr;
-}
-
-// Purpose: Validate user input when navigating the menus.
-bool Global_Functions::validate_UserOption(vector<int> list, int num) {
-
-	for (auto& i : list) {
-		if (num == i) {
-			return true;
-		}
-	}
-	return false;
 }
 
