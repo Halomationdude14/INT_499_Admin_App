@@ -18,7 +18,8 @@ using namespace std;
 
 // Default Constructor
 Global_Functions::Global_Functions() {
-	tempStr = ""; //general use string
+	SYS_Msgs = {}; // Array of strings to display between the header and the menu
+	tempStr = ""; // General use string
 }
 
 // Purpose: Clear the terminal screen.
@@ -31,21 +32,45 @@ void Global_Functions::clearScreen() {
 * Prints out a standard header. Then, if 'msg' is not empty, print that. Then, print the menu options.
 */
 void Global_Functions::displayHeader(string msg, vector<string> menu) {
+	//Once rework is complete, remove "string msg" from method variables!
 	clearScreen();
 
 	cout << "\n##############################################################################" << endl;
 	cout << "####### Welcome to the EZTechMovie Database Administration Application #######" << endl;
 	cout << "##############################################################################" << endl << endl;
 
-	// Display sys/err msg if not empty.
+	/*
 	if (msg.length() > 0) {
 		cout << msg << endl << endl;
+	}
+	*/
+
+	// Display sys/err messages if the array is not empty.
+	if (SYS_Msgs.size() > 0) {
+		for (auto& i : SYS_Msgs) {
+			cout << i << endl;
+		}
 	}
 
 	// Display menu options.
 	for (auto& i : menu) {
 		cout << i << endl;
 	}
+}
+
+// Purpose: Adds a message to SYS_Msgs to display with the header.
+void Global_Functions::addMsg(string msg) {
+
+}
+
+// Purpose: Removes a message from SYS_Msgs to display with the header.
+void Global_Functions::removeMsg(string msg) {
+
+}
+
+// Purpose: Clears the entire SYS_Msgs array.
+void Global_Functions::clearAllMsgs() {
+	SYS_Msgs = {};
 }
 
 // Purpose: Validate user input when navigating the menus.
@@ -55,8 +80,12 @@ bool Global_Functions::validate_UserOption(vector<int> list, int num) {
 		if (num == i) {
 			return true;
 		}
+		else {
+			string s = "ERROR: [" + to_string(num) + "] is not a valid entry!";
+			SYS_Msgs.push_back(s);
+			return false;
+		}
 	}
-	return false;
 }
 
 // Purpose: Convert all chars in a string to UPPER case.

@@ -22,11 +22,15 @@ class Global_Functions {
 		Global_Functions();
 		void clearScreen();
 		void displayHeader(std::string, vector<std::string>);
+		void addMsg(std::string msg);
+		void removeMsg(std::string msg);
+		void clearAllMsgs();
 		bool validate_UserOption(vector<int>, int);
 		std::string strToUpperCase(std::string);
 		std::string strToLowerCase(std::string);
 
 	protected:
+		vector<std::string> SYS_Msgs;
 		std::string tempStr;
 };
 
@@ -34,16 +38,16 @@ class Global_Functions {
 * Establishes the connection to the locally stored MySQL database.
 * Contains functions used to execute queries against the database.
 */
-class MySQL_Conn {
+class MySQL_Connection {
 
 	public:
-		MySQL_Conn();
-		bool startConn();
-		void closeConn();
+		MySQL_Connection();
+		bool startConnection();
+		void closeConnection();
 
 	protected:
-		mysqlx::Session sess;
-		mysqlx::Schema db;
+		//mysqlx::Session sess;
+		//mysqlx::Schema db;
 		std::string hostname;
 		int port;
 		std::string dbName;
@@ -76,6 +80,7 @@ class Main_Menu {
 /*
 * Handles...
 */
+/*
 class Add_Movie {
 	
 	public:
@@ -100,6 +105,7 @@ class Add_Movie {
 		std::string userInput;
 		vector<std::string> movieRatings; // Stores all acceptable values for a movie's rating
 };
+*/
 
 /*
 * Hanldes all opperations found within the "[1] Display Data" option in the Main Menu
@@ -142,7 +148,7 @@ public:
 
 protected:
 	Global_Functions fct;
-	MySQL_Conn db;
+	MySQL_Connection db;
 	Main_Menu menu;
 	std::string sys_msg;
 	bool runInstance;

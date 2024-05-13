@@ -41,7 +41,7 @@ void Start_Program::run() {
 		* NOTE: Currently, this program is designed to connect to a specific database with specific credentials.
 		*		If the connection is unsuccessful, the next "if" stmt will prevent this program from crashing and will close the program with no errors.
 		*/
-		dbConn = db.startConn();
+		dbConn = db.startConnection();
 		// Delete this stmt once better functionality is implemented.
 		if (dbConn == false) {
 			runInstance = false;
