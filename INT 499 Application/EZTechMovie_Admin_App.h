@@ -1,13 +1,14 @@
 
 #include <string>
 #include <vector>
-#include <mysqlx/xdevapi.h>
+//#include <mysqlx/xdevapi.h>
 #pragma once
 
 
 /*
 * Contains generic user defined methods/functions
 */
+// REWORK: Rename class/file to "Glb_Fct"!
 class Global_Functions {
 
 	public:
@@ -31,42 +32,42 @@ class Global_Functions {
 * Establishes the connection to the locally stored MySQL database.
 * Contains functions used to execute queries against the database.
 */
+// REWORK: Rename to "Server_Conn"
 class MySQL_Connection {
 
 	public:
 		MySQL_Connection();
+		std::string run();
 		bool startConnection();
-		void userLogin(std::string, std::string);
-		void closeConnection();
+		bool userLogin(std::string, std::string);
+		bool closeConnection();
 
 	protected:
-		//mysqlx::Session sess;
-		//mysqlx::Schema db;
-		vector<std::string> sys_msg;
-		std::string hostname;
-		int port;
-		std::string dbName;
-		std::string dbUser;
-		std::string dbPass;
-		vector<std::string> dbTables;
 		std::string tempStr;
+		vector<std::string> sys_msg;
+		std::string dbUser;
+		std::string dbName;
 };
 
 class Menus {
 
 	public:
 		Menus();
-		void displayHeader(vector<std::string>, vector<std::string>);
-		void startScreen(vector<std::string>);
-		void loginScreen(vector<std::string>);
-		void mainMenu(vector<std::string>);
+		void displayMenu(vector<std::string>);
+		void displayMenu(vector<std::string>, vector<std::string>);
+		void SCRN_start(vector<std::string>);
+		void SCRN_login(vector<std::string>);
+		void SCRN_mainMenu(vector<std::string>);
+		//void SCRN_a(vector<std::string>);
 
 	private:
 		Global_Functions fct;
 		std::string tempStr;
-		vector<std::string> startMenu;
+		vector<std::string> msgSet;
+		vector<vector<std::string>> msgSetList;
+		vector<std::string> start_Menu;
 		vector<int> startMenu_Options;
-		vector<std::string> mainMenu;
+		vector<std::string> main_Menu;
 		vector<int> mainMenu_Options;
 };
 

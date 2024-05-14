@@ -2,6 +2,7 @@
 #include <iostream>
 #include <string>
 #include <exception>
+#include <vector>
 using namespace std;
 
 #include "EZTechMovie_Admin_App.h"
@@ -9,13 +10,16 @@ using namespace std;
 
 Menus::Menus() {
 	tempStr = "";
-	startMenu = {" [1] Sign In"," [2] Exit Application"};
+	msgSet = {}; // [vector<string>] Contains a single set of sys/err messages.
+	msgSetList = {}; // [vector<vector<string>>] Container for multiple sets of sys/err messages.
+	start_Menu = {" [1] Sign In"," [2] Exit Application"};
 	startMenu_Options = {1,2};
-	mainMenu = {" [1] Display Data"," [2] Modify Data"," [3] Admin Account"," [4] Sign Out"};
+	main_Menu = {" [1] Display Data"," [2] Modify Data"," [3] Admin Account"," [4] Sign Out"};
 	mainMenu_Options = {1,2,3,4};
 }
 
-void Menus::displayHeader(vector<string> msg, vector<string> menu) {
+// Displays partial UI: header + message (if not empty*)
+void Menus::displayMenu(vector<string> msg) {
 	fct.clearScreen();
 
 	cout << "\n##############################################################################" << endl;
@@ -23,6 +27,24 @@ void Menus::displayHeader(vector<string> msg, vector<string> menu) {
 	cout << "##############################################################################" << endl << endl;
 
 	// Display sys/err messages if the array is not empty.
+	// REWORK: May not need the "if" stmt.
+	if (msg.size() > 0) {
+		for (auto& i : msg) {
+			cout << i << endl;
+		}
+	}
+}
+
+// Displays full UI: header + message (if not empty*) + menu
+void Menus::displayMenu(vector<string> msg, vector<string> menu) {
+	fct.clearScreen();
+
+	cout << "\n##############################################################################" << endl;
+	cout << "####### Welcome to the EZTechMovie Database Administration Application #######" << endl;
+	cout << "##############################################################################" << endl << endl;
+
+	// Display sys/err messages if the array is not empty.
+	// REWORK: May not need the "if" stmt.
 	if (msg.size() > 0) {
 		for (auto& i : msg) {
 			cout << i << endl;
@@ -35,16 +57,18 @@ void Menus::displayHeader(vector<string> msg, vector<string> menu) {
 	}
 }
 
-void Menus::startScreen(vector<string> msg) {
-	displayHeader(msg, startMenu);
+// SCREEN: Start screen
+void Menus::SCRN_start(vector<string> msg) {
+	displayMenu(msg, start_Menu);
 }
 
-void Menus::loginScreen(vector<string> msg) {
-	vector<string> empty = {};
-	displayHeader(msg, empty);
+// SCREEN: Login screen
+void Menus::SCRN_login(vector<string> msg) {
+	displayMenu(msg);
 }
 
-void Menus::mainMenu(vector<string> msg) {
-	displayHeader(msg, mainMenu);
+// SCREEN: Main Menu
+void Menus::SCRN_mainMenu(vector<string> msg) {
+	displayMenu(msg, main_Menu);
 }
 

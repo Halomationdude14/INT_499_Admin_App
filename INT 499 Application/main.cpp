@@ -18,15 +18,12 @@ using namespace std;
 int main() {
 	Global_Functions fct;
 	MySQL_Connection() db;
-	//Start_Program newInstance;
-	//Main_Menu menu;
 	Menus() menu;
 
 	vector<vector<string>> Notifications = {};
 	vector<string> sys_msg = {};
 	string str = "";
 	bool running = true;
-	//newInstance.run();
 
 	// Start the application
 	while (running) {
