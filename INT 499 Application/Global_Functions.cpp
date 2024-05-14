@@ -1,12 +1,4 @@
 
-/*
-INT 499 Capstone for Information Technology
-Interactive Assignment
-Date: 2024-04-22
-Author: Paul Oram
-NOTE: This is a modified version of the original code that has been reworked to integrate into the final project (MySQL DB).
-*/
-
 #include <iostream>
 #include <string>
 #include <vector>
@@ -18,8 +10,9 @@ using namespace std;
 
 // Default Constructor
 Global_Functions::Global_Functions() {
-	SYS_Msgs = {}; // Array of strings to display between the header and the menu
-	tempStr = ""; // General use string
+	Notifications = {}; // Vector<Vector<String>> | Contains vector objects sent from various classes to display error/system messages.
+	sys_msg = {}; // Vector<String> | General use message container.
+	tempStr = ""; // General use string.
 }
 
 // Purpose: Clear the terminal screen.
@@ -31,46 +24,48 @@ void Global_Functions::clearScreen() {
 * Purpose: Takes in a system/error message + a list of menu options for the user to choose from.
 * Prints out a standard header. Then, if 'msg' is not empty, print that. Then, print the menu options.
 */
-void Global_Functions::displayHeader(string msg, vector<string> menu) {
-	//Once rework is complete, remove "string msg" from method variables!
+void Global_Functions::displayHeader(vector<string> menu) {
 	clearScreen();
 
 	cout << "\n##############################################################################" << endl;
 	cout << "####### Welcome to the EZTechMovie Database Administration Application #######" << endl;
 	cout << "##############################################################################" << endl << endl;
 
-	/*
-	if (msg.length() > 0) {
-		cout << msg << endl << endl;
-	}
-	*/
-
 	// Display sys/err messages if the array is not empty.
-	if (SYS_Msgs.size() > 0) {
-		for (auto& i : SYS_Msgs) {
-			cout << i << endl;
+	if (Notifications.size() > 0) {
+		for (auto& i : Notifications) {
+			for (auto& j : i) {
+				cout << j << endl;
+			}
 		}
+		cout << endl;
 	}
 
 	// Display menu options.
 	for (auto& i : menu) {
 		cout << i << endl;
 	}
+
+	// Clear the last set of messages from the 'Notifications' list.
+	// This is to ensure that old messages are automatically removed from the Header the next time it it generated.
+	if (Notifications.size() > 0) {
+		removeLastMsg();
+	}
 }
 
-// Purpose: Adds a message to SYS_Msgs to display with the header.
-void Global_Functions::addMsg(string msg) {
-
+// Purpose: Adds a set of messages to the list 'Notifications'.
+void Global_Functions::addMsg(vector<string> msg) {
+	Notifications.push_back(msg);
 }
 
-// Purpose: Removes a message from SYS_Msgs to display with the header.
-void Global_Functions::removeMsg(string msg) {
-
+// Purpose: Removes the oldest set of messages from the list 'Notifications'.
+void Global_Functions::removeLastMsg() {
+	Notifications.erase(Notifications.begin());
 }
 
-// Purpose: Clears the entire SYS_Msgs array.
+// Purpose: Clears the entire 'Notifications' list.
 void Global_Functions::clearAllMsgs() {
-	SYS_Msgs = {};
+	Notifications.clear();
 }
 
 // Purpose: Validate user input when navigating the menus.
@@ -80,12 +75,10 @@ bool Global_Functions::validate_UserOption(vector<int> list, int num) {
 		if (num == i) {
 			return true;
 		}
-		else {
-			string s = "ERROR: [" + to_string(num) + "] is not a valid entry!";
-			SYS_Msgs.push_back(s);
-			return false;
-		}
 	}
+	tempStr = "ERROR: [" + to_string(num) + "] is not a valid entry!";
+	sys_msg.push_back(tempStr);
+	return false;
 }
 
 // Purpose: Convert all chars in a string to UPPER case.

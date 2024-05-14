@@ -8,6 +8,7 @@ NOTE: This is a modified version of the original code that has been reworked to 
 */
 
 #include <iostream>
+#include <vector>
 using namespace std;
 
 #include "EZTechMovie_Admin_App.h"
@@ -15,8 +16,23 @@ using namespace std;
 
 // Purpose: Main Function
 int main() {
-	Start_Program newInstance;
-	newInstance.run();
+	Global_Functions fct;
+	MySQL_Connection() db;
+	//Start_Program newInstance;
+	//Main_Menu menu;
+	Menus() menu;
+
+	vector<vector<string>> Notifications = {};
+	vector<string> sys_msg = {};
+	string str = "";
+	bool running = true;
+	//newInstance.run();
+
+	// Start the application
+	while (running) {
+		//menu.startScreen(sys_msg);
+	}
+
 	cout << "\n\n***** [ Closing Application ] *****\n\n";
 	return 0;
 }

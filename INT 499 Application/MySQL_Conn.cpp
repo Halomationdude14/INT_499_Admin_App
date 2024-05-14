@@ -1,20 +1,13 @@
 
-/*
-INT 499 Capstone for Information Technology
-Interactive Assignment
-Date: 2024-04-22
-Author: Paul Oram
-NOTE: This is a modified version of the original code that has been reworked to integrate into the final project (MySQL DB).
-*/
-
 #include <iostream>
 #include <string>
 #include <exception>
+#include <vector>
 #include <mysqlx/xdevapi.h>
 
 using namespace std;
 using namespace mysqlx;
-int qstate;
+//int qstate;
 
 #include "EZTechMovie_Admin_App.h"
 
@@ -23,13 +16,14 @@ int qstate;
 * Default Constructor
 */
 MySQL_Connection::MySQL_Connection() {
+    sys_msg = {};
     hostname = "localhost";
     port = 33060;
     dbName = "eztechmoviedb";
-    user = "root";
-    pass = "Inferno24/7!";
+    dbUser = "root";
+    dbPass = "Inferno24/7!";
     dbTables = {}; //holds a list of all tables in the database
-    query = "";
+    tempStr = "";
 }
 
 /*
@@ -38,32 +32,37 @@ MySQL_Connection::MySQL_Connection() {
 */
 bool MySQL_Connection::startConnection() {
     try {
-        // Alter how "sys_msg" is handled. Make it a global variable that can be set by any class.
-
+        sys_msg.push_back("SYS: Establishing connection to local MySQL Server...");
         // There are multiple ways of inputting data into the "Session()" function, but this one is straight forward.
         // Session s1("localhost", 3306, "user", "pass");
-        mysqlx::Session sess(hostname, port, user, pass); // Establish connection
-        mysqlx::Schema db = sess.getSchema(dbName); // Points to specific database
+        mysqlx::Session sess(hostname, port, user, pass); // Establish connection with local MySQL server
+        sys_msg.push_back("SYS: Connection to local MySQL Server establish successfully!");
 
-        // If the schema "eztechmoviedb" exists in the database, return true, else return false.
-        if (db.existsInDatabase()) {
-            return true;
-        }
-        else {
-            return false;
-        }
+        sys_msg.push_back("SYS: Establishing connection to database: \"eztechmoviedb\"...");
+        mysqlx::Schema db = sess.getSchema(dbName); // Points to specific database
+        sys_msg.push_back("SYS: Connection to database \"eztechmoviedb\" successful!");
+
+        fct.addMsg(sys_msg);
+        sys_msg.clear();
     }
     catch (const mysqlx::Error& err) {
-        cout << "ERROR: " << err << endl;
+        sys_msg.push_back("[MySQL|mysqlx] ERROR: " + std::string(err.what()));
+        fct.addMsg(sys_msg);
         return false;
     }
-    catch (std::exception& ex) {
-        cout << "STD EXCEPTION: " << ex.what() << endl;
+    catch (const std::exception& ex) {
+        sys_msg.push_back("[MySQL|std] ERROR: " + std::string(ex.what()));
+        fct.addMsg(sys_msg);
         return false;
     }
-    catch (const char* ex) {
-        cout << "EXCEPTION: " << ex << endl;
-        return false;
+}
+
+void MySQL_Connection::userLogin(std::string username, std::string password) {
+    bool validLogin = false;
+
+    while (validLogin == false) {
+        vector<string> empty = {};
+        fct.displayHeader(empty);
     }
 }
 
@@ -71,7 +70,10 @@ bool MySQL_Connection::startConnection() {
 * Purpose: Close the connection to the MySQL database.
 */
 void MySQL_Connection::closeConnection() {
-    dbTables = {};
+    sys_msg.push_back("SYS: Connection to MySQL server closed.");
+    fct.addMsg(sys_msg);
+    sys_msg.clear();
+    dbTables.clear();
     query = "";
 }
 

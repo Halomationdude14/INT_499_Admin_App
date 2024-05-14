@@ -1,12 +1,4 @@
 
-/*
-INT 499 Capstone for Information Technology
-Interactive Assignment
-Date: 2024-04-22
-Author: Paul Oram
-NOTE: This is a modified version of the original code that has been reworked to integrate into the final project (MySQL DB).
-*/
-
 #include <string>
 #include <vector>
 #include <mysqlx/xdevapi.h>
@@ -21,16 +13,17 @@ class Global_Functions {
 	public:
 		Global_Functions();
 		void clearScreen();
-		void displayHeader(std::string, vector<std::string>);
-		void addMsg(std::string msg);
-		void removeMsg(std::string msg);
+		void displayHeader(vector<std::string>);
+		void addMsg(vector<std::string> msg);
+		void removeLastMsg();
 		void clearAllMsgs();
 		bool validate_UserOption(vector<int>, int);
 		std::string strToUpperCase(std::string);
 		std::string strToLowerCase(std::string);
 
 	protected:
-		vector<std::string> SYS_Msgs;
+		vector<vector<std::string>> Notifications;
+		vector<std::string> sys_msg;
 		std::string tempStr;
 };
 
@@ -43,24 +36,48 @@ class MySQL_Connection {
 	public:
 		MySQL_Connection();
 		bool startConnection();
+		void userLogin(std::string, std::string);
 		void closeConnection();
 
 	protected:
 		//mysqlx::Session sess;
 		//mysqlx::Schema db;
+		vector<std::string> sys_msg;
 		std::string hostname;
 		int port;
 		std::string dbName;
-		std::string user;
-		std::string pass;
+		std::string dbUser;
+		std::string dbPass;
 		vector<std::string> dbTables;
-		std::string query;
+		std::string tempStr;
 };
 
+class Menus {
+
+	public:
+		Menus();
+		void displayHeader(vector<std::string>, vector<std::string>);
+		void startScreen(vector<std::string>);
+		void loginScreen(vector<std::string>);
+		void mainMenu(vector<std::string>);
+
+	private:
+		Global_Functions fct;
+		std::string tempStr;
+		vector<std::string> startMenu;
+		vector<int> startMenu_Options;
+		vector<std::string> mainMenu;
+		vector<int> mainMenu_Options;
+};
+
+
+
+
+
+
+
+
 /*
-* Links to all other classes.
-* Responsible for displaying all possible options to admin user in list format.
-*/
 class Main_Menu {
 
 	public:
@@ -69,7 +86,7 @@ class Main_Menu {
 
 	protected:
 		Global_Functions fct;
-		std::string sys_msg;
+		vector<std::string> sys_msg;
 		bool runInstance;
 		int userInput;
 		vector<int> user_options;
@@ -77,65 +94,7 @@ class Main_Menu {
 		bool valid;
 };
 
-/*
-* Handles...
-*/
-/*
-class Add_Movie {
-	
-	public:
-		Add_Movie();
-		std::string strToUpperCase(std::string);
-		void SetAnswer();
-		void SetMovieTitle();
-		void SetCastSize();
-		void SetCastMembers();
-		void SetRating();
-		void addMovie(Add_Movie movie);
-		void displayMovies();
-		void run();
-		char answer;
-		vector<Add_Movie> movieList; // Stores all movies that the user adds to the DB
 
-	protected:
-		std::string title;
-		int castSize;
-		vector<std::string> cast;
-		std::string rating;
-		std::string userInput;
-		vector<std::string> movieRatings; // Stores all acceptable values for a movie's rating
-};
-*/
-
-/*
-* Hanldes all opperations found within the "[1] Display Data" option in the Main Menu
-*/
-class Display_Mode {
-
-	public:
-		Display_Mode();
-		void run();
-
-	protected:
-		Global_Functions fct;
-};
-
-/*
-* Hanldes all opperations found within the "[2] Modify Data" option in the Main Menu
-*/
-class Edit_Mode {
-
-	public:
-		Edit_Mode();
-		void run();
-
-	protected:
-		Global_Functions fct;
-};
-
-/*
-* Handles user login and links to primary application.
-*/
 class Start_Program {
 
 public:
@@ -150,7 +109,7 @@ protected:
 	Global_Functions fct;
 	MySQL_Connection db;
 	Main_Menu menu;
-	std::string sys_msg;
+	vector<std::string> sys_msg;
 	bool runInstance;
 	int userInput;
 	vector<int> user_options;
@@ -160,19 +119,4 @@ protected:
 	bool dbConn;
 	bool validLogin;
 };
-
-/*
-* Handles...
 */
-/*
-class a {
-
-	public:
-		void run();
-
-	protected:
-
-};
-*/
-
-

@@ -18,7 +18,7 @@ using namespace std;
 
 // Default Constructor
 Main_Menu::Main_Menu() {
-	sys_msg = "";
+	sys_msg = {};
 	runInstance = true;
 	userInput = 0;
 	user_options = {1,2,3,4};
@@ -34,7 +34,9 @@ void Main_Menu::run() {
 		valid = false;
 		while (valid == false) {
 			userInput = 0;
-			fct.displayHeader(sys_msg, menu_options);
+			fct.addMsg(sys_msg);
+			sys_msg.clear();
+			fct.displayHeader(menu_options);
 
 			try {
 				cout << "\nUser Input: ";
@@ -44,27 +46,27 @@ void Main_Menu::run() {
 					throw invalid_argument("ERROR: User input was not a valid option! Try again.");
 				}
 				else {
-					sys_msg = "";
 					valid = true;
 				}
 			}
 			catch (exception& e) {
-				sys_msg = e.what();
+				sys_msg.push_back(e.what());
 				cin.clear(); // clears the error flags
 				cin.ignore(numeric_limits<streamsize>::max(), '\n'); // this line discards all the input waiting in the stream
 			}
 		}
 
 		if (userInput == 1) {
-			sys_msg = "INFO: Display Data";
+			sys_msg.push_back("INFO: Display Data");
 		}
 		if (userInput == 2) {
-			sys_msg = "INFO: Modify Data";
+			sys_msg.push_back("INFO: Modify Data");
 		}
 		if (userInput == 3) {
-			sys_msg = "INFO: Admin Account";
+			sys_msg.push_back("INFO: Admin Account");
 		}
 		if (userInput == 4) {
+			sys_msg.push_back("INFO: Main Menu closed. User logged out!");
 			runInstance = false;
 		}
 	}

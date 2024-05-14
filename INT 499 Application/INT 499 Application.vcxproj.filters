@@ -21,19 +21,10 @@
     <ClCompile Include="Global_Functions.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Start_Program.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Main_Menu.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Display_Mode.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Edit_Mode.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="MySQL_Conn.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Menus.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

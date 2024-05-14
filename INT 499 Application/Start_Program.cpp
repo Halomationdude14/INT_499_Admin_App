@@ -18,7 +18,7 @@ using namespace std;
 
 // Default Constructor
 Start_Program::Start_Program() {
-	sys_msg = "";
+	sys_msg = {};
 	runInstance = true;
 	userInput = 0;
 	user_options = {1,2};
@@ -36,20 +36,14 @@ void Start_Program::run() {
 	while (runInstance) {
 		userInput = 0;
 
-		/*
-		* Establish connection to MySQL database.
-		* NOTE: Currently, this program is designed to connect to a specific database with specific credentials.
-		*		If the connection is unsuccessful, the next "if" stmt will prevent this program from crashing and will close the program with no errors.
-		*/
-		dbConn = db.startConnection();
-		// Delete this stmt once better functionality is implemented.
-		if (dbConn == false) {
-			runInstance = false;
-		}
+		// Establish connection to MySQL database.
+		//dbConn = db.startConnection();
 		
 		// While there exists a successful connection to the database...
 		while (dbConn) {
-			fct.displayHeader(sys_msg, menu_options);
+			fct.addMsg(sys_msg);
+			sys_msg.clear();
+			fct.displayHeader(menu_options);
 
 			try {
 				cout << "\nUser Input: ";
@@ -63,20 +57,24 @@ void Start_Program::run() {
 				}
 			}
 			catch (exception& e) {
-				sys_msg = e.what();
+				sys_msg.push_back(e.what());
 				cin.clear(); // clears the error flags
 				cin.ignore(numeric_limits<streamsize>::max(), '\n'); // this line discards all the input waiting in the stream
 			}
 		}
 		
+		// Main Menu
 		if (userInput == 1) {
-			sys_msg = "";
 			login();
 			if (validLogin) {
 				menu.run();
 			}
 		}
+		// Close the app
 		if (userInput == 2) {
+			sys_msg.clear();
+			Username = "";
+			Password = "";
 			runInstance = false;
 		}
 	}
@@ -89,8 +87,12 @@ void Start_Program::login() {
 	Password = "";
 
 	while (validLogin == false) {
+		fct.addMsg(sys_msg);
+		sys_msg.clear();
+
 		vector<string> empty = {};
-		fct.displayHeader(sys_msg, empty);
+		fct.displayHeader(empty);
+
 		cout << "\nEnter Admin Credentials to Log Into the Console -->" << endl;
 
 		// Rework: Verify username first, and then password after implementation.
@@ -110,18 +112,19 @@ void Start_Program::login() {
 			validLogin = verifyLogin(Username, Password);
 		}
 		catch (exception& e) {
-			sys_msg = e.what();
+			sys_msg.push_back(e.what());
 			cin.clear(); // clears the error flags
 			cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // this line discards all the input waiting in the stream
 		}
 	}
+	sys_msg.clear();
 }
 
 // Purpose: Verifies user login credentials against DB records.
 bool Start_Program::verifyLogin(string user, string pass) {
 	// Future implementation of user/pass verification requires additional setup in DB
-	// cout << "Login Successful!" << endl;
-	
+	sys_msg.push_back("SYS: Login Successful!");
+	fct.addMsg(sys_msg);
 	return true; //change to "false" after implementation
 }
 
