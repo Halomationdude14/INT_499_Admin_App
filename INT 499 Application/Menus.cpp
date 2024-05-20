@@ -12,6 +12,8 @@ Menus::Menus() {
 	tempStr = "";
 	msgSet = {}; // [vector<string>] Contains a single set of sys/err messages.
 	msgSetList = {}; // [vector<vector<string>>] Container for multiple sets of sys/err messages.
+	currMenu = {};
+	currOptions = {};
 	start_Menu = {" [1] Sign In"," [2] Exit Application"};
 	startMenu_Options = {1,2};
 	main_Menu = {" [1] Display Data"," [2] Modify Data"," [3] Admin Account"," [4] Sign Out"};
@@ -57,18 +59,26 @@ void Menus::displayMenu(vector<string> msg, vector<string> menu) {
 	}
 }
 
+// Returns the name of the variable which corresponds to the menu currently being displayed.
+vector<string> Menus::getCurrMenu() {
+	return currMenu;
+}
+
 // SCREEN: Start screen
 void Menus::SCRN_start(vector<string> msg) {
 	displayMenu(msg, start_Menu);
+	currMenu = start_Menu;
 }
 
 // SCREEN: Login screen
 void Menus::SCRN_login(vector<string> msg) {
 	displayMenu(msg);
+	currMenu.clear();
 }
 
 // SCREEN: Main Menu
 void Menus::SCRN_mainMenu(vector<string> msg) {
 	displayMenu(msg, main_Menu);
+	currMenu = main_Menu;
 }
 

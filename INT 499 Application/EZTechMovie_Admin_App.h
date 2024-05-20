@@ -14,11 +14,14 @@ class Global_Functions {
 	public:
 		Global_Functions();
 		void clearScreen();
+		char getUsrInput();
+
 		void displayHeader(vector<std::string>);
 		void addMsg(vector<std::string> msg);
 		void removeLastMsg();
 		void clearAllMsgs();
-		bool validate_UserOption(vector<int>, int);
+
+		vector<string> validate_UserOption(vector<string>, char);
 		std::string strToUpperCase(std::string);
 		std::string strToLowerCase(std::string);
 
@@ -55,6 +58,7 @@ class Menus {
 		Menus();
 		void displayMenu(vector<std::string>);
 		void displayMenu(vector<std::string>, vector<std::string>);
+		vector<string> getCurrMenu();
 		void SCRN_start(vector<std::string>);
 		void SCRN_login(vector<std::string>);
 		void SCRN_mainMenu(vector<std::string>);
@@ -65,10 +69,13 @@ class Menus {
 		std::string tempStr;
 		vector<std::string> msgSet;
 		vector<vector<std::string>> msgSetList;
+		vector<string> currMenu;
+		vector<int> currOptions;
 		vector<std::string> start_Menu;
 		vector<int> startMenu_Options;
 		vector<std::string> main_Menu;
 		vector<int> mainMenu_Options;
+		
 };
 
 

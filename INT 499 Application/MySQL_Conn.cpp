@@ -76,5 +76,6 @@ bool MySQL_Connection::closeConnection() {
     //fct.addMsg(sys_msg);
     sys_msg.clear();
     tempStr = "";
+    return true;
 }
 

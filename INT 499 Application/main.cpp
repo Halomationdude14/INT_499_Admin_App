@@ -13,21 +13,34 @@ using namespace std;
 
 #include "EZTechMovie_Admin_App.h"
 
-
 // Purpose: Main Function
 int main() {
 	Global_Functions fct;
-	MySQL_Connection() db;
-	Menus() menu;
+	MySQL_Connection db;
+	Menus menu;
 
-	vector<vector<string>> Notifications = {};
-	vector<string> sys_msg = {};
-	string str = "";
+	//vector<vector<string>> msgList = {};
+	vector<string> msgs = {};
+	string str;
+	char usrInput;
 	bool running = true;
 
 	// Start the application
 	while (running) {
-		//menu.startScreen(sys_msg);
+		str = "";
+		usrInput = 'x';
+
+		menu.SCRN_start(msgs);
+		msgs.clear();
+		usrInput = fct.getUsrInput();
+		msgs = fct.validate_UserOption(menu.getCurrMenu(), usrInput);
+
+		if (msgs.size() > 0) {
+			break;
+		}
+		else {
+			//Put a switch here!
+		}
 	}
 
 	cout << "\n\n***** [ Closing Application ] *****\n\n";

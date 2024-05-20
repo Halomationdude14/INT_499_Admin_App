@@ -20,6 +20,21 @@ void Global_Functions::clearScreen() {
 	system("cls");
 }
 
+// Purpose: Obtain the user's input when selecting menu options. Validate's input too.
+char Global_Functions::getUsrInput() {
+	char c = 'x';
+	cout << "User Input: ";
+	cin >> c;
+	/*
+	if (validate_UserOption(list, c)) {
+		return c;
+	}
+	*/
+	return c;
+}
+
+
+
 /*
 * Purpose: Takes in a system/error message + a list of menu options for the user to choose from.
 * Prints out a standard header. Then, if 'msg' is not empty, print that. Then, print the menu options.
@@ -69,8 +84,18 @@ void Global_Functions::clearAllMsgs() {
 }
 
 // Purpose: Validate user input when navigating the menus.
-bool Global_Functions::validate_UserOption(vector<int> list, int num) {
+vector<string> Global_Functions::validate_UserOption(vector<string> list, char num) {
+	vector<string> msg = {};
+	for (auto& i : list) {
+		if (num = i.at(2)) {
+			return msg;
+		}
+	}
 
+	tempStr = "ERROR: [" + to_string(num) + "] is not a valid entry!";
+	msg.push_back(tempStr);
+	return msg;
+	/*
 	for (auto& i : list) {
 		if (num == i) {
 			return true;
@@ -79,6 +104,7 @@ bool Global_Functions::validate_UserOption(vector<int> list, int num) {
 	tempStr = "ERROR: [" + to_string(num) + "] is not a valid entry!";
 	sys_msg.push_back(tempStr);
 	return false;
+	*/
 }
 
 // Purpose: Convert all chars in a string to UPPER case.
