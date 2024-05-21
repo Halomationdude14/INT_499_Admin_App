@@ -15,6 +15,11 @@ using namespace std;
 
 // Quick method to pick and choose which UI to display in the terminal.
 void static callDisplayMethod(Menus m, vector<string> list, char UI) {
+	//*delete when code-complete
+	char c = 'x';
+	c = m.getCurrMenuNum();
+	string str = "";
+	//*
 
 	switch (UI) {
 		case '0':
@@ -30,17 +35,28 @@ void static callDisplayMethod(Menus m, vector<string> list, char UI) {
 			break;
 		case '4':
 			//m.SCRN.display(list);
+			str = "TEST [main|callDispMeth()]: case '4' --> Displaying previous UI!; ";
+			list.clear();
+			list.push_back(str);
+			callDisplayMethod(m, list, c);
 			break;
 		case '5':
 			//m.SCRN.edit(list);
+			str = "TEST [main|callDispMeth()]: case '5' --> Displaying previous UI!; ";
+			list.clear();
+			list.push_back(str);
+			callDisplayMethod(m, list, c);
 			break;
 		case '6':
 			//m.SCRN.adminAccount(list);
+			str = "TEST [main|callDispMeth()]: case '6' --> Displaying previous UI!; ";
+			list.clear();
+			list.push_back(str);
+			callDisplayMethod(m, list, c);
 			break;
 		default:
-			char c = m.getCurrMenuNum();
 			string s(1, UI);
-			string str = "CRITICAL ERROR: CODE MALFUNCTION! Program tried to call non-existent UI with ID = [" + s + "]. Displaying previous UI!";
+			str = "CRITICAL ERROR: CODE MALFUNCTION! Program tried to call non-existent UI with ID = [" + s + "]. Displaying previous UI!";
 			list.clear();
 			list.push_back(str);
 			callDisplayMethod(m, list, c);
@@ -49,14 +65,9 @@ void static callDisplayMethod(Menus m, vector<string> list, char UI) {
 }
 
 // Processes the user's input based on the current UI being displayed.
+/*
 char static processUserSelection(Menus m, char UI, char input) {
 
-	/*
-	* Each case represents a specific UI.
-	* Once the UI is determined, a call is made to process the user's input based on the available options for that UI.
-	* The only exception for this is the login screen (case 2).
-	* If the user's input was valid, the currUI will be updated via the RETURN.
-	*/
 	switch (UI) {
 		case '0': //EXIT PROGRAM
 			return '0';
@@ -85,13 +96,14 @@ char static processUserSelection(Menus m, char UI, char input) {
 			break;
 	}
 }
+*/
 
 // Purpose: Main Function
 int main() {
 	Global_Functions fct;
 	MySQL_Connection db;
 	Menus menu;
-	vector<string> msgs = {};
+	vector<string> msgs = {}; // Vector to temporarily hold sys/err messages generated from other classes.
 	string str;
 	char currUI = '0'; // Depicts the current UI being displayed. Default is '0' to display the greeting screen.
 	char usrInput = '0';
@@ -121,63 +133,39 @@ int main() {
 				running = false;
 				break;
 			case '1': //start screen
+				if (db.getConn() == true) {
+					msgs = db.closeConn(); //need to close the actual connection*
+				}
+
 				currUI = menu.SLCT_start(usrInput);
 				break;
 			case '2': //login screen
-				//currUI = db.login();
-				//return a value. Set 'currUI' based on that value.
+				msgs = db.login();
+
+				if (db.getConn() == true) {
+					currUI = '3';
+				}
 				break;
 			case '3': //main menu
 				currUI = menu.SLCT_mainMenu(usrInput);
 				break;
 			case '4': //display
 				//currUI = menu.
+				currUI = menu.getCurrMenuNum(); //delete*
 				break;
 			case '5': //edit
 				//currUI = menu.
+				currUI = menu.getCurrMenuNum(); //delete*
 				break;
 			case '6': //admin account
 				//currUI = menu.
+				currUI = menu.getCurrMenuNum(); //delete*
 				break;
 			default:
 				//currUI = menu.
+				currUI = menu.getCurrMenuNum(); //delete*
 				break;
 		}
-
-		/*
-		currUI = processUserSelection(menu, currUI, usrInput);
-
-		if (currUI == '0') {
-			running = false;
-		}
-		*/
-
-
-		/*
-		switch (currUI) {
-			case '0': //EXIT PROGRAM
-				running = false;
-				break;
-			case '1': //start screen
-				currUI = menu.SLCT_start(usrInput);
-				break;
-			case '2': //login screen
-				//currUI = db.???();
-				//return a value. Set 'currUI' based on that value.
-				break;
-			case '3': //main menu
-				currUI = menu.SLCT_mainMenu(usrInput);
-				break;
-			case '4': //display
-				break;
-			case '5': //edit
-				break;
-			case '6': //admin account
-				break;
-			default:
-				break;
-		}
-		*/
 	}
 
 	msgs.push_back("\n***** [ Closing Application ] *****\n\n");

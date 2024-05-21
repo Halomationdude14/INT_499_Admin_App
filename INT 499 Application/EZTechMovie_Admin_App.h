@@ -1,6 +1,7 @@
 
 #include <string>
 #include <vector>
+#include <mysqlx/xdevapi.h>
 #pragma once
 
 
@@ -39,16 +40,18 @@ class MySQL_Connection {
 
 	public:
 		MySQL_Connection();
+		bool getConn();
 		vector<std::string> login();
-		bool startConnection();
-		bool userLogin(std::string, std::string);
-		bool closeConnection();
+		bool startConn(std::string, std::string);
+		vector<std::string> closeConn();
 
 	protected:
-		std::string tempStr;
-		vector<std::string> sys_msg;
+		std::string str;
+		vector<std::string> msgs;
 		std::string dbUser;
-		std::string dbName;
+		std::string dbPass;
+		bool conn;
+		mysqlx::Session sess;
 };
 
 class Menus {
@@ -128,3 +131,4 @@ protected:
 	bool validLogin;
 };
 */
+
