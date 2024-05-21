@@ -13,13 +13,18 @@ using namespace std;
 
 #include "EZTechMovie_Admin_App.h"
 
+// Method to quickly add any sys/err message from "message" to "list" if there are any.
+vector<string> static addMsg(vector<string> list, vector<string> message) {
+	if (message.size() > 0) {
+		list.insert(list.end(), message.begin(), message.end());
+	}
+
+	return list;
+}
+
 // Quick method to pick and choose which UI to display in the terminal.
-void static callDisplayMethod(Menus m, vector<string> list, char UI) {
-	//*delete when code-complete
-	char c = 'x';
-	c = m.getCurrMenuNum();
-	string str = "";
-	//*
+vector<string> static callDisplayMethod(Menus m, vector<string> list, char UI) {
+	vector<string> msg = {};
 
 	switch (UI) {
 		case '0':
@@ -35,90 +40,45 @@ void static callDisplayMethod(Menus m, vector<string> list, char UI) {
 			break;
 		case '4':
 			//m.SCRN.display(list);
-			str = "TEST [main|callDispMeth()]: case '4' --> Displaying previous UI!; ";
-			list.clear();
-			list.push_back(str);
-			callDisplayMethod(m, list, c);
+			msg.push_back("TEST [callDisplayMethod()]: case 4 = display");
 			break;
 		case '5':
 			//m.SCRN.edit(list);
-			str = "TEST [main|callDispMeth()]: case '5' --> Displaying previous UI!; ";
-			list.clear();
-			list.push_back(str);
-			callDisplayMethod(m, list, c);
+			msg.push_back("TEST [callDisplayMethod()]: case 5 = edit");
 			break;
 		case '6':
 			//m.SCRN.adminAccount(list);
-			str = "TEST [main|callDispMeth()]: case '6' --> Displaying previous UI!; ";
-			list.clear();
-			list.push_back(str);
-			callDisplayMethod(m, list, c);
+			msg.push_back("TEST [callDisplayMethod()]: case 6 = Admin Account");
 			break;
 		default:
 			string s(1, UI);
-			str = "CRITICAL ERROR: CODE MALFUNCTION! Program tried to call non-existent UI with ID = [" + s + "]. Displaying previous UI!";
-			list.clear();
-			list.push_back(str);
-			callDisplayMethod(m, list, c);
+			string str = "CRITICAL ERROR: CODE MALFUNCTION! Program tried to call non-existent UI with ID = [" + s + "]. Displaying previous UI!";
+			msg.push_back(str);
 			break;
 	}
+	return msg;
 }
-
-// Processes the user's input based on the current UI being displayed.
-/*
-char static processUserSelection(Menus m, char UI, char input) {
-
-	switch (UI) {
-		case '0': //EXIT PROGRAM
-			return '0';
-			break;
-		case '1': //start screen
-			return m.SLCT_start(input);
-			break;
-		case '2': //login screen
-			//currUI = db.login();
-			//return a value. Set 'currUI' based on that value.
-			break;
-		case '3': //main menu
-			return m.SLCT_mainMenu(input);
-			break;
-		case '4': //display
-			//return ?
-			break;
-		case '5': //edit
-			//return ?
-			break;
-		case '6': //admin account
-			//return ?
-			break;
-		default:
-			//return ?
-			break;
-	}
-}
-*/
 
 // Purpose: Main Function
 int main() {
 	Global_Functions fct;
 	MySQL_Connection db;
 	Menus menu;
-	vector<string> msgs = {}; // Vector to temporarily hold sys/err messages generated from other classes.
-	string str;
-	char currUI = '0'; // Depicts the current UI being displayed. Default is '0' to display the greeting screen.
-	char usrInput = '0';
+	vector<string> msgs = {}; // Vector to hold all sys/err messages.
+	vector<string> temp_msg = {}; // Messages from other classes are temporarily stored in this vector before being transfered to the end of "msgs".
+	char currUI = '1'; // Depicts the current UI being displayed. Default is '1' to display the greeting screen.
+	char usrInput = 'a';
 	bool running = true;
 	
 
 	// Start the application
 	while (running) {
-		str = "";
-
-		callDisplayMethod(menu, msgs, currUI);
+		temp_msg = callDisplayMethod(menu, msgs, currUI);
 		msgs.clear();
+		msgs = addMsg(msgs, temp_msg);
 
 		// Do not obtain user input the standard way if the login screen is displayed.
-		if (!currUI == '2') {
+		if (!(currUI == '0') && !(currUI == '2')) {
 			usrInput = fct.getUsrInput();
 		}
 
@@ -134,14 +94,12 @@ int main() {
 				break;
 			case '1': //start screen
 				if (db.getConn() == true) {
-					msgs = db.closeConn(); //need to close the actual connection*
+					temp_msg = db.closeConn();
 				}
-
 				currUI = menu.SLCT_start(usrInput);
 				break;
 			case '2': //login screen
-				msgs = db.login();
-
+				temp_msg = db.login();
 				if (db.getConn() == true) {
 					currUI = '3';
 				}
@@ -150,27 +108,28 @@ int main() {
 				currUI = menu.SLCT_mainMenu(usrInput);
 				break;
 			case '4': //display
-				//currUI = menu.
-				currUI = menu.getCurrMenuNum(); //delete*
+				//currUI = menu
+				currUI = '3'; //delete*
 				break;
 			case '5': //edit
-				//currUI = menu.
-				currUI = menu.getCurrMenuNum(); //delete*
+				//currUI = menu
+				currUI = '3'; //delete*
 				break;
 			case '6': //admin account
-				//currUI = menu.
-				currUI = menu.getCurrMenuNum(); //delete*
+				//currUI = menu
+				currUI = '3'; //delete*
 				break;
 			default:
-				//currUI = menu.
-				currUI = menu.getCurrMenuNum(); //delete*
+				//currUI = menu?
+				//currUI = menu.getCurrMenuNum(); //delete*
 				break;
 		}
+
+		msgs = addMsg(msgs, temp_msg);
 	}
 
-	msgs.push_back("\n***** [ Closing Application ] *****\n\n");
+	msgs.push_back("\n***** [ Closing Application ] *****\n");
 	menu.displayMenu(msgs);
-	//cout << "\n***** [ Closing Application ] *****\n\n";
 	return 0;
 }
 

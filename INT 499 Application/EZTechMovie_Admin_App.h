@@ -38,6 +38,11 @@ class Global_Functions {
 // REWORK: Rename to "Server_Conn"
 class MySQL_Connection {
 
+	private:
+		std::unique_ptr<mysqlx::Session> sess;
+		std::unique_ptr<mysqlx::Schema> schema;
+		std::unique_ptr<mysqlx::Table> table;
+
 	public:
 		MySQL_Connection();
 		bool getConn();
@@ -51,7 +56,6 @@ class MySQL_Connection {
 		std::string dbUser;
 		std::string dbPass;
 		bool conn;
-		mysqlx::Session sess;
 };
 
 class Menus {
@@ -75,10 +79,7 @@ class Menus {
 		vector<vector<std::string>> msgSetList;
 		char currMenu;
 		vector<std::string> start_Menu;
-		vector<int> startMenu_Options;
 		vector<std::string> main_Menu;
-		vector<int> mainMenu_Options;
-		
 };
 
 

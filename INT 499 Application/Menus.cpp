@@ -22,11 +22,9 @@ Menus::Menus() {
 	tempStr = "";
 	msgSet = {}; // [vector<string>] Contains a single set of sys/err messages.
 	msgSetList = {}; // [vector<vector<string>>] Container for multiple sets of sys/err messages.
-	currMenu = '0';
+	currMenu = '1'; //default value is '1' for start screen.
 	start_Menu = {" [1] Sign In"," [0] Exit Application"};
-	//startMenu_Options = {1,0};
 	main_Menu = {" [1] Display Data"," [2] Modify Data"," [3] Admin Account"," [0] Sign Out"};
-	//mainMenu_Options = {1,2,3,0};
 }
 
 // Displays partial UI: header + message (if not empty*)
@@ -91,11 +89,15 @@ void Menus::SCRN_start(vector<string> msg) {
 
 // SELECTION: Start screen
 char Menus::SLCT_start(char input) {
+	//char c = 'a';
+
 	switch (input) {
 		case '0':
 			return '0'; //EXIT PROGRAM
+			//break;
 		case '1':
 			return '2'; //Login
+			//break;
 	}
 }
 
@@ -113,15 +115,21 @@ void Menus::SCRN_mainMenu(vector<string> msg) {
 
 // SELECTION: Main Menu
 char Menus::SLCT_mainMenu(char input) {
+	//char c = 'a';
+
 	switch (input) {
 		case '0':
 			return '1'; //Start
+			//break;
 		case '1':
 			return '4'; //Display
+			//break;
 		case '2':
 			return '5'; //Edit
+			//break;
 		case '3':
 			return '6'; //Admin Account
+			//break;
 	}
 }
 
