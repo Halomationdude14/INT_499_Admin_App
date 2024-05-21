@@ -7,17 +7,26 @@ using namespace std;
 
 #include "EZTechMovie_Admin_App.h"
 
+/*
+* 0 = EXIT PROGRAM
+* 1 = start screen
+* 2 = login screen
+* 3 = main menu
+* 4 = 'display' menu
+* 5 = 'edit' menu
+* 6 = admin account
+*/
+
 
 Menus::Menus() {
 	tempStr = "";
 	msgSet = {}; // [vector<string>] Contains a single set of sys/err messages.
 	msgSetList = {}; // [vector<vector<string>>] Container for multiple sets of sys/err messages.
-	currMenu = {};
-	currOptions = {};
-	start_Menu = {" [1] Sign In"," [2] Exit Application"};
-	startMenu_Options = {1,2};
-	main_Menu = {" [1] Display Data"," [2] Modify Data"," [3] Admin Account"," [4] Sign Out"};
-	mainMenu_Options = {1,2,3,4};
+	currMenu = '0';
+	start_Menu = {" [1] Sign In"," [0] Exit Application"};
+	//startMenu_Options = {1,0};
+	main_Menu = {" [1] Display Data"," [2] Modify Data"," [3] Admin Account"," [0] Sign Out"};
+	//mainMenu_Options = {1,2,3,0};
 }
 
 // Displays partial UI: header + message (if not empty*)
@@ -34,6 +43,7 @@ void Menus::displayMenu(vector<string> msg) {
 		for (auto& i : msg) {
 			cout << i << endl;
 		}
+		cout << endl;
 	}
 }
 
@@ -51,6 +61,7 @@ void Menus::displayMenu(vector<string> msg, vector<string> menu) {
 		for (auto& i : msg) {
 			cout << i << endl;
 		}
+		cout << endl;
 	}
 
 	// Display menu options.
@@ -59,26 +70,58 @@ void Menus::displayMenu(vector<string> msg, vector<string> menu) {
 	}
 }
 
-// Returns the name of the variable which corresponds to the menu currently being displayed.
+// Returns the full menu being displayed [type vector<string>].
 vector<string> Menus::getCurrMenu() {
+	// No need for this code for now.
+	// If need later, use a switch.
+	vector<string> empty = {};
+	return empty;
+}
+
+// Returns the number correspoding to the current menu being displayed in the terminal.
+char Menus::getCurrMenuNum() {
 	return currMenu;
 }
 
 // SCREEN: Start screen
 void Menus::SCRN_start(vector<string> msg) {
 	displayMenu(msg, start_Menu);
-	currMenu = start_Menu;
+	currMenu = '1';
+}
+
+// SELECTION: Start screen
+char Menus::SLCT_start(char input) {
+	switch (input) {
+		case '0':
+			return '0'; //EXIT PROGRAM
+		case '1':
+			return '2'; //Login
+	}
 }
 
 // SCREEN: Login screen
 void Menus::SCRN_login(vector<string> msg) {
 	displayMenu(msg);
-	currMenu.clear();
+	currMenu = '2';
 }
 
 // SCREEN: Main Menu
 void Menus::SCRN_mainMenu(vector<string> msg) {
 	displayMenu(msg, main_Menu);
-	currMenu = main_Menu;
+	currMenu = '3';
+}
+
+// SELECTION: Main Menu
+char Menus::SLCT_mainMenu(char input) {
+	switch (input) {
+		case '0':
+			return '1'; //Start
+		case '1':
+			return '4'; //Display
+		case '2':
+			return '5'; //Edit
+		case '3':
+			return '6'; //Admin Account
+	}
 }
 

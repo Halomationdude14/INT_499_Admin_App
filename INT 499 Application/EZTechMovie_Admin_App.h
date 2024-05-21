@@ -1,7 +1,6 @@
 
 #include <string>
 #include <vector>
-//#include <mysqlx/xdevapi.h>
 #pragma once
 
 
@@ -21,7 +20,7 @@ class Global_Functions {
 		void removeLastMsg();
 		void clearAllMsgs();
 
-		vector<string> validate_UserOption(vector<string>, char);
+		vector<std::string> validate_UserOption(vector<std::string>, char);
 		std::string strToUpperCase(std::string);
 		std::string strToLowerCase(std::string);
 
@@ -40,7 +39,7 @@ class MySQL_Connection {
 
 	public:
 		MySQL_Connection();
-		std::string run();
+		vector<std::string> login();
 		bool startConnection();
 		bool userLogin(std::string, std::string);
 		bool closeConnection();
@@ -58,19 +57,20 @@ class Menus {
 		Menus();
 		void displayMenu(vector<std::string>);
 		void displayMenu(vector<std::string>, vector<std::string>);
-		vector<string> getCurrMenu();
+		vector<std::string> getCurrMenu();
+		char getCurrMenuNum();
 		void SCRN_start(vector<std::string>);
+		char SLCT_start(char);
 		void SCRN_login(vector<std::string>);
 		void SCRN_mainMenu(vector<std::string>);
-		//void SCRN_a(vector<std::string>);
+		char SLCT_mainMenu(char input);
 
 	private:
 		Global_Functions fct;
 		std::string tempStr;
 		vector<std::string> msgSet;
 		vector<vector<std::string>> msgSetList;
-		vector<string> currMenu;
-		vector<int> currOptions;
+		char currMenu;
 		vector<std::string> start_Menu;
 		vector<int> startMenu_Options;
 		vector<std::string> main_Menu;

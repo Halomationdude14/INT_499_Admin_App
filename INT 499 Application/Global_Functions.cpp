@@ -1,4 +1,8 @@
 
+#ifdef _WIN32
+#include <conio.h>
+#endif
+
 #include <iostream>
 #include <string>
 #include <vector>
@@ -22,18 +26,22 @@ void Global_Functions::clearScreen() {
 
 // Purpose: Obtain the user's input when selecting menu options. Validate's input too.
 char Global_Functions::getUsrInput() {
-	char c = 'x';
-	cout << "User Input: ";
-	cin >> c;
-	/*
-	if (validate_UserOption(list, c)) {
-		return c;
+	char c;
+	std::cout << "\nUser Input: ";
+#ifdef _WIN32
+	c = _getch(); // Get a character without requiring ENTER
+#else
+	std::string input;
+	std::getline(std::cin, input);
+	if (!input.empty()) {
+		c = input[0];
 	}
-	*/
+	else {
+		c = ' ';
+	}
+#endif
 	return c;
 }
-
-
 
 /*
 * Purpose: Takes in a system/error message + a list of menu options for the user to choose from.

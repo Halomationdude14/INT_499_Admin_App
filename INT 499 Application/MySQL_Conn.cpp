@@ -18,9 +18,17 @@ MySQL_Connection::MySQL_Connection() {
     dbName = "";
 }
 
-std::string MySQL_Connection::run() {
+vector<std::string> MySQL_Connection::login() {
+    bool validLogin = false;
 
-    return tempStr;
+    while (validLogin == false) {
+        cout << 
+
+        cout << "[MySQL_Conn|userLogin] Dump String" << endl;
+        validLogin = true;
+    }
+
+    return {};
 }
 
 /*
@@ -34,14 +42,14 @@ bool MySQL_Connection::startConnection() {
         // There are multiple ways of inputting data into the "Session()" function, but this one is straight forward.
         // Session s1("localhost", 3306, "user", "pass");
         mysqlx::Session sess("localhost", 33060, "root", "Inferno24/7!"); // Establish connection with local MySQL server
-        sys_msg.push_back("SYS: Connection to local MySQL Server establish successfully!");
+        //sys_msg.push_back("SYS: Connection to local MySQL Server establish successfully!");
 
         //sys_msg.push_back("SYS: Establishing connection to database: \"eztechmoviedb\"...");
         mysqlx::Schema db = sess.getSchema(dbName); // Points to specific database
-        sys_msg.push_back("SYS: Connection to database \"eztechmoviedb\" successful!");
+        //sys_msg.push_back("SYS: Connection to database \"eztechmoviedb\" successful!");
 
         //fct.addMsg(sys_msg);
-        sys_msg.clear();
+        //sys_msg.clear();
         return true;
     }
     catch (const mysqlx::Error& err) {
