@@ -18,7 +18,6 @@ vector<string> static addMsg(vector<string> list, vector<string> message) {
 	if (message.size() > 0) {
 		list.insert(list.end(), message.begin(), message.end());
 	}
-
 	return list;
 }
 
@@ -27,6 +26,9 @@ vector<string> static callDisplayMethod(Menus m, vector<string> list, char UI) {
 	vector<string> msg = {};
 
 	switch (UI) {
+		case 'B':
+			m.SCRN_BASE(list);
+			break;
 		case '0':
 			break; //Send back to main() to exit program.
 		case '1':
@@ -41,19 +43,19 @@ vector<string> static callDisplayMethod(Menus m, vector<string> list, char UI) {
 		case '4':
 			//m.SCRN.display(list);
 			msg.push_back("TEST [callDisplayMethod()]: case 4 = display");
+			m.SCRN_BASE(list);
 			break;
 		case '5':
 			//m.SCRN.edit(list);
 			msg.push_back("TEST [callDisplayMethod()]: case 5 = edit");
+			m.SCRN_BASE(list);
 			break;
 		case '6':
 			//m.SCRN.adminAccount(list);
 			msg.push_back("TEST [callDisplayMethod()]: case 6 = Admin Account");
+			m.SCRN_BASE(list);
 			break;
 		default:
-			string s(1, UI);
-			string str = "CRITICAL ERROR: CODE MALFUNCTION! Program tried to call non-existent UI with ID = [" + s + "]. Displaying previous UI!";
-			msg.push_back(str);
 			break;
 	}
 	return msg;
@@ -89,12 +91,15 @@ int main() {
 		* If the user's input was valid, the currUI will be updated via the RETURN.
 		*/
 		switch (currUI) {
+			case 'B': //base screen
+				currUI = menu.SLCT_BASE(usrInput);
+				break;
 			case '0': //EXIT PROGRAM
 				running = false;
 				break;
 			case '1': //start screen
 				if (db.getConn() == true) {
-					temp_msg = db.closeConn();
+					temp_msg = db.closeConn(); //Close the connection when the start screen is displayed
 				}
 				currUI = menu.SLCT_start(usrInput);
 				break;
@@ -103,25 +108,27 @@ int main() {
 				if (db.getConn() == true) {
 					currUI = '3';
 				}
+				else {
+					currUI = '1';
+				}
 				break;
 			case '3': //main menu
 				currUI = menu.SLCT_mainMenu(usrInput);
 				break;
 			case '4': //display
-				//currUI = menu
-				currUI = '3'; //delete*
+				currUI = menu.SLCT_BASE(usrInput);
 				break;
 			case '5': //edit
-				//currUI = menu
-				currUI = '3'; //delete*
+				currUI = menu.SLCT_BASE(usrInput);
 				break;
 			case '6': //admin account
-				//currUI = menu
-				currUI = '3'; //delete*
+				currUI = menu.SLCT_BASE(usrInput);
 				break;
 			default:
-				//currUI = menu?
-				//currUI = menu.getCurrMenuNum(); //delete*
+				string s(1, currUI);
+				string str = "CRITICAL ERROR: CODE MALFUNCTION! Program tried to call non-existent UI with ID = [" + s + "]. Displaying previous UI!";
+				msgs.push_back(str);
+				currUI = menu.getPrevMenu();
 				break;
 		}
 

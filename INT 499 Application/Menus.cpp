@@ -8,12 +8,13 @@ using namespace std;
 #include "EZTechMovie_Admin_App.h"
 
 /*
+* B = base menu
 * 0 = EXIT PROGRAM
-* 1 = start screen
+* 1 = start menu
 * 2 = login screen
 * 3 = main menu
-* 4 = 'display' menu
-* 5 = 'edit' menu
+* 4 = display menu
+* 5 = edit menu
 * 6 = admin account
 */
 
@@ -22,7 +23,9 @@ Menus::Menus() {
 	tempStr = "";
 	msgSet = {}; // [vector<string>] Contains a single set of sys/err messages.
 	msgSetList = {}; // [vector<vector<string>>] Container for multiple sets of sys/err messages.
-	currMenu = '1'; //default value is '1' for start screen.
+	currMenu = '1'; // default value is '1' for start screen.
+	prevMenu = '1'; // contains value of the last menu displayed for regression.
+	base_Menu = {" [0] Previous Menu"};
 	start_Menu = {" [1] Sign In"," [0] Exit Application"};
 	main_Menu = {" [1] Display Data"," [2] Modify Data"," [3] Admin Account"," [0] Sign Out"};
 }
@@ -68,68 +71,79 @@ void Menus::displayMenu(vector<string> msg, vector<string> menu) {
 	}
 }
 
-// Returns the full menu being displayed [type vector<string>].
-vector<string> Menus::getCurrMenu() {
-	// No need for this code for now.
-	// If need later, use a switch.
-	vector<string> empty = {};
-	return empty;
+// Returns the number correspoding to the current menu being displayed in the terminal.
+char Menus::getCurrMenu() const {
+	return currMenu;
 }
 
-// Returns the number correspoding to the current menu being displayed in the terminal.
-char Menus::getCurrMenuNum() {
-	return currMenu;
+char Menus::getPrevMenu() const {
+	return prevMenu;
+}
+
+// SCREEN: Base screen (used for testing purposes and dead end UIs)
+void Menus::SCRN_BASE(vector<string> msg) {
+	msg.push_back("TEST: Base Screen Displayed!");
+	displayMenu(msg, base_Menu);
+	prevMenu = currMenu;
+	currMenu = 'B';
+}
+
+// SELECTION: Base screen
+char Menus::SLCT_BASE(char input) {
+	if (input == '0') {
+		return prevMenu;
+	}
+	else {
+		return currMenu;
+	}
 }
 
 // SCREEN: Start screen
 void Menus::SCRN_start(vector<string> msg) {
 	displayMenu(msg, start_Menu);
+	prevMenu = currMenu;
 	currMenu = '1';
 }
 
 // SELECTION: Start screen
 char Menus::SLCT_start(char input) {
-	//char c = 'a';
-
 	switch (input) {
 		case '0':
 			return '0'; //EXIT PROGRAM
-			//break;
 		case '1':
 			return '2'; //Login
-			//break;
+		default:
+			return currMenu;
 	}
 }
 
 // SCREEN: Login screen
 void Menus::SCRN_login(vector<string> msg) {
 	displayMenu(msg);
+	prevMenu = currMenu;
 	currMenu = '2';
 }
 
 // SCREEN: Main Menu
 void Menus::SCRN_mainMenu(vector<string> msg) {
 	displayMenu(msg, main_Menu);
+	prevMenu = currMenu;
 	currMenu = '3';
 }
 
 // SELECTION: Main Menu
 char Menus::SLCT_mainMenu(char input) {
-	//char c = 'a';
-
 	switch (input) {
 		case '0':
 			return '1'; //Start
-			//break;
 		case '1':
 			return '4'; //Display
-			//break;
 		case '2':
 			return '5'; //Edit
-			//break;
 		case '3':
 			return '6'; //Admin Account
-			//break;
+		default:
+			return currMenu;
 	}
 }
 

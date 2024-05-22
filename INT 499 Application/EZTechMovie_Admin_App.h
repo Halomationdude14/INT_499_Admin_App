@@ -64,8 +64,10 @@ class Menus {
 		Menus();
 		void displayMenu(vector<std::string>);
 		void displayMenu(vector<std::string>, vector<std::string>);
-		vector<std::string> getCurrMenu();
-		char getCurrMenuNum();
+		char getCurrMenu() const;
+		char getPrevMenu() const;
+		void SCRN_BASE(vector<std::string>);
+		char SLCT_BASE(char);
 		void SCRN_start(vector<std::string>);
 		char SLCT_start(char);
 		void SCRN_login(vector<std::string>);
@@ -78,6 +80,8 @@ class Menus {
 		vector<std::string> msgSet;
 		vector<vector<std::string>> msgSetList;
 		char currMenu;
+		char prevMenu;
+		vector<std::string> base_Menu;
 		vector<std::string> start_Menu;
 		vector<std::string> main_Menu;
 };
