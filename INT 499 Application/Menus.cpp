@@ -84,7 +84,10 @@ char Menus::getPrevMenu() const {
 void Menus::SCRN_BASE(vector<string> msg) {
 	msg.push_back("TEST: Base Screen Displayed!");
 	displayMenu(msg, base_Menu);
-	prevMenu = currMenu;
+
+	if (!(currMenu == 'B')) {
+		prevMenu = currMenu;
+	}
 	currMenu = 'B';
 }
 
@@ -94,14 +97,16 @@ char Menus::SLCT_BASE(char input) {
 		return prevMenu;
 	}
 	else {
-		return currMenu;
+		return 'x';
 	}
 }
 
 // SCREEN: Start screen
 void Menus::SCRN_start(vector<string> msg) {
 	displayMenu(msg, start_Menu);
-	prevMenu = currMenu;
+	if (!(currMenu == '1')) {
+		prevMenu = currMenu;
+	}
 	currMenu = '1';
 }
 
@@ -113,21 +118,25 @@ char Menus::SLCT_start(char input) {
 		case '1':
 			return '2'; //Login
 		default:
-			return currMenu;
+			return 'x';
 	}
 }
 
 // SCREEN: Login screen
 void Menus::SCRN_login(vector<string> msg) {
 	displayMenu(msg);
-	prevMenu = currMenu;
+	if (!(currMenu == '2')) {
+		prevMenu = currMenu;
+	}
 	currMenu = '2';
 }
 
 // SCREEN: Main Menu
 void Menus::SCRN_mainMenu(vector<string> msg) {
 	displayMenu(msg, main_Menu);
-	prevMenu = currMenu;
+	if (!(currMenu == '3')) {
+		prevMenu = currMenu;
+	}
 	currMenu = '3';
 }
 
@@ -143,7 +152,7 @@ char Menus::SLCT_mainMenu(char input) {
 		case '3':
 			return '6'; //Admin Account
 		default:
-			return currMenu;
+			return 'x';
 	}
 }
 

@@ -40,6 +40,8 @@ vector<std::string> MySQL_Connection::login() {
         msgs.push_back("SYS [MySQL]: Could not establish connection to MySQL server! Ensure you have entered the correct credentials (case sensitive).");
     }
 
+    dbUser = "";
+    dbPass = "";
     return msgs;
 }
 
@@ -72,6 +74,7 @@ vector<std::string> MySQL_Connection::closeConn() {
         schema.reset();
         sess->close();
         sess.reset();
+        conn = false;
         msgs.push_back("SYS [MySQL]: Connection to MySQL server closed.");
     }
     else {
