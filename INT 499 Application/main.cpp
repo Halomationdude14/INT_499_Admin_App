@@ -18,8 +18,8 @@ Global_Functions fct;
 MySQL_Connection db;
 Menus menu;
 vector<string> msgs = {}; // Vector to hold all sys/err messages.
-//vector<string> temp_msg = {}; // Messages from other classes are temporarily stored in this vector before being transfered to the end of "msgs".
 char currUI = '1'; // Depicts the current UI being displayed. Default is '1' to display the greeting screen.
+char usrInput = 'a';
 
 
 // Adds a vector<string> to the end of 'msgs'
@@ -38,6 +38,7 @@ void static addMsg(string message) {
 
 // Quick method to pick and choose which UI to display in the terminal.
 void static callDisplayMethod() {
+	vector<vector<string>> tblData = {};
 
 	switch (currUI) {
 		case 'B':
@@ -61,19 +62,23 @@ void static callDisplayMethod() {
 			menu.SCRN_mainMenu(msgs);
 			break;
 		case '4':
-			//menu.SCRN.display(msgs);
-			addMsg("TEST [callDisplayMethod()]: case 4 = display");
-			menu.SCRN_BASE(msgs);
+			menu.SCRN_displayMenu(msgs);
 			break;
 		case '5':
-			//menu.SCRN.edit(msgs);
-			addMsg("TEST [callDisplayMethod()]: case 5 = edit");
-			menu.SCRN_BASE(msgs);
+			menu.SCRN_editMenu(msgs);
 			break;
 		case '6':
-			//menu.SCRN.adminAccount(msgs);
-			addMsg("TEST [callDisplayMethod()]: case 6 = Admin Account");
-			menu.SCRN_BASE(msgs);
+			menu.SCRN_adminAccount(msgs);
+			break;
+		case '7':
+			db.setTable(usrInput);
+			tblData = db.getTable();
+			menu.SCRN_displayTable(msgs, tblData);
+			break;
+		case '8':
+			db.setTable(usrInput);
+			tblData = db.getTable();
+			menu.SCRN_editTable(msgs, tblData);
 			break;
 		default:
 			string s(1, currUI);
@@ -115,14 +120,20 @@ void static processUserInput(char input) {
 		case '3': //main menu
 			c = menu.SLCT_mainMenu(input);
 			break;
-		case '4': //display
-			c = menu.SLCT_BASE(input);
+		case '4': //display menu
+			c = menu.SLCT_displayMenu(input);
 			break;
-		case '5': //edit
-			c = menu.SLCT_BASE(input);
+		case '5': //edit menu
+			c = menu.SLCT_editMenu(input);
 			break;
 		case '6': //admin account
-			c = menu.SLCT_BASE(input);
+			c = menu.SLCT_adminAccount(input);
+			break;
+		case '7':
+			c = menu.SLCT_displayTable(input);
+			break;
+		case '8':
+			c = menu.SLCT_editTable(input);
 			break;
 		default:
 			break;
@@ -141,7 +152,6 @@ void static processUserInput(char input) {
 // Purpose: Main Function
 int main() {
 	bool running = true;
-	char usrInput = 'a';
 
 	// Start the application
 	while (running) {
