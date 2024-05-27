@@ -35,8 +35,13 @@ class MySQL_Connection {
 		std::unique_ptr<mysqlx::Schema> scm;
 		std::unique_ptr<mysqlx::Table> tbl;
 
+		//Session sess2;
+		//Schema scm2;
+		//Table tbl2;
+
 	public:
 		MySQL_Connection();
+		MySQL_Connection(std::string, std::string);
 		bool getConn();
 		vector<std::string> login();
 		vector<std::string> setTable(char);

@@ -22,6 +22,17 @@ MySQL_Connection::MySQL_Connection() {
     // Table tbl
 }
 
+MySQL_Connection::MySQL_Connection(std::string user, std::string pass) {
+    msgs = {};
+    dbUser = user; //Not good to store credentials in code!!!
+    dbPass = pass; //Not good to store credentials in code!!!
+    conn = false;
+    currTbl = "";
+    Session sess2 = getSession("localhost", 33060, user, pass);
+    Schema scm2 = sess2.getSchema("eztechmoviedb");
+    // Table tbl2
+}
+
 bool MySQL_Connection::getConn() {
     return conn;
 }
@@ -55,48 +66,64 @@ vector<std::string> MySQL_Connection::setTable(char input) {
 
     switch (input) {
         case '1':
-            tbl = std::make_unique<mysqlx::Table>(scm->getTable("tbl_plans"));
+            currTbl = "tbl_plans";
+            //tbl = std::make_unique<mysqlx::Table>(scm->getTable("tbl_plans"));
             break;
         case '2':
-            tbl = std::make_unique<mysqlx::Table>(scm->getTable("tbl_actors"));
+            currTbl = "tbl_actors";
+            //tbl = std::make_unique<mysqlx::Table>(scm->getTable("tbl_actors"));
             break;
         case '3':
-            tbl = std::make_unique<mysqlx::Table>(scm->getTable("tbl_custdata"));
+            currTbl = "tbl_custdata";
+            //tbl = std::make_unique<mysqlx::Table>(scm->getTable("tbl_custdata"));
             break;
         case '4':
-            tbl = std::make_unique<mysqlx::Table>(scm->getTable("tbl_moviedata"));
+            currTbl = "tbl_moviedata";
+            //tbl = std::make_unique<mysqlx::Table>(scm->getTable("tbl_moviedata"));
             break;
         case '5':
-            tbl = std::make_unique<mysqlx::Table>(scm->getTable("tbl_paymentinfo"));
+            currTbl = "tbl_paymentinfo";
+            //tbl = std::make_unique<mysqlx::Table>(scm->getTable("tbl_paymentinfo"));
             break;
         case '6':
-            tbl = std::make_unique<mysqlx::Table>(scm->getTable("tbl_directors"));
+            currTbl = "tbl_directors";
+            //tbl = std::make_unique<mysqlx::Table>(scm->getTable("tbl_directors"));
             break;
         case '7':
-            tbl = std::make_unique<mysqlx::Table>(scm->getTable("tbl_genredata"));
+            currTbl = "tbl_genredata";
+            //tbl = std::make_unique<mysqlx::Table>(scm->getTable("tbl_genredata"));
             break;
         case '8':
-            tbl = std::make_unique<mysqlx::Table>(scm->getTable("tbl_moviedirectors"));
+            currTbl = "tbl_moviedirectors";
+            //tbl = std::make_unique<mysqlx::Table>(scm->getTable("tbl_moviedirectors"));
             break;
         case '9':
-            tbl = std::make_unique<mysqlx::Table>(scm->getTable("tbl_moviegenres"));
+            currTbl = "tbl_moviegenres";
+            //tbl = std::make_unique<mysqlx::Table>(scm->getTable("tbl_moviegenres"));
             break;
         case '10':
-            tbl = std::make_unique<mysqlx::Table>(scm->getTable("tbl_moviecast"));
+            currTbl = "tbl_moviecast";
+            //tbl = std::make_unique<mysqlx::Table>(scm->getTable("tbl_moviecast"));
             break;
         case '11':
-            tbl = std::make_unique<mysqlx::Table>(scm->getTable("tbl_custactivity_dvd"));
+            currTbl = "tbl_custactivity_dvd";
+            //tbl = std::make_unique<mysqlx::Table>(scm->getTable("tbl_custactivity_dvd"));
             break;
         case '12':
-            tbl = std::make_unique<mysqlx::Table>(scm->getTable("tbl_custactivity_stream"));
+            currTbl = "tbl_custactivity_stream";
+            //tbl = std::make_unique<mysqlx::Table>(scm->getTable("tbl_custactivity_stream"));
             break;
         case '13':
-            tbl = std::make_unique<mysqlx::Table>(scm->getTable("tbl_dvdrentalhistory"));
+            currTbl = "tbl_dvdrentalhistory";
+            //tbl = std::make_unique<mysqlx::Table>(scm->getTable("tbl_dvdrentalhistory"));
             break;
         default:
             msgs.push_back("ERR [MySQL|setTable()]: Table does not exist in the database!");
             break;
     }
+    //tbl = std::make_unique<mysqlx::Table>(scm->getTable(currTbl));
+    //tbl = scm->getTable(currTbl);
+
     return msgs;
 }
 
@@ -106,45 +133,58 @@ vector<vector<std::string>> MySQL_Connection::getTable() {
     RowResult result = tbl->select("*").execute();
     vector<vector<std::string>> tableData = {};
 
-    // Convert RowResult to vector<vector<std::string>>
-    for (Row row : result) {
-        vector<std::string> rowData;
-        for (int i = 0; i < row.colCount(); ++i) {
-            Value val = row[i];
-            std::string strValue;
+    try {
+        for (Row row : result) {
+            vector<std::string> rowData;
+            for (int i = 0; i < row.colCount(); ++i) {
+                Value val = row[i];
+                std::string strValue;
 
-            switch (val.getType()) {
-            case Value::Type::UINT64:
-                strValue = to_string(val.get<uint64_t>());
-                break;
-            case Value::Type::INT64:
-                strValue = to_string(val.get<int64_t>());
-                break;
-            case Value::Type::FLOAT:
-                strValue = to_string(val.get<float>());
-                break;
-            case Value::Type::DOUBLE:
-                strValue = to_string(val.get<double>());
-                break;
-            case Value::Type::BOOL:
-                strValue = to_string(val.get<bool>());
-                break;
-            case Value::Type::STRING:
-                strValue = val.get<std::string>();
-                break;
-            case Value::Type::VNULL:
-                strValue = "NULL";
-                break;
-            default:
-                strValue = "UNKNOWN_TYPE";
-                break;
+                switch (val.getType()) {
+                case Value::Type::UINT64:
+                    strValue = to_string(val.get<uint64_t>());
+                    break;
+                case Value::Type::INT64:
+                    strValue = to_string(val.get<int64_t>());
+                    break;
+                case Value::Type::FLOAT:
+                    strValue = to_string(val.get<float>());
+                    break;
+                case Value::Type::DOUBLE:
+                    strValue = to_string(val.get<double>());
+                    break;
+                case Value::Type::BOOL:
+                    strValue = to_string(val.get<bool>());
+                    break;
+                case Value::Type::STRING:
+                    strValue = val.get<std::string>();
+                    break;
+                case Value::Type::VNULL:
+                    strValue = "NULL";
+                    break;
+                default:
+                    strValue = "UNKNOWN_TYPE";
+                    break;
+                }
+
+                rowData.push_back(strValue);
             }
-
-            rowData.push_back(strValue);
+            tableData.push_back(rowData);
         }
-        tableData.push_back(rowData);
     }
-    
+    catch (const mysqlx::Error& err) {
+        cout << "\nERROR: " << err << endl;
+        return {};
+    }
+    catch (std::exception& ex) {
+        cout << "\nSTD EXCEPTION: " << ex.what() << endl;
+        return {};
+    }
+    catch (const char* ex) {
+        cout << "\nEXCEPTION: " << ex << endl;
+        return {};
+    }
+
     return tableData;
 }
 
@@ -173,7 +213,7 @@ vector<std::string> MySQL_Connection::closeConn() {
     msgs.clear();
 
     if (conn) {
-        tbl.reset();
+        //tbl.reset();
         scm.reset();
         sess->close();
         sess.reset();
