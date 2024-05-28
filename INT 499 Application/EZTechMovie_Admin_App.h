@@ -1,7 +1,7 @@
 
 #include <string>
 #include <vector>
-#include <mysqlx/xdevapi.h>
+//#include <mysqlx/xdevapi.h>
 #pragma once
 
 
@@ -28,6 +28,7 @@ class Global_Functions {
 * Establishes the connection to the locally stored MySQL database.
 * Contains functions used to execute queries against the database.
 */
+/*
 class MySQL_Connection {
 
 	private:
@@ -57,6 +58,7 @@ class MySQL_Connection {
 		bool conn;
 		std::string currTbl;
 };
+*/
 
 class Menus {
 
