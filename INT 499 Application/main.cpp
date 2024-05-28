@@ -20,7 +20,6 @@ Menus menu;
 vector<string> msgs = {}; // Vector to hold all sys/err messages.
 char currUI = '1'; // Depicts the current UI being displayed. Default is '1' to display the greeting screen.
 char usrInput = 'x';
-
 bool running = true;
 bool conn = false;
 string User = "";
@@ -40,111 +39,6 @@ void static addMsg(vector<string> message) {
 void static addMsg(string message) {
 	if (message.size() > 0) {
 		msgs.push_back(message);
-	}
-}
-
-// Quick method to pick and choose which UI to display in the terminal.
-void static callDisplayMethod() {
-
-	switch (currUI) {
-		case 'B':
-			menu.SCRN_BASE(msgs);
-			break;
-		case '0':
-			msgs.clear();
-			msgs.push_back("\n***** [ Closing Application ] *****\n");
-			menu.displayMenu(msgs);
-			break;
-		case '1':
-			menu.SCRN_start(msgs);
-			break;
-		case '2':
-			menu.SCRN_login(msgs);
-			break;
-		case '3':
-			menu.SCRN_mainMenu(msgs);
-			break;
-		case '4':
-			menu.SCRN_displayMenu(msgs);
-			break;
-		case '5':
-			menu.SCRN_editMenu(msgs);
-			break;
-		case '6':
-			menu.SCRN_adminAccount(msgs);
-			break;
-		case '7':
-			menu.SCRN_displayTable(msgs, tableData);
-			break;
-		case '8':
-			menu.SCRN_editTable(msgs, tableData);
-			break;
-		default:
-			string s(1, currUI);
-			string str = "CRITICAL ERROR: CODE MALFUNCTION! Program tried to call non-existent UI with ID = [" + s + "]. Displaying previous UI!";
-			addMsg(str);
-			currUI = menu.getCurrMenu(); //may need to change this to menu.getPrevMenu() eventually
-			break;
-	}
-	msgs.clear();
-}
-
-// Processes a char through Menus.cpp and updates the current UI based on the user's selection.
-void static processUserInput(char input) {
-	char c = 'x';
-	
-	/*
-	* Each case represents a specific UI.
-	* Once the UI is determined, a call is made to process the user's input based on the available options for that UI.
-	* The only exception for this is the login screen (case 2).
-	* If the user's input was valid, the currUI will be updated via the RETURN.
-	*/
-	switch (currUI) {
-		case 'B': //base screen
-			c = menu.SLCT_BASE(input);
-			break;
-		case '0': //EXIT PROGRAM
-			break; //do nothing; main() will handle this
-		case '1': //start screen
-			c = menu.SLCT_start(input);
-			break;
-		case '2': //login screen
-			if (conn == true) {
-				c = '3';
-			}
-			else {
-				c = '1';
-			}
-			break;
-		case '3': //main menu
-			c = menu.SLCT_mainMenu(input);
-			break;
-		case '4': //display menu
-			c = menu.SLCT_displayMenu(input);
-			break;
-		case '5': //edit menu
-			c = menu.SLCT_editMenu(input);
-			break;
-		case '6': //admin account
-			c = menu.SLCT_adminAccount(input);
-			break;
-		case '7':
-			c = menu.SLCT_displayTable(input);
-			break;
-		case '8':
-			c = menu.SLCT_editTable(input);
-			break;
-		default:
-			break;
-	}
-
-	if (c == 'x') {
-		string s(1, input);
-		string str = "ERROR: User input [" + s + "] is invalid!";
-		addMsg(str);
-	}
-	else {
-		currUI = c;
 	}
 }
 
@@ -273,6 +167,115 @@ static void getTableData(mysqlx::Table table) {
 	}
 }
 
+// Quick method to pick and choose which UI to display in the terminal.
+void static callDisplayMethod() {
+
+	switch (currUI) {
+		case 'B': //base menu
+			menu.SCRN_BASE(msgs);
+			break;
+		case '0': //EXIT PROGRAM
+			msgs.clear();
+			msgs.push_back("\n***** [ Closing Application ] *****\n");
+			menu.displayMenu(msgs);
+			break;
+		case '1': //start menu
+			menu.SCRN_start(msgs);
+			break;
+		case '2': //login screen
+			menu.SCRN_login(msgs);
+			break;
+		case '3': //main menu
+			menu.SCRN_mainMenu(msgs);
+			break;
+		case '4': //display menu
+			menu.SCRN_displayMenu(msgs);
+			break;
+		case '5': //edit menu
+			menu.SCRN_editMenu(msgs);
+			break;
+		case '6': //admin account
+			menu.SCRN_adminAccount(msgs);
+			break;
+		case '7': //display table
+			menu.SCRN_displayTable(msgs, tableData);
+			break;
+		case '8': //edit table
+			menu.SCRN_editTable(msgs, tableData);
+			break;
+		default:
+			string s(1, currUI);
+			string str = "CRITICAL ERROR: CODE MALFUNCTION! Program tried to call non-existent UI with ID = [" + s + "]. Displaying previous UI!";
+			addMsg(str);
+			currUI = menu.getCurrMenu(); //may need to change this to menu.getPrevMenu() eventually
+			break;
+	}
+	msgs.clear();
+}
+
+// Processes a char through Menus.cpp and updates the current UI based on the user's selection.
+void static processUserInput(char input) {
+	char c = 'x';
+	
+	/*
+	* Each case represents a specific UI.
+	* Once the UI is determined, a call is made to process the user's input based on the available options for that UI.
+	* The only exception for this is the login screen (case 2).
+	* If the user's input was valid, the currUI will be updated via the RETURN.
+	*/
+	switch (currUI) {
+		case 'B': //base screen
+			c = menu.SLCT_BASE(input);
+			break;
+		case '0': //EXIT PROGRAM
+			break; //do nothing; main() will handle this
+		case '1': //start screen
+			c = menu.SLCT_start(input);
+			break;
+		case '2': //login screen
+			if (conn == true) {
+				c = '3';
+			}
+			else {
+				c = '1';
+			}
+			break;
+		case '3': //main menu
+			c = menu.SLCT_mainMenu(input);
+			break;
+		case '4': //display menu
+			c = menu.SLCT_displayMenu(input);
+			break;
+		case '5': //edit menu
+			c = menu.SLCT_editMenu(input);
+			break;
+		case '6': //admin account
+			c = menu.SLCT_adminAccount(input);
+			break;
+		case '7': //display table
+			c = menu.SLCT_displayTable(input);
+			break;
+		case '8': //edit table
+			c = menu.SLCT_editTable(input);
+			break;
+		default:
+			break;
+	}
+
+	if (c == 'x') {
+		string s(1, input);
+		string str = "ERROR: User input [" + s + "] is invalid!";
+		addMsg(str);
+	}
+	else {
+		if (currUI == '4' || currUI == '5') {
+			setTableName(input);
+		}
+		currUI = c;
+	}
+}
+
+
 
 
 // Purpose: Main Function
@@ -281,8 +284,7 @@ int main() {
 	// Start the application
 	while (running) {
 		usrInput = 'x'; //reset user input to avoid possible mis-inputs.
-		User = "";
-		Pass = "";
+		
 
 		callDisplayMethod();
 
@@ -304,35 +306,31 @@ int main() {
 		// Create connection to MySQL server
 		while (conn) {
 			usrInput = 'x'; //reset user input to avoid possible mis-inputs.
-			currTbl = ""; //reset current table name to avoid possible mis-inputs.
 			tableData.clear(); //clear variable to avoid displaying a table previously displayed.
 
 			try {
 				mysqlx::Session sess = mysqlx::getSession("localhost", 33060, User, Pass);
 				mysqlx::Schema db = sess.getSchema("eztechmoviedb");
-				vector<mysqlx::Table> tblList = db.getTables(); //stores all tables in the database in this single vector
-
+				//vector<mysqlx::Table> tblList = db.getTables(); //stores all tables in the database in this single vector
 				
 				if (currUI == '1') { //stop program
 					msgs.push_back("SYS [MySQL]: Connection to MySQL server closed.");
+					User = "";
+					Pass = "";
+					currTbl = "";
 					conn = false;
 				}
-				else if (currUI == '7' || currUI == '8') { //If UI is in "edit/display mode"
-					setTableName(usrInput);
-					if (!(currTbl == "")) { //unecessary error handling??? overkill?
-						mysqlx::Table tbl = db.getTable(currTbl);
-						getTableData(tbl);
-					}
-				}
-				else {
-					//do nothing
+				
+				if (currUI == '7' || currUI == '8') { //If UI is in "edit/display mode"
+					mysqlx::Table tbl = db.getTable(currTbl);
+					getTableData(tbl);
 				}
 
 				callDisplayMethod();
 				usrInput = fct.getUsrInput();
-				processUserInput(usrInput);
+				processUserInput(usrInput); //table name set if [UI == 4 OR 5] AND user input was valid
 
-				sess.close();
+				sess.close(); //close the Session object to avoid errors
 			}
 			catch (const mysqlx::Error& err) {
 				msgs.push_back("MYSQLX_ERROR [main()]: " + std::string(err.what()));

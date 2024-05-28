@@ -104,7 +104,9 @@ class Menus {
 		vector<std::string> start_Menu;
 		vector<std::string> main_Menu;
 		vector<std::string> display_Menu;
+		vector<std::string> displayTable_Menu;
 		vector<std::string> edit_Menu;
+		vector<std::string> editTable_Menu;
 };
 
 

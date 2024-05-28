@@ -31,7 +31,9 @@ Menus::Menus() {
 	start_Menu = {" [1] Sign In"," [0] Exit Application"};
 	main_Menu = {" [1] Display Data"," [2] Modify Data"," [3] Admin Account"," [0] Sign Out"};
 	display_Menu = {" [1] tbl_plans"," [2] tbl_actors"," [3] tbl_custdata"," [4] tbl_moviedata"," [5] tbl_paymentinfo"," [6] tbl_directors"," [7] tbl_genredata"," [8] tbl_moviedirectors"," [9] tbl_moviegenres"," [10] tbl_moviecast"," [11] tbl_custactivity_dvd"," [12] tbl_custactivity_stream"," [13] tbl_dvdrentalhistory"," [0] Main Menu"};
+	displayTable_Menu = {" [1] Switch to \'Edit Mode\'"," [0] Return to Display Menu"};
 	edit_Menu = {" [1] tbl_plans"," [2] tbl_actors"," [3] tbl_custdata"," [4] tbl_moviedata"," [5] tbl_paymentinfo"," [6] tbl_directors"," [7] tbl_genredata"," [0] Main Menu"};
+	editTable_Menu = {" [1] Add Entry*"," [2] Update Entry*"," [3] Delete Entry*"," [4] Switch to \'Display Mode\'"," [0] Return to Edit Menu"};
 }
 
 // Displays partial UI: header + message (if not empty*)
@@ -250,7 +252,7 @@ char Menus::SLCT_displayMenu(char input) {
 
 // SCREEN: Display table menu
 void Menus::SCRN_displayTable(vector<string> msg, vector<vector<string>> tblData) {
-	displayTable(msg, display_Menu, tblData);
+	displayTable(msg, displayTable_Menu, tblData);
 	if (!(currMenu == '7')) {
 		prevMenu = currMenu;
 		currMenu = '7';
@@ -298,7 +300,7 @@ char Menus::SLCT_editMenu(char input) {
 
 // SCREEN: Edit table menu
 void Menus::SCRN_editTable(vector<string> msg, vector<vector<string>> tblData) {
-	displayTable(msg, display_Menu, tblData);
+	displayTable(msg, editTable_Menu, tblData);
 	if (!(currMenu == '8')) {
 		prevMenu = currMenu;
 		currMenu = '8';
