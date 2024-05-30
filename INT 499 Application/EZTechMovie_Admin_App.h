@@ -29,11 +29,13 @@ class Menus {
 
 	public:
 		Menus();
+
 		void displayMenu(vector<string>);
 		void displayMenu(vector<string>, vector<string>);
 		void displayTable(vector<string>, vector<string>, vector<vector<string>>);
 		char getCurrMenu() const;
 		char getPrevMenu() const;
+
 		void SCRN_BASE(vector<string>);
 		char SLCT_BASE(char);
 		void SCRN_start(vector<string>);
@@ -42,9 +44,16 @@ class Menus {
 		void SCRN_mainMenu(vector<string>);
 		char SLCT_mainMenu(char);
 		void SCRN_displayMenu(vector<string>);
-		char SLCT_displayMenu(char input);
+		char SLCT_displayMenu(char);
 		void SCRN_displayTable(vector<string>, vector<vector<string>>);
-		char SLCT_displayTable(char input);
+		char SLCT_displayTable(char);
+
+		void SCRN_adminActions(vector<string>);
+		char SLCT_adminActions(char);
+		void SCRN_modMovieMenu(vector<string>);
+		char SLCT_modMovieMenu(char);
+		void SCRN_modCustMenu(vector<string>);
+		char SLCT_modCustMenu(char);
 
 	private:
 		Global_Functions fct;
@@ -52,6 +61,7 @@ class Menus {
 		char currMenu;
 		char prevMenu;
 		bool noEdit_Table;
+
 		vector<string> base_Menu;
 		vector<string> start_Menu;
 		vector<string> main_Menu;
@@ -59,5 +69,7 @@ class Menus {
 		vector<string> editTable_Menu;
 		vector<string> noEditTable_Menu;
 		vector<string> adminActions_Menu;
+		vector<string> modifyMovie_Menu;
+		vector<string> modifyCust_Menu;
 };
 

@@ -199,8 +199,13 @@ void static callDisplayMethod() {
 			menu.SCRN_displayTable(msgs, tableData);
 			break;
 		case '6': //admin actions menu
-			//menu.SCRN_adminActions(msgs);
-			addMsg("SYS [main()]: Admin Actions feature not implemented yet!");
+			menu.SCRN_adminActions(msgs);
+			break;
+		case '7': //modify menu data
+			menu.SCRN_modMovieMenu(msgs);
+			break;
+		case '8': //modify customer data
+			menu.SCRN_modCustMenu(msgs);
 			break;
 		default:
 			string s(1, currUI);
@@ -249,8 +254,13 @@ void static processUserInput(char input) {
 			c = menu.SLCT_displayTable(input);
 			break;
 		case '6': //admin actions menu
-			//c = menu.SLCT_adminActions(input);
-			c = menu.SLCT_mainMenu(input); //delete*
+			c = menu.SLCT_adminActions(input);
+			break;
+		case '7':
+			c = menu.SLCT_modMovieMenu(input);
+			break;
+		case '8':
+			c = menu.SLCT_modCustMenu(input);
 			break;
 		default:
 			break;

@@ -15,7 +15,18 @@ using namespace std;
 * 3 = main menu
 *	4 = display tables menu
 *		5 = display table
+*			? = Add Entry
+*			? = Update Entry
+* 			? = Delete Entry
 *	6 = admin actions
+*		7 = Modify Movie Data
+*			? = Add New Movie
+* 			? = Update Movie Info
+* 			? = Delete Movie
+* 		8 = Modify Customer Data
+* 			? = Add New Customer
+* 			? = Update Customer Info
+* 			? = Delete Customer
 */
 
 
@@ -37,7 +48,9 @@ Menus::Menus() {
 	editTable_Menu = {" [1] Add Entry*"," [2] Update Entry*"," [3] Delete Entry*"," [0] Return to Previous Menu"};
 	noEditTable_Menu = {"[0] Return to Previous Menu"};
 
-	adminActions_Menu = {" [1] Add/Remove Movie"," [2] Modify Customer Data"," [3] ?"," [4] ?"," [0] Return to Main Menu"};
+	adminActions_Menu = {" [1] Add/Remove Movie"," [2] Modify Customer Data"," [0] Return to Main Menu"};
+	modifyMovie_Menu = {" [1] Add New Movie"," [2] Update Movie Info"," [3] Delete Movie"," [0] Previous Menu"};
+	modifyCust_Menu = {" [1] Add New Customer"," [2] Update Customer Info"," [3] Delete Customer"," [0] Previous Menu"};
 }
 
 // Displays partial UI: header + message (if not empty*)
@@ -207,7 +220,7 @@ void Menus::SCRN_displayMenu(vector<string> msg) {
 	}
 }
 
-// SELECTION: display menu
+// SELECTION: Display menu
 char Menus::SLCT_displayMenu(char input) {
 
 	switch (input) {
@@ -273,6 +286,79 @@ char Menus::SLCT_displayTable(char input) {
 			default:
 				return 'X';
 		}
+	}
+}
+
+// SCREEN: Admin Actions menu
+void Menus::SCRN_adminActions(vector<string> msg) {
+	displayMenu(msg, adminActions_Menu);
+	if (!(currMenu == '6')) {
+		prevMenu = currMenu;
+		currMenu = '6';
+	}
+}
+
+// SELECTION: Admin Actions menu
+char Menus::SLCT_adminActions(char input) {
+	switch (input) {
+		case '0':
+			return '3'; //main menu
+		case '1':
+			return '7';
+		case '2':
+			return '8';
+		default:
+			return 'X';
+	}
+}
+
+// SCREEN: Modify Movie menu
+void Menus::SCRN_modMovieMenu(vector<string> msg) {
+	displayMenu(msg, modifyMovie_Menu);
+	if (!(currMenu == '7')) {
+		prevMenu = currMenu;
+		currMenu = '7';
+	}
+}
+
+// SELECTION: Modify Movie menu
+char Menus::SLCT_modMovieMenu(char input) {
+	switch (input) {
+		case '0':
+			return '6'; //Previous menu
+		case '1': //add
+			return '7';
+		case '2': //update
+			return '7';
+		case '3': //delete
+			return '7';
+		default:
+			return 'X';
+	}
+}
+
+// SCREEN: Modify Customer menu
+void Menus::SCRN_modCustMenu(vector<string> msg) {
+	displayMenu(msg, modifyCust_Menu);
+	if (!(currMenu == '8')) {
+		prevMenu = currMenu;
+		currMenu = '8';
+	}
+}
+
+// SELECTION: Modify Customer menu
+char Menus::SLCT_modCustMenu(char input) {
+	switch (input) {
+		case '0':
+			return '6'; //Previous menu
+		case '1': //add
+			return '8';
+		case '2': //update
+			return '8';
+		case '3': //delete
+			return '8';
+		default:
+			return 'X';
 	}
 }
 
