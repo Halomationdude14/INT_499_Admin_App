@@ -14,9 +14,8 @@ using namespace std;
 
 // Default Constructor
 Global_Functions::Global_Functions() {
-	Notifications = {}; // Vector<Vector<String>> | Contains vector objects sent from various classes to display error/system messages.
-	sys_msg = {}; // Vector<String> | General use message container.
 	tempStr = ""; // General use string.
+	c = 'X';
 }
 
 // Purpose: Clear the terminal screen.
@@ -26,27 +25,29 @@ void Global_Functions::clearScreen() {
 
 // Purpose: Obtain the user's input when selecting menu options. Validate's input too.
 char Global_Functions::getUsrInput() {
-	char c;
-	std::cout << "\nUser Input: ";
+	tempStr = "";
+	c = 'X';
+
+	cout << "\nUser Input: ";
 #ifdef _WIN32
 	c = _getch(); // Get a character without requiring ENTER
 #else
-	std::string input;
-	std::getline(std::cin, input);
-	if (!input.empty()) {
-		c = input[0];
+	getline(cin, tempStr);
+	if (!tempStr.empty()) {
+		c = tempStr[0];
 	}
 	else {
-		c = ' ';
+		c = 'X';
 	}
 #endif
+	c = charToUpperCase(c);
 	return c;
 }
 
 // Purpose: Convert all chars in a string to UPPER case.
 string Global_Functions::strToUpperCase(string str) {
 	tempStr = "";
-	char c;
+	c = 'X';
 
 	for (int i = 0; i < str.size(); ++i) {
 		c = str.at(i);
@@ -63,7 +64,7 @@ string Global_Functions::strToUpperCase(string str) {
 // Purpose: Convert all chars in a string to LOWER case.
 string Global_Functions::strToLowerCase(string str) {
 	tempStr = "";
-	char c;
+	c = 'X';
 
 	for (int i = 0; i < str.size(); ++i) {
 		c = str.at(i);
@@ -75,5 +76,19 @@ string Global_Functions::strToLowerCase(string str) {
 		}
 	}
 	return tempStr;
+}
+
+// Convert a given char to upper case if it is alphabetical.
+char Global_Functions::charToUpperCase(char letter) {
+	c = 'X';
+
+	if (isalpha(letter) and islower(letter)) {
+		c = toupper(letter);
+	}
+	else {
+		c = letter;
+	}
+
+	return c;
 }
 

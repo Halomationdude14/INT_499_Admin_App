@@ -19,7 +19,7 @@ Global_Functions fct;
 Menus menu;
 vector<string> msgs = {}; // Vector to hold all sys/err messages.
 char currUI = '1'; // Depicts the current UI being displayed. Default is '1' to display the greeting screen.
-char usrInput = 'x';
+char usrInput = 'X';
 bool running = true;
 bool conn = false;
 string User = "";
@@ -70,49 +70,53 @@ bool static verifyLogin() {
 void static setTableName(char input) {
 
 	switch (input) {
-	case '1':
-		currTbl = "tbl_plans";
-		break;
-	case '2':
-		currTbl = "tbl_actors";
-		break;
-	case '3':
-		currTbl = "tbl_custdata";
-		break;
-	case '4':
-		currTbl = "tbl_moviedata";
-		break;
-	case '5':
-		currTbl = "tbl_paymentinfo";
-		break;
-	case '6':
-		currTbl = "tbl_directors";
-		break;
-	case '7':
-		currTbl = "tbl_genredata";
-		break;
-	case '8':
-		currTbl = "tbl_moviedirectors";
-		break;
-	case '9':
-		currTbl = "tbl_moviegenres";
-		break;
-	case '10':
-		currTbl = "tbl_moviecast";
-		break;
-	case '11':
-		currTbl = "tbl_custactivity_dvd";
-		break;
-	case '12':
-		currTbl = "tbl_custactivity_stream";
-		break;
-	case '13':
-		currTbl = "tbl_dvdrentalhistory";
-		break;
-	default:
-		currTbl = "";
-		msgs.push_back("ERROR [MySQL|setTable()]: Table does not exist in the database!");
-		break;
+		case 'A':
+			currTbl = "tbl_plans";
+			break;
+		case 'B':
+			currTbl = "tbl_actors";
+			break;
+		case 'C':
+			currTbl = "tbl_custdata";
+			break;
+		case 'D':
+			currTbl = "tbl_moviedata";
+			break;
+		case 'E':
+			currTbl = "tbl_paymentinfo";
+			break;
+		case 'F':
+			currTbl = "tbl_directors";
+			break;
+		case 'G':
+			currTbl = "tbl_genredata";
+			break;
+		case 'H':
+			currTbl = "tbl_moviedirectors";
+			break;
+		case 'I':
+			currTbl = "tbl_moviegenres";
+			break;
+		case 'J':
+			currTbl = "tbl_moviecast";
+			break;
+		case 'K':
+			currTbl = "tbl_custactivity_dvd";
+			break;
+		case 'L':
+			currTbl = "tbl_custactivity_stream";
+			break;
+		case 'M':
+			currTbl = "tbl_dvdrentalhistory";
+			break;
+		case '0': //exit back to main menu
+			currTbl = "";
+			break;
+		default:
+			currTbl = "";
+			string str = "ERROR [MySQL|setTable()]: Table does not exist in the database for user input [" + to_string(input) + "] !";
+			addMsg(str);
+			break;
 	}
 }
 
@@ -215,7 +219,7 @@ void static callDisplayMethod() {
 
 // Processes a char through Menus.cpp and updates the current UI based on the user's selection.
 void static processUserInput(char input) {
-	char c = 'x';
+	char c = 'X';
 	
 	/*
 	* Each case represents a specific UI.
@@ -262,7 +266,7 @@ void static processUserInput(char input) {
 			break;
 	}
 
-	if (c == 'x') {
+	if (c == 'X') {
 		string s(1, input);
 		string str = "ERROR: User input [" + s + "] is invalid!";
 		addMsg(str);
@@ -283,8 +287,7 @@ int main() {
 
 	// Start the application
 	while (running) {
-		usrInput = 'x'; //reset user input to avoid possible mis-inputs.
-		
+		usrInput = 'X'; //reset user input to avoid possible mis-inputs.
 
 		callDisplayMethod();
 
@@ -305,13 +308,12 @@ int main() {
 
 		// Create connection to MySQL server
 		while (conn) {
-			usrInput = 'x'; //reset user input to avoid possible mis-inputs.
+			usrInput = 'X'; //reset user input to avoid possible mis-inputs.
 			tableData.clear(); //clear variable to avoid displaying a table previously displayed.
 
 			try {
 				mysqlx::Session sess = mysqlx::getSession("localhost", 33060, User, Pass);
 				mysqlx::Schema db = sess.getSchema("eztechmoviedb");
-				//vector<mysqlx::Table> tblList = db.getTables(); //stores all tables in the database in this single vector
 				
 				if (currUI == '1') { //stop program
 					msgs.push_back("SYS [MySQL]: Connection to MySQL server closed.");
@@ -321,7 +323,7 @@ int main() {
 					conn = false;
 				}
 				
-				if (currUI == '7' || currUI == '8') { //If UI is in "edit/display mode"
+				if (currUI == '7' || currUI == '8') { //If UI is displaying a table (edit/display mode)
 					mysqlx::Table tbl = db.getTable(currTbl);
 					getTableData(tbl);
 				}

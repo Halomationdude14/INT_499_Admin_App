@@ -1,112 +1,76 @@
 
 #include <string>
 #include <vector>
-//#include <mysqlx/xdevapi.h>
 #pragma once
 
 
 /*
 * Contains generic user defined methods/functions
 */
-// REWORK: Rename class/file to "Glb_Fct"!
 class Global_Functions {
 
 	public:
 		Global_Functions();
 		void clearScreen();
 		char getUsrInput();
-		std::string strToUpperCase(std::string);
-		std::string strToLowerCase(std::string);
+		string strToUpperCase(string);
+		string strToLowerCase(string);
+		char charToUpperCase(char);
 
 	protected:
-		vector<vector<std::string>> Notifications;
-		vector<std::string> sys_msg;
-		std::string tempStr;
+		string tempStr;
+		char c;
 };
 
 /*
-* Establishes the connection to the locally stored MySQL database.
-* Contains functions used to execute queries against the database.
+* Contains all menu data and methods to display that data
 */
-/*
-class MySQL_Connection {
-
-	private:
-		std::unique_ptr<mysqlx::Session> sess;
-		std::unique_ptr<mysqlx::Schema> scm;
-		std::unique_ptr<mysqlx::Table> tbl;
-
-		//Session sess2;
-		//Schema scm2;
-		//Table tbl2;
-
-	public:
-		MySQL_Connection();
-		MySQL_Connection(std::string, std::string);
-		bool getConn();
-		vector<std::string> login();
-		vector<std::string> setTable(char);
-		vector<vector<std::string>> getTable();
-		bool startConn(std::string, std::string);
-		vector<std::string> closeConn();
-
-	protected:
-		std::string str;
-		vector<std::string> msgs;
-		std::string dbUser;
-		std::string dbPass;
-		bool conn;
-		std::string currTbl;
-};
-*/
-
 class Menus {
 
 	public:
 		Menus();
-		void displayMenu(vector<std::string>);
-		void displayMenu(vector<std::string>, vector<std::string>);
-		void displayTable(vector<std::string>, vector<std::string>, vector<vector<std::string>>);
-		void displayAdmin(vector<std::string>, vector<std::string>, vector<vector<std::string>>);
-
+		void displayMenu(vector<string>);
+		void displayMenu(vector<string>, vector<string>);
+		void displayTable(vector<string>, vector<string>, vector<vector<string>>);
+		
+		void displayAdmin(vector<string>, vector<string>, vector<vector<string>>);
+		
 		char getCurrMenu() const;
 		char getPrevMenu() const;
-		void SCRN_BASE(vector<std::string>);
+		void SCRN_BASE(vector<string>);
 		char SLCT_BASE(char);
-		void SCRN_start(vector<std::string>);
+		void SCRN_start(vector<string>);
 		char SLCT_start(char);
-		void SCRN_login(vector<std::string>);
-		void SCRN_mainMenu(vector<std::string>);
+		void SCRN_login(vector<string>);
+		void SCRN_mainMenu(vector<string>);
 		char SLCT_mainMenu(char input);
-
-		void SCRN_displayMenu(vector<std::string>);
+		void SCRN_displayMenu(vector<string>);
 		char SLCT_displayMenu(char input);
-		void SCRN_displayTable(vector<std::string>, vector<vector<std::string>>);
+		void SCRN_displayTable(vector<string>, vector<vector<string>>);
 		char SLCT_displayTable(char input);
-
-		void SCRN_editMenu(vector<std::string>);
+		void SCRN_editMenu(vector<string>);
 		char SLCT_editMenu(char input);
-		void SCRN_editTable(vector<std::string>, vector<vector<std::string>>);
+		void SCRN_editTable(vector<string>, vector<vector<string>>);
 		char SLCT_editTable(char input);
-
-		void SCRN_adminAccount(vector<std::string>);
+		void SCRN_adminAccount(vector<string>);
 		char SLCT_adminAccount(char input);
 
 
 	private:
 		Global_Functions fct;
-		std::string tempStr;
-		vector<std::string> msgSet;
-		vector<vector<std::string>> msgSetList;
+		string tempStr;
+		vector<string> msgSet;
+		vector<vector<string>> msgSetList;
 		char currMenu;
 		char prevMenu;
-		vector<std::string> base_Menu;
-		vector<std::string> start_Menu;
-		vector<std::string> main_Menu;
-		vector<std::string> display_Menu;
-		vector<std::string> displayTable_Menu;
-		vector<std::string> edit_Menu;
-		vector<std::string> editTable_Menu;
+		bool noEdit_Table;
+		vector<string> base_Menu;
+		vector<string> start_Menu;
+		vector<string> main_Menu;
+		vector<string> display_Menu;
+		vector<string> displayTable_Menu;
+		vector<string> displayTable_Menu_NoEdit;
+		vector<string> edit_Menu;
+		vector<string> editTable_Menu;
 };
-
 
