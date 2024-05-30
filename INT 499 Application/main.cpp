@@ -66,7 +66,7 @@ bool static verifyLogin() {
 	}
 }
 
-// Assign the name of the chosen table to 'currTbl'
+// Assign the name of the chosen table to 'currTbl' [pertains to 'display table' menu]
 void static setTableName(char input) {
 
 	switch (input) {
@@ -121,7 +121,7 @@ void static setTableName(char input) {
 }
 
 // Converts <mysqlx::RowResult> to vector<vector<std::string>> format
-static void getTableData(mysqlx::Table table) {
+void static getTableData(mysqlx::Table table) {
 	try {
 		mysqlx::RowResult result = table.select("*").execute();
 
@@ -171,6 +171,37 @@ static void getTableData(mysqlx::Table table) {
 	}
 }
 
+// Processes user requests to ADD data to the database
+void static db_INSERT() {
+	// do something...
+}
+
+// Processes user requests to UPDATE data on the database
+void static db_UPDATE() {
+	// do something...
+}
+
+// Processes user requests to DELETE data from the database
+void static db_DELETE() {
+	// do something...
+}
+
+// For specific UIs that ask the user to either ADD, UPDATE, or DELETE data to/from the database,
+// this method handles the user's selection.
+void static modifyDatabase(char input) {
+	switch (input) {
+		case 'A': //ADD
+			db_INSERT();
+			break;
+		case 'B': //UPDATE
+			db_UPDATE();
+			break;
+		case 'C': //DELETE
+			db_DELETE();
+			break;
+	}
+}
+
 // Quick method to pick and choose which UI to display in the terminal.
 void static callDisplayMethod() {
 
@@ -189,7 +220,7 @@ void static callDisplayMethod() {
 		case '2': //login screen
 			menu.SCRN_login(msgs);
 			break;
-		case '3':
+		case '3': //main menu
 			menu.SCRN_mainMenu(msgs);
 			break;
 		case '4': //display menu
@@ -201,10 +232,10 @@ void static callDisplayMethod() {
 		case '6': //admin actions menu
 			menu.SCRN_adminActions(msgs);
 			break;
-		case '7': //modify menu data
+		case '7': //modify menu data menu
 			menu.SCRN_modMovieMenu(msgs);
 			break;
-		case '8': //modify customer data
+		case '8': //modify customer data menu
 			menu.SCRN_modCustMenu(msgs);
 			break;
 		default:
@@ -244,7 +275,7 @@ void static processUserInput(char input) {
 				c = '1';
 			}
 			break;
-		case '3':
+		case '3': //main menu
 			c = menu.SLCT_mainMenu(input);
 			break;
 		case '4': //display menu
@@ -256,10 +287,10 @@ void static processUserInput(char input) {
 		case '6': //admin actions menu
 			c = menu.SLCT_adminActions(input);
 			break;
-		case '7':
+		case '7': //modify movie data menu
 			c = menu.SLCT_modMovieMenu(input);
 			break;
-		case '8':
+		case '8': //modify customer data menu
 			c = menu.SLCT_modCustMenu(input);
 			break;
 		default:
@@ -272,14 +303,24 @@ void static processUserInput(char input) {
 		addMsg(str);
 	}
 	else {
-		if (currUI == '4') {
-			setTableName(input);
+		switch (currUI) {
+			case '4':
+				setTableName(input); // When UI is at the Display menu, process the user's input to prep for displaying table data on the next UI.
+				break;
+			case '7':
+				// When UI is at the Modify Movie Data menu, process user's input through this method.
+				//modifyDatabase(input);
+				break;
+			case '8':
+				// When UI is at the Modify Customer Data menu, process user's input through this method.
+				//modifyDatabase(input);
+				break;
+			default:
+				break;
 		}
-		currUI = c;
+		currUI = c; //Update current UI reference as long as 'c' is valid.
 	}
 }
-
-
 
 
 // Purpose: Main Function

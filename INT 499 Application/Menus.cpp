@@ -15,18 +15,18 @@ using namespace std;
 * 3 = main menu
 *	4 = display tables menu
 *		5 = display table
-*			? = Add Entry
-*			? = Update Entry
-* 			? = Delete Entry
+*			A = Add Entry
+*			B = Update Entry
+* 			C = Delete Entry
 *	6 = admin actions
 *		7 = Modify Movie Data
-*			? = Add New Movie
-* 			? = Update Movie Info
-* 			? = Delete Movie
+*			A = Add New Movie
+* 			B = Update Movie Info
+* 			C = Delete Movie
 * 		8 = Modify Customer Data
-* 			? = Add New Customer
-* 			? = Update Customer Info
-* 			? = Delete Customer
+* 			A = Add New Customer
+* 			B = Update Customer Info
+* 			C = Delete Customer
 */
 
 
