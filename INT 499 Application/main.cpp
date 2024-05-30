@@ -109,7 +109,7 @@ void static setTableName(char input) {
 		case 'M':
 			currTbl = "tbl_dvdrentalhistory";
 			break;
-		case '0': //exit back to main menu
+		case '0': //return to main menu
 			currTbl = "";
 			break;
 		default:
@@ -189,23 +189,18 @@ void static callDisplayMethod() {
 		case '2': //login screen
 			menu.SCRN_login(msgs);
 			break;
-		case '3': //main menu
+		case '3':
 			menu.SCRN_mainMenu(msgs);
 			break;
 		case '4': //display menu
 			menu.SCRN_displayMenu(msgs);
 			break;
-		case '5': //edit menu
-			menu.SCRN_editMenu(msgs);
-			break;
-		case '6': //admin account
-			menu.SCRN_adminAccount(msgs);
-			break;
-		case '7': //display table
+		case '5': //display table
 			menu.SCRN_displayTable(msgs, tableData);
 			break;
-		case '8': //edit table
-			menu.SCRN_editTable(msgs, tableData);
+		case '6': //admin actions menu
+			//menu.SCRN_adminActions(msgs);
+			addMsg("SYS [main()]: Admin Actions feature not implemented yet!");
 			break;
 		default:
 			string s(1, currUI);
@@ -244,23 +239,18 @@ void static processUserInput(char input) {
 				c = '1';
 			}
 			break;
-		case '3': //main menu
+		case '3':
 			c = menu.SLCT_mainMenu(input);
 			break;
 		case '4': //display menu
 			c = menu.SLCT_displayMenu(input);
 			break;
-		case '5': //edit menu
-			c = menu.SLCT_editMenu(input);
-			break;
-		case '6': //admin account
-			c = menu.SLCT_adminAccount(input);
-			break;
-		case '7': //display table
+		case '5': //display table
 			c = menu.SLCT_displayTable(input);
 			break;
-		case '8': //edit table
-			c = menu.SLCT_editTable(input);
+		case '6': //admin actions menu
+			//c = menu.SLCT_adminActions(input);
+			c = menu.SLCT_mainMenu(input); //delete*
 			break;
 		default:
 			break;
@@ -272,7 +262,7 @@ void static processUserInput(char input) {
 		addMsg(str);
 	}
 	else {
-		if (currUI == '4' || currUI == '5') {
+		if (currUI == '4') {
 			setTableName(input);
 		}
 		currUI = c;
@@ -323,7 +313,7 @@ int main() {
 					conn = false;
 				}
 				
-				if (currUI == '7' || currUI == '8') { //If UI is displaying a table (edit/display mode)
+				if (currUI == '5') { //If UI is displaying a table
 					mysqlx::Table tbl = db.getTable(currTbl);
 					getTableData(tbl);
 				}

@@ -13,18 +13,14 @@ using namespace std;
 * 1 = start menu
 * 2 = login screen
 * 3 = main menu
-* 4 = display menu
-* 5 = edit menu
-* 6 = admin account
-* 7 = display table
-* 8 = edit table
+*	4 = display tables menu
+*		5 = display table
+*	6 = admin actions
 */
 
 
 Menus::Menus() {
 	tempStr = "";
-	msgSet = {}; // [vector<string>] Contains a single set of sys/err messages.
-	msgSetList = {}; // [vector<vector<string>>] Container for multiple sets of sys/err messages.
 	currMenu = '1'; // default value is '1' for start screen.
 	prevMenu = '1'; // contains value of the last menu displayed for regression.
 	
@@ -34,15 +30,14 @@ Menus::Menus() {
 
 	base_Menu = {" [0] Previous Menu"};
 	start_Menu = {" [1] Sign In"," [0] Exit Application"};
-	main_Menu = {" [1] Display Data"," [2] Modify Data"," [3] Admin Account"," [0] Sign Out"};
-	display_Menu = {" [A] tbl_plans"," [B] tbl_actors"," [C] tbl_custdata"," [D] tbl_moviedata"," [E] tbl_paymentinfo",
+	main_Menu = {" [1] Display Tables", " [2] Admin Actions", " [0] Sign Out"};
+	displayTables_Menu = {" [A] tbl_plans"," [B] tbl_actors"," [C] tbl_custdata"," [D] tbl_moviedata"," [E] tbl_paymentinfo",
 		" [F] tbl_directors"," [G] tbl_genredata"," [H] tbl_moviedirectors"," [I] tbl_moviegenres"," [J] tbl_moviecast",
-		" [K] tbl_custactivity_dvd"," [L] tbl_custactivity_stream"," [M] tbl_dvdrentalhistory"," [0] Main Menu"};
-	displayTable_Menu = {" [1] Switch to \'Edit Mode\'"," [0] Return to Display Menu"};
-	displayTable_Menu_NoEdit = {"[0] Return to Display Menu"};
-	edit_Menu = {" [A] tbl_plans"," [B] tbl_actors"," [C] tbl_custdata"," [D] tbl_moviedata"," [E] tbl_paymentinfo",
-		" [F] tbl_directors"," [G] tbl_genredata"," [0] Main Menu"};
-	editTable_Menu = {" [1] Switch to \'Display Mode\'"," [2] Add Entry*"," [3] Update Entry*"," [4] Delete Entry*"," [0] Return to Edit Menu"};
+		" [K] tbl_custactivity_dvd"," [L] tbl_custactivity_stream"," [M] tbl_dvdrentalhistory"," [0] Return to Main Menu"};
+	editTable_Menu = {" [1] Add Entry*"," [2] Update Entry*"," [3] Delete Entry*"," [0] Return to Previous Menu"};
+	noEditTable_Menu = {"[0] Return to Previous Menu"};
+
+	adminActions_Menu = {" [1] Add/Remove Movie"," [2] Modify Customer Data"," [3] ?"," [4] ?"," [0] Return to Main Menu"};
 }
 
 // Displays partial UI: header + message (if not empty*)
@@ -111,31 +106,6 @@ void Menus::displayTable(vector<string> msg, vector<string> menu, vector<vector<
 		}
 		cout << endl;
 	}
-
-	// Display menu options.
-	for (auto& i : menu) {
-		cout << i << endl;
-	}
-}
-
-// Displays full UI w/admin info
-void Menus::displayAdmin(vector<string> msg, vector<string> menu, vector<vector<string>> tblData) {
-	fct.clearScreen();
-
-	cout << "\n##############################################################################" << endl;
-	cout << "####### Welcome to the EZTechMovie Database Administration Application #######" << endl;
-	cout << "##############################################################################" << endl << endl;
-
-	// Display sys/err messages if the array is not empty.
-	// REWORK: May not need the "if" stmt.
-	if (msg.size() > 0) {
-		for (auto& i : msg) {
-			cout << i << endl;
-		}
-		cout << endl;
-	}
-
-	// Display Admin info
 
 	// Display menu options.
 	for (auto& i : menu) {
@@ -213,22 +183,24 @@ void Menus::SCRN_mainMenu(vector<string> msg) {
 // SELECTION: Main Menu
 char Menus::SLCT_mainMenu(char input) {
 	switch (input) {
-		case '0':
-			return '1'; //Start
-		case '1':
-			return '4'; //Display
-		case '2':
-			return '5'; //Edit
-		case '3':
-			return '6'; //Admin Account
+		case '0': //sign out
+			return '1';
+			break;
+		case '1': //display tables
+			return '4';
+			break;
+		case '2': //admin actions
+			return '6';
+			break;
 		default:
 			return 'X';
+			break;
 	}
 }
 
 // SCREEN: Display menu
 void Menus::SCRN_displayMenu(vector<string> msg) {
-	displayMenu(msg, display_Menu);
+	displayMenu(msg, displayTables_Menu);
 	if (!(currMenu == '4')) {
 		prevMenu = currMenu;
 		currMenu = '4';
@@ -237,13 +209,8 @@ void Menus::SCRN_displayMenu(vector<string> msg) {
 
 // SELECTION: display menu
 char Menus::SLCT_displayMenu(char input) {
-	char c = 'X';
-	if (isalpha(input) and islower(input)) {
-		c = toupper(input);
-	}
-	c = input;
 
-	switch (c) {
+	switch (input) {
 		case '0':
 			return '3'; //main menu
 		case 'A':
@@ -254,7 +221,7 @@ char Menus::SLCT_displayMenu(char input) {
 		case 'F':
 		case 'G':
 			noEdit_Table = false; //Tables [A-G] may be edited
-			return '7';
+			return '5';
 		case 'H':
 		case 'I':
 		case 'J':
@@ -262,7 +229,7 @@ char Menus::SLCT_displayMenu(char input) {
 		case 'L':
 		case 'M':
 			noEdit_Table = true; //Tables [H-M] may NOT be edited
-			return '7';
+			return '5';
 		default:
 			return 'X';
 	}
@@ -271,15 +238,15 @@ char Menus::SLCT_displayMenu(char input) {
 // SCREEN: Display table menu
 void Menus::SCRN_displayTable(vector<string> msg, vector<vector<string>> tblData) {
 	if (noEdit_Table == true) {
-		displayTable(msg, displayTable_Menu_NoEdit, tblData);
+		displayTable(msg, noEditTable_Menu, tblData);
 	}
 	else {
-		displayTable(msg, displayTable_Menu, tblData);
+		displayTable(msg, editTable_Menu, tblData);
 	}
 	
-	if (!(currMenu == '7')) {
+	if (!(currMenu == '5')) {
 		prevMenu = currMenu;
-		currMenu = '7';
+		currMenu = '5';
 	}
 }
 
@@ -297,91 +264,15 @@ char Menus::SLCT_displayTable(char input) {
 		switch (input) {
 			case '0':
 				return '4'; //display menu
-			case '1':
-				return '8'; // Switch to edit mode
+			case '1': //add new entry
+				return '5';
+			case '2': //delete existing entry
+				return '5';
+			case '3': //update existing entry
+				return '5'; //***add new UIs for add/delete/update entries***
 			default:
 				return 'X';
 		}
 	}
 }
-
-// SCREEN: Edit menu
-void Menus::SCRN_editMenu(vector<string> msg) {
-	displayMenu(msg, edit_Menu);
-	if (!(currMenu == '5')) {
-		prevMenu = currMenu;
-		currMenu = '5';
-	}
-}
-
-// SELECTION: Edit menu
-char Menus::SLCT_editMenu(char input) {
-	char c = 'X';
-	if (isalpha(input) and islower(input)) {
-		c = toupper(input);
-	}
-	c = input;
-	
-	switch (c) {
-		case '0':
-			return '3'; //main menu
-		case 'A':
-		case 'B':
-		case 'C':
-		case 'D':
-		case 'E':
-		case 'F':
-		case 'G':
-			return '8';
-		default:
-			return 'X';
-	}
-}
-
-// SCREEN: Edit table menu
-void Menus::SCRN_editTable(vector<string> msg, vector<vector<string>> tblData) {
-	displayTable(msg, editTable_Menu, tblData);
-	if (!(currMenu == '8')) {
-		prevMenu = currMenu;
-		currMenu = '8';
-	}
-}
-
-// SELECTION: Edit table menu
-char Menus::SLCT_editTable(char input) {
-	switch (input) {
-		case '0':
-			return '5'; //edit menu
-		case '1':
-			return '7'; // Switch to display_table mode
-		case '2': //add new entry
-		case '3': //delete existing entry
-		case '4': //update existing entry
-			return '8'; //***add new UIs for add/delete/update entries***
-		default:
-			return 'X';
-	}
-}
-
-// SCREEN: Admin Account
-void Menus::SCRN_adminAccount(vector<string> msg) {
-	// New method to display admin account info
-	//displayAdmin(msg);
-	if (!(currMenu == '6')) {
-		prevMenu = currMenu;
-		currMenu = '6';
-	}
-}
-
-// SELECTION: Admin Account
-char Menus::SLCT_adminAccount(char input) {
-	if (input == '0') {
-		return prevMenu;
-	}
-	else {
-		return 'X';
-	}
-}
-
-
 
