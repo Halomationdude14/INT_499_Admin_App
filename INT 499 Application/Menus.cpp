@@ -94,6 +94,33 @@ void Menus::displayMenu(vector<string> msg, vector<string> menu) {
 	}
 }
 
+// Displays partial UI: header + message + selected table from the database
+void Menus::displayTable(vector<string> msg, vector<vector<string>> tblData) {
+	fct.clearScreen();
+
+	cout << "\n##############################################################################" << endl;
+	cout << "####### Welcome to the EZTechMovie Database Administration Application #######" << endl;
+	cout << "##############################################################################" << endl << endl;
+
+	// Display table data
+	for (const auto& row : tblData) {
+		for (const auto& col : row) {
+			cout << col << " ";
+		}
+		cout << endl;
+	}
+	cout << endl;
+
+	// Display sys/err messages if the array is not empty.
+	// REWORK: May not need the "if" stmt.
+	if (msg.size() > 0) {
+		for (auto& i : msg) {
+			cout << i << endl;
+		}
+		cout << endl;
+	}
+}
+
 // Displays full UI w/a selected table from the database
 void Menus::displayTable(vector<string> msg, vector<string> menu, vector<vector<string>> tblData) {
 	fct.clearScreen();

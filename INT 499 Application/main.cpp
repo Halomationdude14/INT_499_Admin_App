@@ -52,16 +52,16 @@ bool static verifyLogin() {
 		getline(cin, Pass);
 
 		mysqlx::Session sess = mysqlx::getSession("localhost", 33060, User, Pass);
-		msgs.push_back("SYS [MySQL]: Connection to MySQL server successful!");
+		addMsg("SYS [MySQL]: Connection to MySQL server successful!");
 		sess.close();
 		return true;
 	}
 	catch (const mysqlx::Error& err) {
-		msgs.push_back("MYSQLX_ERROR [verifyLogin()]: " + std::string(err.what()));
+		addMsg("MYSQLX_ERROR [verifyLogin()]: " + string(err.what()));
 		return false;
 	}
-	catch (std::exception& ex) {
-		msgs.push_back("ERROR [verifyLogin()]: " + std::string(ex.what()));
+	catch (exception& ex) {
+		addMsg("ERROR [verifyLogin()]: " + string(ex.what()));
 		return false;
 	}
 }
@@ -120,7 +120,7 @@ void static setTableName(char input) {
 	}
 }
 
-// Converts <mysqlx::RowResult> to vector<vector<std::string>> format
+// Converts <mysqlx::RowResult> to vector<vector<string>> format
 void static getTableData(mysqlx::Table table) {
 	try {
 		mysqlx::RowResult result = table.select("*").execute();
@@ -148,7 +148,7 @@ void static getTableData(mysqlx::Table table) {
 					strValue = to_string(val.get<bool>());
 					break;
 				case mysqlx::Value::Type::STRING:
-					strValue = val.get<std::string>();
+					strValue = val.get<string>();
 					break;
 				case mysqlx::Value::Type::VNULL:
 					strValue = "<NULL>";
@@ -164,91 +164,219 @@ void static getTableData(mysqlx::Table table) {
 		}
 	}
 	catch (const mysqlx::Error& err) {
-		msgs.push_back("MYSQLX_ERROR [getTableData()]: " + std::string(err.what()));
+		addMsg("MYSQLX_ERROR [getTableData()]: " + string(err.what()));
 	}
-	catch (std::exception& ex) {
-		msgs.push_back("ERROR [getTableData()]: " + std::string(ex.what()));
+	catch (exception& ex) {
+		addMsg("ERROR [getTableData()]: " + string(ex.what()));
 	}
 }
 
-// Processes user requests to ADD data to the database
-void static insertModMovieData(mysqlx::Schema db) {
-	vector<mysqlx::Value> movieData = {};
-	string title = "";
-	int year = -1;
-	int numCast = -1;
-	vector<vector<string>> castMembers = {};
-	vector<string> actor = {};
-	string name = "";
-	char rating = 'X';
 
-	//Need error handling!!! try-catch{}
-	cout << "\nMovie Title: ";
-	getline(cin, title);
-	movieData.push_back(title);
 
-	cout << "\nYear: ";
-	cin >> year;
-	movieData.push_back(year);
 
-	cout << "\nHow many cast members?: ";
-	cin >> numCast;
-	movieData.push_back(numCast);
+// Make a PROCESS for this???
+vector<char> getGenres(vector<vector<string>> tblData) {
 
-	for (int i = 0; i < numCast; i++) {
-		cout << "\nCast Member #"+ to_string(i+1) +" -->\n" << endl;
 
-		cout << "\nFirst Name: ";
-		cin >> name;
-		actor.push_back(name);
-
-		cout << "\nMiddle Name: ";
-		cin >> name;
-		actor.push_back(name);
-
-		cout << "\nLast Name: ";
-		cin >> name;
-		actor.push_back(name);
-
-		castMembers.push_back(actor);
-	}
-
-	cout << "\nRating [G,PG,PG-13,R]: ";
-	cin >> rating;
-	movieData.push_back(rating);
-
-	// DO: push data to tables!
-}
-
-// Processes user requests to UPDATE data on the database
-vector<vector<mysqlx::Value>> updateModMovieData() {
-	// do something...
-	return { {} };
-}
-
-// Processes user requests to DELETE data from the database
-int static deleteModMovieRow() {
-	// do something...
-	return -1;
-}
-
-// Processes user requests to ADD data to the database
-vector<mysqlx::Value> static insertModCustData() {
-	// do something...
 	return {};
 }
 
+// Processes user requests to ADD a new movie (and other associated info) to the database
+void static insertMovieData(mysqlx::Schema db) {
+	bool running = true; //loop*
+	string input = "";
+
+	string title = "";
+	int year = -1;
+	char rating = 'X';
+	int numCast = -1;
+	int numDir = -1;
+	vector<vector<string>> castMembers = {};
+	vector<vector<string>> directors = {};
+	vector<string> person = {};
+	vector<int> genres = {};
+
+	mysqlx::Table genreTbl = db.getTable("tbl_genredata");
+
+	/*
+	mysqlx::Table movieTbl = db.getTable("tbl_moviedata");
+	mysqlx::Table actorTbl = db.getTable("tbl_actors");
+	mysqlx::Table genreTbl = db.getTable("tbl_moviecast"); //relational
+	mysqlx::Table dirTbl = db.getTable("tbl_directors");
+	mysqlx::Table movieDirTbl = db.getTable("tbl_moviedirectors"); //relational
+	mysqlx::Table genreTbl = db.getTable("tbl_genredata");
+	mysqlx::Table movieGenreTbl = db.getTable("tbl_moviegenres"); //relational
+	*/
+	
+	while (running) {
+		menu.displayMenu(msgs); // Display header
+		msgs.clear();
+
+		// NOTE: Function will prompt user for each input one at a time. If user enters invalid data, method starts again.
+		// REWORK: Don't make the user re-enter each prompt after 1 mistake. Reprompt for only the 1 prompt to which the user entered invalid data.
+		//		   Could create a function in the new class "Admin_Actions" that takes in a string/prompt, obtains user input, verifies input, and
+		//		   returns value if valid/reprompts if invalid.
+		try {
+			// Obtain input data from user
+
+			cout << "\nMovie Title: ";
+			// NOTE: Verify user entry!!!
+			getline(cin, title);
+			cout << "\nYear [YYYY]: ";
+			// NOTE: Verify user entry!!!
+			cin >> year;
+			cout << "\nRating [G,PG,PG-13,R]: ";
+			// NOTE: Verify user entry!!!
+			cin >> rating;
+
+			menu.displayMenu({}); // Reset UI for next set of inputs
+			cout << "\nHow many cast members?: ";
+			// NOTE: Num must be >= 1!!!
+			cin >> numCast;
+			cout << endl;
+
+			for (int i = 0; i < numCast; i++) {
+				string name = "";
+				person.clear();
+				cout << "\nCast Member #" + to_string(i + 1) + " -->\n" << endl;
+
+				cout << "\n  First Name: ";
+				cin >> name;
+				person.push_back(name);
+				cout << "\n  Middle Name: ";
+				cin >> name;
+				person.push_back(name);
+				cout << "\n  Last Name: ";
+				cin >> name;
+				person.push_back(name);
+
+				castMembers.push_back(person);
+			}
+
+			menu.displayMenu({}); // Reset UI for next set of inputs
+			cout << "\nHow many directors?: ";
+			// NOTE: Num must be >= 1!!!
+			cin >> numDir;
+			cout << endl;
+
+			for (int i = 0; i < numDir; i++) {
+				string name = "";
+				person.clear();
+				cout << "\nDirector #" + to_string(i + 1) + " -->\n" << endl;
+
+				cout << "\n  First Name: ";
+				cin >> name;
+				person.push_back(name);
+				cout << "\n  Middle Name: ";
+				cin >> name;
+				person.push_back(name);
+				cout << "\n  Last Name: ";
+				cin >> name;
+				person.push_back(name);
+
+				directors.push_back(person);
+			}
+
+			// Get genre data
+			while (!(genres.size() > 0) || ( !(input == "C") && !(input == "0") )) {
+				getTableData(genreTbl);
+				vector<char> genreIndexes = getGenres(tableData);
+				menu.displayTable(msgs, tableData); // Display list of available genres
+				msgs.clear();
+
+				cout << "\nEnter one or more genres by their index number -->" << endl
+					 << "\n  Enter[G] to add a new genre to the database."
+					 << "\n  Enter[C] when done to continue."
+					 << "\n  Enter[0] to cancel this process and return to the Admin Actions menu." << endl;
+				//Add function to CANCEL current function and return to Admin Actions menu.
+
+				cout << "\nGenres Selected = " + genres.size() << endl;
+				cout << "User Input: ";
+				cin >> input;
+
+				// Verify genre selection
+				for (auto& i : genreIndexes) {
+					int index = stoi(input);
+					if (index == i) {
+						genres.push_back(index);
+						break;
+					}
+				}
+
+				if (genres.size() == 0) {
+					addMsg("ERROR [insertMovieData()]: No genres selected! Please select at least 1 genre for the movie before continuing.");
+				}
+				else {
+					input = fct.strToUpperCase(input);
+					if (input == "G") { // Add new genre to database
+						//addNewGenre();
+						break;
+					}
+					else if (input == "C" || input == "0") { // These options are handled below 
+						break;
+					}
+					else {
+						addMsg("ERROR: User input [" + input + "] is invalid!");
+						break;
+					}
+
+					/* Switches don't work with std::string!!!
+					switch (input) {
+						case "0": // Proceed
+							//
+							break;
+						case "G": // Create new genre
+							break;
+						default:
+							addMsg("ERROR: User input [" + input + "] is invalid!");
+							break;
+					}
+					*/
+				}
+			}
+
+			// Verify that [!(input == "0") && input == "C"] before interacting with database.
+
+			//once all data has been obtained+verified, insert new data to database tables where appropriate!
+			//create a PROCESS on the db to assist?
+
+		}
+		catch (const mysqlx::Error& err) {
+			addMsg("MYSQLX_ERROR [insertMovieData()]: " + string(err.what()));
+		}
+		catch (exception& ex) {
+			addMsg("ERROR [insertMovieData()]: " + string(ex.what()));
+		}
+	}
+}
+
 // Processes user requests to UPDATE data on the database
-vector<vector<mysqlx::Value>> static updateModCustData() {
+void static updateMovieData() {
 	// do something...
-	return { {} };
 }
 
 // Processes user requests to DELETE data from the database
-int static deleteModCustRow() {
+void static deleteMovieData() {
 	// do something...
-	return -1;
 }
+
+// Processes user requests to ADD data to the database
+void static insertCustData() {
+	// do something...
+}
+
+// Processes user requests to UPDATE data on the database
+void static updateCustData() {
+	// do something...
+}
+
+// Processes user requests to DELETE data from the database
+void static deleteCustData() {
+	// do something...
+}
+
+
+
 
 // Quick method to pick and choose which UI to display in the terminal.
 void static callDisplayMethod() {
@@ -356,10 +484,10 @@ void static processUserInput(char input) {
 				setTableName(input); // When UI is at the Display menu, process the user's input to prep for displaying table data on the next UI.
 				break;
 			case '7':
-				currTbl = "tbl_moviedata";
+				//currTbl = "tbl_moviedata";
 				break;
 			case '8':
-				currTbl = "tbl_custdata";
+				//currTbl = "tbl_custdata";
 				break;
 			default:
 				break;
@@ -421,10 +549,6 @@ int main() {
 				processUserInput(usrInput); //table name set if [UI == 4] AND user input was valid
 
 				if (!(usrInput == 'X')) {
-					vector<mysqlx::Value> insertData; //FORMAT = based on table column order*
-					vector<vector<mysqlx::Value>> updateData; //FORMAT = each vector<mysqlx::Value> contains column name + new value
-					int deleteRow = -1; //Index of row to be deleted
-
 					switch (currUI) { //when user is presented with options to ADD/UPDATE/DELETE
 						case '5':
 							//generic table edit method
@@ -432,15 +556,13 @@ int main() {
 						case '7': //Admin::Modify Movie Data
 							switch (usrInput) {
 								case 'A': //INSERT
-									insertModMovieData(db);
+									insertMovieData(db);
 									break;
 								case 'B': //UPDATE
-									//updateData = updateModMovieData();
-									//process the change!!!
+									//updateMovieData(db);
 									break;
 								case 'C': //DELETE
-									//deleteRow = deleteModMovieRow();
-									//process the change!!!
+									//deleteMovieData(db);
 									break;
 								default:
 									break;
@@ -449,16 +571,13 @@ int main() {
 						case '8': //Admin::Modify Customer Data
 							switch (usrInput) {
 								case 'A': //INSERT
-									//insertData = insertModCustData();
-									//process the change!!!
+									//insertCustData(db);
 									break;
 								case 'B': //UPDATE
-									//updateData = updateModCustData();
-									//process the change!!!
+									//updateCustData(db);
 									break;
 								case 'C': //DELETE
-									//deleteRow = deleteModCustRow();
-									//process the change!!!
+									//deleteCustData(db);
 									break;
 								default:
 									break;
@@ -472,10 +591,10 @@ int main() {
 				sess.close(); //close the Session object to avoid errors
 			}
 			catch (const mysqlx::Error& err) {
-				msgs.push_back("MYSQLX_ERROR [main()]: " + std::string(err.what()));
+				addMsg("MYSQLX_ERROR [main()]: " + string(err.what()));
 			}
-			catch (std::exception& ex) {
-				msgs.push_back("ERROR [main()]: " + std::string(ex.what()));
+			catch (exception& ex) {
+				addMsg("ERROR [main()]: " + string(ex.what()));
 			}
 		}
 	}
