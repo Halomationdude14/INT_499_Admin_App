@@ -172,34 +172,82 @@ void static getTableData(mysqlx::Table table) {
 }
 
 // Processes user requests to ADD data to the database
-void static db_INSERT() {
-	// do something...
+void static insertModMovieData(mysqlx::Schema db) {
+	vector<mysqlx::Value> movieData = {};
+	string title = "";
+	int year = -1;
+	int numCast = -1;
+	vector<vector<string>> castMembers = {};
+	vector<string> actor = {};
+	string name = "";
+	char rating = 'X';
+
+	//Need error handling!!! try-catch{}
+	cout << "\nMovie Title: ";
+	getline(cin, title);
+	movieData.push_back(title);
+
+	cout << "\nYear: ";
+	cin >> year;
+	movieData.push_back(year);
+
+	cout << "\nHow many cast members?: ";
+	cin >> numCast;
+	movieData.push_back(numCast);
+
+	for (int i = 0; i < numCast; i++) {
+		cout << "\nCast Member #"+ to_string(i+1) +" -->\n" << endl;
+
+		cout << "\nFirst Name: ";
+		cin >> name;
+		actor.push_back(name);
+
+		cout << "\nMiddle Name: ";
+		cin >> name;
+		actor.push_back(name);
+
+		cout << "\nLast Name: ";
+		cin >> name;
+		actor.push_back(name);
+
+		castMembers.push_back(actor);
+	}
+
+	cout << "\nRating [G,PG,PG-13,R]: ";
+	cin >> rating;
+	movieData.push_back(rating);
+
+	// DO: push data to tables!
 }
 
 // Processes user requests to UPDATE data on the database
-void static db_UPDATE() {
+vector<vector<mysqlx::Value>> updateModMovieData() {
 	// do something...
+	return { {} };
 }
 
 // Processes user requests to DELETE data from the database
-void static db_DELETE() {
+int static deleteModMovieRow() {
 	// do something...
+	return -1;
 }
 
-// For specific UIs that ask the user to either ADD, UPDATE, or DELETE data to/from the database,
-// this method handles the user's selection.
-void static modifyDatabase(char input) {
-	switch (input) {
-		case 'A': //ADD
-			db_INSERT();
-			break;
-		case 'B': //UPDATE
-			db_UPDATE();
-			break;
-		case 'C': //DELETE
-			db_DELETE();
-			break;
-	}
+// Processes user requests to ADD data to the database
+vector<mysqlx::Value> static insertModCustData() {
+	// do something...
+	return {};
+}
+
+// Processes user requests to UPDATE data on the database
+vector<vector<mysqlx::Value>> static updateModCustData() {
+	// do something...
+	return { {} };
+}
+
+// Processes user requests to DELETE data from the database
+int static deleteModCustRow() {
+	// do something...
+	return -1;
 }
 
 // Quick method to pick and choose which UI to display in the terminal.
@@ -281,16 +329,16 @@ void static processUserInput(char input) {
 		case '4': //display menu
 			c = menu.SLCT_displayMenu(input);
 			break;
-		case '5': //display table
+		case '5': //display table*
 			c = menu.SLCT_displayTable(input);
 			break;
 		case '6': //admin actions menu
 			c = menu.SLCT_adminActions(input);
 			break;
-		case '7': //modify movie data menu
+		case '7': //modify movie data menu*
 			c = menu.SLCT_modMovieMenu(input);
 			break;
-		case '8': //modify customer data menu
+		case '8': //modify customer data menu*
 			c = menu.SLCT_modCustMenu(input);
 			break;
 		default:
@@ -308,12 +356,10 @@ void static processUserInput(char input) {
 				setTableName(input); // When UI is at the Display menu, process the user's input to prep for displaying table data on the next UI.
 				break;
 			case '7':
-				// When UI is at the Modify Movie Data menu, process user's input through this method.
-				//modifyDatabase(input);
+				currTbl = "tbl_moviedata";
 				break;
 			case '8':
-				// When UI is at the Modify Customer Data menu, process user's input through this method.
-				//modifyDatabase(input);
+				currTbl = "tbl_custdata";
 				break;
 			default:
 				break;
@@ -323,7 +369,8 @@ void static processUserInput(char input) {
 }
 
 
-// Purpose: Main Function
+
+
 int main() {
 
 	// Start the application
@@ -371,8 +418,57 @@ int main() {
 
 				callDisplayMethod();
 				usrInput = fct.getUsrInput();
-				processUserInput(usrInput); //table name set if [UI == 4 OR 5] AND user input was valid
+				processUserInput(usrInput); //table name set if [UI == 4] AND user input was valid
 
+				if (!(usrInput == 'X')) {
+					vector<mysqlx::Value> insertData; //FORMAT = based on table column order*
+					vector<vector<mysqlx::Value>> updateData; //FORMAT = each vector<mysqlx::Value> contains column name + new value
+					int deleteRow = -1; //Index of row to be deleted
+
+					switch (currUI) { //when user is presented with options to ADD/UPDATE/DELETE
+						case '5':
+							//generic table edit method
+							break;
+						case '7': //Admin::Modify Movie Data
+							switch (usrInput) {
+								case 'A': //INSERT
+									insertModMovieData(db);
+									break;
+								case 'B': //UPDATE
+									//updateData = updateModMovieData();
+									//process the change!!!
+									break;
+								case 'C': //DELETE
+									//deleteRow = deleteModMovieRow();
+									//process the change!!!
+									break;
+								default:
+									break;
+							}
+							break;
+						case '8': //Admin::Modify Customer Data
+							switch (usrInput) {
+								case 'A': //INSERT
+									//insertData = insertModCustData();
+									//process the change!!!
+									break;
+								case 'B': //UPDATE
+									//updateData = updateModCustData();
+									//process the change!!!
+									break;
+								case 'C': //DELETE
+									//deleteRow = deleteModCustRow();
+									//process the change!!!
+									break;
+								default:
+									break;
+							}
+							break;
+						default:
+							break;
+					}
+				}
+				
 				sess.close(); //close the Session object to avoid errors
 			}
 			catch (const mysqlx::Error& err) {
