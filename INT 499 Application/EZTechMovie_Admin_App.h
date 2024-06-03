@@ -103,11 +103,22 @@ class DB_MovieData {
 	
 	public:
 		DB_MovieData();
+		int setYear();
+		string setRating();
+		int setNumCast();
+		vector<vector<string>> setCast(int numCast);
+		int setNumDir();
+		vector<vector<string>> setDir(int numDir);
+		vector<int> setGenre(mysqlx::Table tbl);
+		void validationSCRN();
+
 		vector<string> insertMovieData(mysqlx::Schema);
 		vector<string> updateMovieData(mysqlx::Schema);
 		vector<string> deleteMovieData(mysqlx::Schema);
 
 	protected:
+		Global_Functions fct;
+		Menus menu;
 		vector<string> msgs;
 		vector<vector<string>> tableData;
 		bool running = true;

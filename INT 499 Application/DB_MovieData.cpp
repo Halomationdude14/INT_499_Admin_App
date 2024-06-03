@@ -9,9 +9,6 @@ using namespace std;
 #include "EZTechMovie_Admin_App.h"
 
 
-// Declare global variables
-Global_Functions fct;
-Menus menu;
 
 
 DB_MovieData::DB_MovieData() {
@@ -22,10 +19,8 @@ DB_MovieData::DB_MovieData() {
 }
 
 
-
-
 // a
-int static setYear() {
+int DB_MovieData::setYear() {
 	vector<string> msgs = {};
 	string input = "";
 	int year = -1;
@@ -51,7 +46,7 @@ int static setYear() {
 }
 
 // a
-string static setRating() {
+string DB_MovieData::setRating() {
 	vector<string> msgs = {};
 	string input = "";
 	vector<string> ratings = { "G","PG","PG-13","R" };
@@ -79,7 +74,7 @@ string static setRating() {
 }
 
 // a
-int static setNumCast() {
+int DB_MovieData::setNumCast() {
 	vector<string> msgs = {};
 	string input = "";
 	int numCast = -1;
@@ -106,19 +101,43 @@ int static setNumCast() {
 }
 
 // a
-vector<vector<string>> static setCast(int numCast) {
-	vector<string> msgs = {};
+vector<vector<string>> DB_MovieData::setCast(int numCast) {
 	string input = "";
 	vector<vector<string>> castMembers = {};
 	vector<string> person = {};
 
-	//a
+	for (int i = 0; i < numCast; i++) {
+		menu.displayMenu({});
+		person.clear();
 
-	return {};
+		cout << "\nCast Member #" + to_string(i + 1) + " -->\n" << endl;
+
+		cout << "\n  First Name: ";
+		getline(cin, input);
+		person.push_back(input);
+
+		cout << "Enter [~] to skip middle name entry." << endl;
+		cout << "\n  Middle Name: ";
+		getline(cin, input);
+		if (input == "~") {
+			person.push_back("NULL");
+		}
+		else {
+			person.push_back(input);
+		}
+
+		cout << "\n  Last Name: ";
+		getline(cin, input);
+		person.push_back(input);
+
+		castMembers.push_back(person);
+	}
+
+	return castMembers;
 }
 
 // a
-int static setNumDir() {
+int DB_MovieData::setNumDir() {
 	vector<string> msgs = {};
 	string input = "";
 	int numDir = -1;
@@ -145,22 +164,90 @@ int static setNumDir() {
 }
 
 // a
-vector<vector<string>> static setDir(int numDir) {
-	vector<string> msgs = {};
+vector<vector<string>> DB_MovieData::setDir(int numDir) {
 	string input = "";
+	vector<vector<string>> directors = {};
+	vector<string> person = {};
 
-	return {};
+	for (int i = 0; i < numDir; i++) {
+		menu.displayMenu({});
+		person.clear();
+
+		cout << "\nDirector #" + to_string(i + 1) + " -->\n" << endl;
+
+		cout << "\n  First Name: ";
+		getline(cin, input);
+		person.push_back(input);
+
+		cout << "Enter [~] to skip middle name entry." << endl;
+		cout << "\n  Middle Name: ";
+		getline(cin, input);
+		if (input == "~") {
+			person.push_back("NULL");
+		}
+		else {
+			person.push_back(input);
+		}
+
+		cout << "\n  Last Name: ";
+		getline(cin, input);
+		person.push_back(input);
+
+		directors.push_back(person);
+	}
+
+	return directors;
 }
 
 // a
-vector<int> static setGenre() {
+vector<int> DB_MovieData::setGenre(mysqlx::Table tbl) {
 	vector<string> msgs = {};
 	string input = "";
+	vector<vector<string>> tableData = {};
+	vector<int> genres = {};
 
-	return {};
+	// Get genre data: which genres to link to new movie (optional to add a new genre to the db)
+	while ((genres.size() == 0 || !(input == "C")) && !(input == "~")) {
+		tableData = fct.getTableData(tbl);
+		menu.displayTable(msgs, tableData); // Display list of available genres
+		msgs.clear();
+
+		cout << "\nEnter one or more genres by their index number -->" << endl
+			<< "\n  Enter[G] to add a new genre to the database."
+			<< "\n  Enter[C] to continue." << endl;
+
+		cout << "\nGenres Selected = " + genres.size() << endl;
+		cout << "User Input: ";
+		cin >> input;
+
+		// Verify genre selection
+		for (auto& i : tableData) {
+			int index = stoi(input);
+			if (index = stoi(i[0])) {
+				genres.push_back(index);
+			}
+		}
+
+		// Error handling
+		if (genres.size() == 0) {
+			msgs.push_back("ERROR [insertMovieData()]: No genres selected! Please select at least 1 genre for the movie before continuing.");
+		}
+		else {
+			input = fct.strToUpperCase(input);
+			if ( !(input == "C") && !(input == "~") ) {
+				msgs.push_back("ERROR [insertMovieData()]: User input [" + input + "] is invalid!");
+			}
+		}
+	}
+
+	return genres;
 }
 
+// Final screen during the "add movie" process.
+// Displays the user's entered data, asks them to confirm, allows them to modify, and asks to continue.
+void DB_MovieData::validationSCRN() {
 
+}
 
 
 // Processes user requests to INSERT a new movie (and other associated info) to the database
@@ -191,14 +278,7 @@ vector<string> DB_MovieData::insertMovieData(mysqlx::Schema db) {
 	mysqlx::Table movieGenreTbl = db.getTable("tbl_moviegenres"); //relational
 	*/
 
-
-	// NOTE: Function will prompt user for each input one at a time. If user enters invalid data, method starts again.
-	// REWORK: Don't make the user re-enter each prompt after 1 mistake. Reprompt for only the 1 prompt to which the user entered invalid data.
-	//		   Could create a function in the new class "Admin_Actions" that takes in a string/prompt, obtains user input, verifies input, and
-	//		   returns value if valid/reprompts if invalid.
 	try {
-		// Obtain input data from user
-
 		menu.displayMenu(msgs); //display header
 		msgs.clear();
 		cout << "\nMovie Title: ";
@@ -210,104 +290,8 @@ vector<string> DB_MovieData::insertMovieData(mysqlx::Schema db) {
 		castMembers = setCast(numCast);
 		numDir = setNumDir();
 		directors = setDir(numDir);
-		genres = setGenre();
-
-		for (int i = 0; i < numCast; i++) {
-			string name = "";
-			person.clear();
-			cout << "\nCast Member #" + to_string(i + 1) + " -->\n" << endl;
-
-			cout << "\n  First Name: ";
-			cin >> name;
-			person.push_back(name);
-			cout << "\n  Middle Name: ";
-			cin >> name;
-			person.push_back(name);
-			cout << "\n  Last Name: ";
-			cin >> name;
-			person.push_back(name);
-
-			castMembers.push_back(person);
-		}
-
-		menu.displayMenu({}); // Reset UI for next set of inputs
-		cout << "\nHow many directors?: ";
-		// NOTE: Num must be >= 1!!!
-		cin >> numDir;
-		cout << endl;
-
-		for (int i = 0; i < numDir; i++) {
-			string name = "";
-			person.clear();
-			cout << "\nDirector #" + to_string(i + 1) + " -->\n" << endl;
-
-			cout << "\n  First Name: ";
-			cin >> name;
-			person.push_back(name);
-			cout << "\n  Middle Name: ";
-			cin >> name;
-			person.push_back(name);
-			cout << "\n  Last Name: ";
-			cin >> name;
-			person.push_back(name);
-
-			directors.push_back(person);
-		}
-
-		// Get genre data: which genres to link to new movie (optional to add a new genre to the db)
-		while ((genres.size() == 0 || !(input == "C")) && !(input == "~")) {
-			tableData = fct.getTableData(genreTbl);
-			menu.displayTable(msgs, tableData); // Display list of available genres
-			msgs.clear();
-
-			cout << "\nEnter one or more genres by their index number -->" << endl
-				<< "\n  Enter[G] to add a new genre to the database."
-				<< "\n  Enter[C] to add this new movie to the database."
-				<< "\n  Enter[~] to cancel this process and return to the Admin Actions menu." << endl;
-			//Add function to CANCEL current function and return to Admin Actions menu.
-
-			cout << "\nGenres Selected = " + genres.size() << endl;
-			cout << "User Input: ";
-			cin >> input;
-
-			// Verify genre selection
-			for (auto& i : tableData) {
-				int index = stoi(input);
-				if ( index = stoi(i[0]) ) {
-					genres.push_back(index);
-				}
-			}
-
-			if (genres.size() == 0) {
-				msgs.push_back("ERROR [insertMovieData()]: No genres selected! Please select at least 1 genre for the movie before continuing.");
-			}
-			else {
-				input = fct.strToUpperCase(input);
-				if (input == "G") { // Add new genre to database
-					//addNewGenre();
-					msgs.push_back("TEST [insertMovieData()]: Cannot add new genre! Functionality not implemented yet!");
-					break;
-				}
-				else if (input == "C" || input == "~") { // These options are handled below 
-					break;
-				}
-				else {
-					msgs.push_back("ERROR [insertMovieData()]: User input [" + input + "] is invalid!");
-					break;
-				}
-			}
-		}
-
-		if (input == "~") { //Abord process! Return to Admin Settings menu
-			msgs.push_back("SYS [insertMovieData()]: Process aborted! No new movies added to the database.");
-			running = false;
-		}
-		else if (input == "C") { // process data to database
-			// code here*
-
-			msgs.push_back("SYS [insertMovieData()]: New movie successfully added to the database!");
-			running = false;
-		}
+		genres = setGenre(genreTbl);
+		
 	}
 	catch (const mysqlx::Error& err) {
 		msgs.push_back("MYSQLX_ERROR [insertMovieData()]: " + string(err.what()));
@@ -316,16 +300,20 @@ vector<string> DB_MovieData::insertMovieData(mysqlx::Schema db) {
 		msgs.push_back("ERROR [insertMovieData()]: " + string(ex.what()));
 	}
 
+	msgs.push_back("SYS: New movie successfully added to the database!"); //what if the process was cancelled?
+
 	return msgs;
 }
 
 // Processes user requests to UPDATE data on the database
 vector<string> DB_MovieData::updateMovieData(mysqlx::Schema db) {
 	// do something...
+	return {};
 }
 
 // Processes user requests to DELETE data from the database
 vector<string> DB_MovieData::deleteMovieData(mysqlx::Schema db) {
 	// do something...
+	return {};
 }
 

@@ -317,6 +317,8 @@ int main() {
 
 		// Create connection to MySQL server
 		while (conn) {
+			DB_MovieData movie; // Allows for manipulation of "tbl_moviedata"
+			//DB_CustData cust; // Allows for manipulation of "tbl_custdata"
 			usrInput = 'X'; //reset user input to avoid possible mis-inputs.
 			tableData.clear(); //clear variable to avoid displaying a table previously displayed.
 
@@ -347,8 +349,6 @@ int main() {
 							//generic table edit method******
 							break;
 						case '7': //Admin::Modify Movie Data
-							DB_MovieData movie; // Allows for manipulation of "tbl_moviedata"
-
 							switch (usrInput) {
 								case 'A': //INSERT
 									addMsg(movie.insertMovieData(db));
@@ -364,8 +364,6 @@ int main() {
 							}
 							break;
 						case '8': //Admin::Modify Customer Data
-							//DB_CustData cust; // Allows for manipulation of "tbl_custdata"
-
 							switch (usrInput) {
 								case 'A': //INSERT
 									//addMsg(cust.insertCustData(db));
