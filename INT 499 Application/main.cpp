@@ -171,213 +171,6 @@ void static getTableData(mysqlx::Table table) {
 	}
 }
 
-
-
-
-// Make a PROCESS for this???
-vector<char> getGenres(vector<vector<string>> tblData) {
-
-
-	return {};
-}
-
-// Processes user requests to ADD a new movie (and other associated info) to the database
-void static insertMovieData(mysqlx::Schema db) {
-	bool running = true; //loop*
-	string input = "";
-
-	string title = "";
-	int year = -1;
-	char rating = 'X';
-	int numCast = -1;
-	int numDir = -1;
-	vector<vector<string>> castMembers = {};
-	vector<vector<string>> directors = {};
-	vector<string> person = {};
-	vector<int> genres = {};
-
-	mysqlx::Table genreTbl = db.getTable("tbl_genredata");
-
-	/*
-	mysqlx::Table movieTbl = db.getTable("tbl_moviedata");
-	mysqlx::Table actorTbl = db.getTable("tbl_actors");
-	mysqlx::Table genreTbl = db.getTable("tbl_moviecast"); //relational
-	mysqlx::Table dirTbl = db.getTable("tbl_directors");
-	mysqlx::Table movieDirTbl = db.getTable("tbl_moviedirectors"); //relational
-	mysqlx::Table genreTbl = db.getTable("tbl_genredata");
-	mysqlx::Table movieGenreTbl = db.getTable("tbl_moviegenres"); //relational
-	*/
-	
-	while (running) {
-		menu.displayMenu(msgs); // Display header
-		msgs.clear();
-
-		// NOTE: Function will prompt user for each input one at a time. If user enters invalid data, method starts again.
-		// REWORK: Don't make the user re-enter each prompt after 1 mistake. Reprompt for only the 1 prompt to which the user entered invalid data.
-		//		   Could create a function in the new class "Admin_Actions" that takes in a string/prompt, obtains user input, verifies input, and
-		//		   returns value if valid/reprompts if invalid.
-		try {
-			// Obtain input data from user
-
-			cout << "\nMovie Title: ";
-			// NOTE: Verify user entry!!!
-			getline(cin, title);
-			cout << "\nYear [YYYY]: ";
-			// NOTE: Verify user entry!!!
-			cin >> year;
-			cout << "\nRating [G,PG,PG-13,R]: ";
-			// NOTE: Verify user entry!!!
-			cin >> rating;
-
-			menu.displayMenu({}); // Reset UI for next set of inputs
-			cout << "\nHow many cast members?: ";
-			// NOTE: Num must be >= 1!!!
-			cin >> numCast;
-			cout << endl;
-
-			for (int i = 0; i < numCast; i++) {
-				string name = "";
-				person.clear();
-				cout << "\nCast Member #" + to_string(i + 1) + " -->\n" << endl;
-
-				cout << "\n  First Name: ";
-				cin >> name;
-				person.push_back(name);
-				cout << "\n  Middle Name: ";
-				cin >> name;
-				person.push_back(name);
-				cout << "\n  Last Name: ";
-				cin >> name;
-				person.push_back(name);
-
-				castMembers.push_back(person);
-			}
-
-			menu.displayMenu({}); // Reset UI for next set of inputs
-			cout << "\nHow many directors?: ";
-			// NOTE: Num must be >= 1!!!
-			cin >> numDir;
-			cout << endl;
-
-			for (int i = 0; i < numDir; i++) {
-				string name = "";
-				person.clear();
-				cout << "\nDirector #" + to_string(i + 1) + " -->\n" << endl;
-
-				cout << "\n  First Name: ";
-				cin >> name;
-				person.push_back(name);
-				cout << "\n  Middle Name: ";
-				cin >> name;
-				person.push_back(name);
-				cout << "\n  Last Name: ";
-				cin >> name;
-				person.push_back(name);
-
-				directors.push_back(person);
-			}
-
-			// Get genre data
-			while (!(genres.size() > 0) || ( !(input == "C") && !(input == "0") )) {
-				getTableData(genreTbl);
-				vector<char> genreIndexes = getGenres(tableData);
-				menu.displayTable(msgs, tableData); // Display list of available genres
-				msgs.clear();
-
-				cout << "\nEnter one or more genres by their index number -->" << endl
-					 << "\n  Enter[G] to add a new genre to the database."
-					 << "\n  Enter[C] when done to continue."
-					 << "\n  Enter[0] to cancel this process and return to the Admin Actions menu." << endl;
-				//Add function to CANCEL current function and return to Admin Actions menu.
-
-				cout << "\nGenres Selected = " + genres.size() << endl;
-				cout << "User Input: ";
-				cin >> input;
-
-				// Verify genre selection
-				for (auto& i : genreIndexes) {
-					int index = stoi(input);
-					if (index == i) {
-						genres.push_back(index);
-						break;
-					}
-				}
-
-				if (genres.size() == 0) {
-					addMsg("ERROR [insertMovieData()]: No genres selected! Please select at least 1 genre for the movie before continuing.");
-				}
-				else {
-					input = fct.strToUpperCase(input);
-					if (input == "G") { // Add new genre to database
-						//addNewGenre();
-						break;
-					}
-					else if (input == "C" || input == "0") { // These options are handled below 
-						break;
-					}
-					else {
-						addMsg("ERROR: User input [" + input + "] is invalid!");
-						break;
-					}
-
-					/* Switches don't work with std::string!!!
-					switch (input) {
-						case "0": // Proceed
-							//
-							break;
-						case "G": // Create new genre
-							break;
-						default:
-							addMsg("ERROR: User input [" + input + "] is invalid!");
-							break;
-					}
-					*/
-				}
-			}
-
-			// Verify that [!(input == "0") && input == "C"] before interacting with database.
-
-			//once all data has been obtained+verified, insert new data to database tables where appropriate!
-			//create a PROCESS on the db to assist?
-
-		}
-		catch (const mysqlx::Error& err) {
-			addMsg("MYSQLX_ERROR [insertMovieData()]: " + string(err.what()));
-		}
-		catch (exception& ex) {
-			addMsg("ERROR [insertMovieData()]: " + string(ex.what()));
-		}
-	}
-}
-
-// Processes user requests to UPDATE data on the database
-void static updateMovieData() {
-	// do something...
-}
-
-// Processes user requests to DELETE data from the database
-void static deleteMovieData() {
-	// do something...
-}
-
-// Processes user requests to ADD data to the database
-void static insertCustData() {
-	// do something...
-}
-
-// Processes user requests to UPDATE data on the database
-void static updateCustData() {
-	// do something...
-}
-
-// Processes user requests to DELETE data from the database
-void static deleteCustData() {
-	// do something...
-}
-
-
-
-
 // Quick method to pick and choose which UI to display in the terminal.
 void static callDisplayMethod() {
 
@@ -551,33 +344,37 @@ int main() {
 				if (!(usrInput == 'X')) {
 					switch (currUI) { //when user is presented with options to ADD/UPDATE/DELETE
 						case '5':
-							//generic table edit method
+							//generic table edit method******
 							break;
 						case '7': //Admin::Modify Movie Data
+							DB_MovieData movie; // Allows for manipulation of "tbl_moviedata"
+
 							switch (usrInput) {
 								case 'A': //INSERT
-									insertMovieData(db);
+									addMsg(movie.insertMovieData(db));
 									break;
 								case 'B': //UPDATE
-									//updateMovieData(db);
+									//addMsg(movie.updateMovieData(db));
 									break;
 								case 'C': //DELETE
-									//deleteMovieData(db);
+									//addMsg(movie.deleteMovieData(db));
 									break;
 								default:
 									break;
 							}
 							break;
 						case '8': //Admin::Modify Customer Data
+							//DB_CustData cust; // Allows for manipulation of "tbl_custdata"
+
 							switch (usrInput) {
 								case 'A': //INSERT
-									//insertCustData(db);
+									//addMsg(cust.insertCustData(db));
 									break;
 								case 'B': //UPDATE
-									//updateCustData(db);
+									//addMsg(cust.updateCustData(db));
 									break;
 								case 'C': //DELETE
-									//deleteCustData(db);
+									//addMsg(cust.deleteCustData(db));
 									break;
 								default:
 									break;

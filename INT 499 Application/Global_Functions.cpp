@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 #include <cstdlib>
+#include <mysqlx/xdevapi.h>
 using namespace std;
 
 #include "EZTechMovie_Admin_App.h"
@@ -42,6 +43,61 @@ char Global_Functions::getUsrInput() {
 #endif
 	c = charToUpperCase(c);
 	return c;
+}
+
+// Converts <mysqlx::RowResult> to vector<vector<string>> format
+vector<vector<string>> Global_Functions::getTableData(mysqlx::Table table) {
+	vector<string> msgs = {}; // Vector to hold all sys/err messages.
+	vector<vector<string>> tableData = {}; // Holds table data in <std> format to be sent to Menus object for display.
+
+	try {
+		mysqlx::RowResult result = table.select("*").execute();
+
+		for (mysqlx::Row row : result) {
+			vector<string> rowData;
+			for (int i = 0; i < row.colCount(); ++i) {
+				mysqlx::Value val = row[i];
+				string strValue;
+
+				switch (val.getType()) {
+				case mysqlx::Value::Type::UINT64:
+					strValue = to_string(val.get<uint64_t>());
+					break;
+				case mysqlx::Value::Type::INT64:
+					strValue = to_string(val.get<int64_t>());
+					break;
+				case mysqlx::Value::Type::FLOAT:
+					strValue = to_string(val.get<float>());
+					break;
+				case mysqlx::Value::Type::DOUBLE:
+					strValue = to_string(val.get<double>());
+					break;
+				case mysqlx::Value::Type::BOOL:
+					strValue = to_string(val.get<bool>());
+					break;
+				case mysqlx::Value::Type::STRING:
+					strValue = val.get<string>();
+					break;
+				case mysqlx::Value::Type::VNULL:
+					strValue = "<NULL>";
+					break;
+				default:
+					strValue = "<ERR>";
+					break;
+				}
+
+				rowData.push_back(strValue);
+			}
+			tableData.push_back(rowData);
+		}
+		return tableData;
+	}
+	catch (const mysqlx::Error& err) {
+		msgs.push_back("MYSQLX_ERROR [getTableData()]: " + string(err.what()));
+	}
+	catch (exception& ex) {
+		msgs.push_back("ERROR [getTableData()]: " + string(ex.what()));
+	}
 }
 
 // Purpose: Convert all chars in a string to UPPER case.
@@ -92,3 +148,7 @@ char Global_Functions::charToUpperCase(char letter) {
 	return c;
 }
 
+// Takes in a string and verifies if it contains all integers or not.
+bool Global_Functions::strIsInt(string& str) {
+	return all_of(str.begin(), str.end(), ::isdigit);
+}

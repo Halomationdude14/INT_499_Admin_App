@@ -138,6 +138,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="DB_CustData.cpp" />
+    <ClCompile Include="DB_MovieData.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Global_Functions.cpp" />
     <ClCompile Include="Menus.cpp" />

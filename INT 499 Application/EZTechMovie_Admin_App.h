@@ -1,6 +1,7 @@
 
 #include <string>
 #include <vector>
+#include <mysqlx/xdevapi.h>
 #pragma once
 
 
@@ -13,9 +14,11 @@ class Global_Functions {
 		Global_Functions();
 		void clearScreen();
 		char getUsrInput();
+		vector<vector<string>> getTableData(mysqlx::Table);
 		string strToUpperCase(string);
 		string strToLowerCase(string); //delete??? (don't think this is used at all anymore)
 		char charToUpperCase(char);
+		bool strIsInt(string&);
 
 	protected:
 		string tempStr;
@@ -94,17 +97,40 @@ class Menus {
 };
 
 
-/*
-* Default constructor takes in Schema object to allow functions to process user input to the MySQL database.
-* All functions correlate to a feature in the Admin Actions UI.
-*/
-/*
-class Admin_Actions {
+// Class to handle INSERT/UPDATE/DELETE opperations on the table "tbl_moviedata".
+// Operations are found in Admin Actions menu.
+class DB_MovieData {
 	
 	public:
-		Admin_Actions(mysqlx::Schema db);
+		DB_MovieData();
+		vector<string> insertMovieData(mysqlx::Schema);
+		vector<string> updateMovieData(mysqlx::Schema);
+		vector<string> deleteMovieData(mysqlx::Schema);
 
 	protected:
-		//string tempStr;
+		vector<string> msgs;
+		vector<vector<string>> tableData;
+		bool running = true;
+		string input = "";
 };
-*/
+
+
+// Class to handle INSERT/UPDATE/DELETE opperations on the table "tbl_custdata".
+// Operations are found in Admin Actions menu.
+class DB_CustData {
+
+	public:
+		DB_CustData();
+		void insertCustData();
+		void updateCustData();
+		void deleteCustData();
+
+	protected:
+		Global_Functions fct;
+		Menus menu;
+		vector<string> msgs;
+		vector<vector<string>> tableData;
+		bool running = true;
+		string input = "";
+};
+
