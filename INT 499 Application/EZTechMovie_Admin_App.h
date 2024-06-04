@@ -104,13 +104,16 @@ class DB_MovieData {
 	public:
 		DB_MovieData();
 		void setDefaultValues();
+		void setTitle();
 		void setYear();
 		void setRating();
 		void setNumCast();
 		void setCast(int numCast);
 		void setNumDir();
 		void setDir(int numDir);
-		void setGenre(mysqlx::Table tbl);
+		void setGenre();
+		void displayNewMovie();
+		void modifyNewMovie();
 		void validationSCRN();
 
 		vector<string> insertMovieData(mysqlx::Schema);
