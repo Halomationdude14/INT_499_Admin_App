@@ -19,10 +19,9 @@ DB_MovieData::DB_MovieData() {
 }
 
 
-// a
+// Prompts user for the year the movie was published
 int DB_MovieData::setYear() {
-	vector<string> msgs = {};
-	string input = "";
+	msgs.clear();
 	int year = -1;
 	
 	while (year == -1) {
@@ -45,10 +44,9 @@ int DB_MovieData::setYear() {
 	return year;
 }
 
-// a
+// Prompts user for the rating of the movie
 string DB_MovieData::setRating() {
-	vector<string> msgs = {};
-	string input = "";
+	msgs.clear();
 	vector<string> ratings = { "G","PG","PG-13","R" };
 	bool running = true;
 
@@ -58,6 +56,7 @@ string DB_MovieData::setRating() {
 
 		cout << "\nRating [G,PG,PG-13,R]: ";
 		getline(cin, input);
+		input = fct.strToUpperCase(input);
 
 		for (auto& i : ratings) {
 			if (input == i) {
@@ -73,10 +72,9 @@ string DB_MovieData::setRating() {
 	return input;
 }
 
-// a
+// Prompts user for the number of cast members in the movie
 int DB_MovieData::setNumCast() {
-	vector<string> msgs = {};
-	string input = "";
+	msgs.clear();
 	int numCast = -1;
 
 	while (numCast == -1) {
@@ -86,7 +84,7 @@ int DB_MovieData::setNumCast() {
 		cout << "\nHow many cast members? [1-5]: ";
 		getline(cin, input);
 
-		if (!(fct.strIsInt(input))) {
+		if ( !(fct.strIsInt(input)) ) { //if entry contains non-numerical data
 			msgs.push_back("ERROR: User entry was not a number!");
 		}
 		else if ( !(0 < stoi(input) < 6) ) { //if not between 1-5
@@ -100,9 +98,8 @@ int DB_MovieData::setNumCast() {
 	return numCast;
 }
 
-// a
+// Prompts user to enter the names of each main cast member
 vector<vector<string>> DB_MovieData::setCast(int numCast) {
-	string input = "";
 	vector<vector<string>> castMembers = {};
 	vector<string> person = {};
 
@@ -136,10 +133,9 @@ vector<vector<string>> DB_MovieData::setCast(int numCast) {
 	return castMembers;
 }
 
-// a
+// Prompts user for number of directors of the movie
 int DB_MovieData::setNumDir() {
-	vector<string> msgs = {};
-	string input = "";
+	msgs.clear();
 	int numDir = -1;
 
 	while (numDir == -1) {
@@ -163,9 +159,8 @@ int DB_MovieData::setNumDir() {
 	return numDir;
 }
 
-// a
+// Prompts user to enter the names of each director
 vector<vector<string>> DB_MovieData::setDir(int numDir) {
-	string input = "";
 	vector<vector<string>> directors = {};
 	vector<string> person = {};
 
@@ -199,16 +194,16 @@ vector<vector<string>> DB_MovieData::setDir(int numDir) {
 	return directors;
 }
 
-// a
+// Prompts user to select 1 or more genres that the movie falls into.
+// Also allows the user to add a genre to the database if one is missing.
 vector<int> DB_MovieData::setGenre(mysqlx::Table tbl) {
-	vector<string> msgs = {};
-	string input = "";
-	vector<vector<string>> tableData = {};
+	msgs.clear();
+	tableData.clear();
 	vector<int> genres = {};
+	tableData = fct.getTableData(tbl);
 
 	// Get genre data: which genres to link to new movie (optional to add a new genre to the db)
-	while ((genres.size() == 0 || !(input == "C")) && !(input == "~")) {
-		tableData = fct.getTableData(tbl);
+	while ( genres.size() == 0 || !(input == "C") ) {
 		menu.displayTable(msgs, tableData); // Display list of available genres
 		msgs.clear();
 
@@ -216,16 +211,33 @@ vector<int> DB_MovieData::setGenre(mysqlx::Table tbl) {
 			<< "\n  Enter[G] to add a new genre to the database."
 			<< "\n  Enter[C] to continue." << endl;
 
-		cout << "\nGenres Selected = " + genres.size() << endl;
-		cout << "User Input: ";
+		cout << "\nGenres Selected = ";
+		if (genres.size() == 0) {
+			cout << "NONE";
+		}
+		else {
+			for (auto& i : genres) {
+				cout << i;
+			}
+		}
+		cout << "\nUser Input: ";
 		cin >> input;
 
 		// Verify genre selection
-		for (auto& i : tableData) {
-			int index = stoi(input);
-			if (index = stoi(i[0])) {
-				genres.push_back(index);
+		if (fct.strIsInt(input)) { //if input is int
+			for (auto& i : tableData) {
+				int index = stoi(input);
+				if (index == stoi(i[0])) {
+					genres.push_back(index);
+				}
 			}
+		}
+		else { //if input is NOT int
+			input = fct.strToUpperCase(input);
+		}
+
+		if (input == "G") { //add new genre to database
+			//addNewGenre();
 		}
 
 		// Error handling
@@ -233,8 +245,7 @@ vector<int> DB_MovieData::setGenre(mysqlx::Table tbl) {
 			msgs.push_back("ERROR [insertMovieData()]: No genres selected! Please select at least 1 genre for the movie before continuing.");
 		}
 		else {
-			input = fct.strToUpperCase(input);
-			if ( !(input == "C") && !(input == "~") ) {
+			if ( !(input == "C") ) {
 				msgs.push_back("ERROR [insertMovieData()]: User input [" + input + "] is invalid!");
 			}
 		}
@@ -279,7 +290,7 @@ vector<string> DB_MovieData::insertMovieData(mysqlx::Schema db) {
 	*/
 
 	try {
-		menu.displayMenu(msgs); //display header
+		menu.displayMenu({}); //display header
 		msgs.clear();
 		cout << "\nMovie Title: ";
 		getline(cin, title);

@@ -152,3 +152,4 @@ char Global_Functions::charToUpperCase(char letter) {
 bool Global_Functions::strIsInt(string& str) {
 	return all_of(str.begin(), str.end(), ::isdigit);
 }
+

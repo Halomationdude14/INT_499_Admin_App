@@ -17,6 +17,9 @@ using namespace std;
 
 Global_Functions fct;
 Menus menu;
+DB_MovieData movie; // Allows for manipulation of "tbl_moviedata"
+DB_CustData cust; // Allows for manipulation of "tbl_custdata"
+
 vector<string> msgs = {}; // Vector to hold all sys/err messages.
 char currUI = '1'; // Depicts the current UI being displayed. Default is '1' to display the greeting screen.
 char usrInput = 'X';
@@ -256,10 +259,10 @@ void static processUserInput(char input) {
 		case '6': //admin actions menu
 			c = menu.SLCT_adminActions(input);
 			break;
-		case '7': //modify movie data menu*
+		case '7': //modify movie data menu
 			c = menu.SLCT_modMovieMenu(input);
 			break;
-		case '8': //modify customer data menu*
+		case '8': //modify customer data menu
 			c = menu.SLCT_modCustMenu(input);
 			break;
 		default:
@@ -272,18 +275,8 @@ void static processUserInput(char input) {
 		addMsg(str);
 	}
 	else {
-		switch (currUI) {
-			case '4':
-				setTableName(input); // When UI is at the Display menu, process the user's input to prep for displaying table data on the next UI.
-				break;
-			case '7':
-				//currTbl = "tbl_moviedata";
-				break;
-			case '8':
-				//currTbl = "tbl_custdata";
-				break;
-			default:
-				break;
+		if (currUI == '4') {
+			setTableName(input); // When UI is at the Display menu, process the user's input to prep for displaying table data on the next UI.
 		}
 		currUI = c; //Update current UI reference as long as 'c' is valid.
 	}
@@ -317,8 +310,7 @@ int main() {
 
 		// Create connection to MySQL server
 		while (conn) {
-			DB_MovieData movie; // Allows for manipulation of "tbl_moviedata"
-			//DB_CustData cust; // Allows for manipulation of "tbl_custdata"
+			
 			usrInput = 'X'; //reset user input to avoid possible mis-inputs.
 			tableData.clear(); //clear variable to avoid displaying a table previously displayed.
 
@@ -350,13 +342,13 @@ int main() {
 							break;
 						case '7': //Admin::Modify Movie Data
 							switch (usrInput) {
-								case 'A': //INSERT
+								case '1': //INSERT
 									addMsg(movie.insertMovieData(db));
 									break;
-								case 'B': //UPDATE
+								case '2': //UPDATE
 									//addMsg(movie.updateMovieData(db));
 									break;
-								case 'C': //DELETE
+								case '3': //DELETE
 									//addMsg(movie.deleteMovieData(db));
 									break;
 								default:
@@ -365,13 +357,13 @@ int main() {
 							break;
 						case '8': //Admin::Modify Customer Data
 							switch (usrInput) {
-								case 'A': //INSERT
+								case '1': //INSERT
 									//addMsg(cust.insertCustData(db));
 									break;
-								case 'B': //UPDATE
+								case '2': //UPDATE
 									//addMsg(cust.updateCustData(db));
 									break;
-								case 'C': //DELETE
+								case '3': //DELETE
 									//addMsg(cust.deleteCustData(db));
 									break;
 								default:
