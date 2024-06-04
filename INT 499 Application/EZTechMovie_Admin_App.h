@@ -103,13 +103,14 @@ class DB_MovieData {
 	
 	public:
 		DB_MovieData();
-		int setYear();
-		string setRating();
-		int setNumCast();
-		vector<vector<string>> setCast(int numCast);
-		int setNumDir();
-		vector<vector<string>> setDir(int numDir);
-		vector<int> setGenre(mysqlx::Table tbl);
+		void setDefaultValues();
+		void setYear();
+		void setRating();
+		void setNumCast();
+		void setCast(int numCast);
+		void setNumDir();
+		void setDir(int numDir);
+		void setGenre(mysqlx::Table tbl);
 		void validationSCRN();
 
 		vector<string> insertMovieData(mysqlx::Schema);
@@ -121,8 +122,16 @@ class DB_MovieData {
 		Menus menu;
 		vector<string> msgs;
 		vector<vector<string>> tableData;
-		bool running = true;
-		string input = "";
+		string input;
+		// Vars to be processed to DB -->
+		string movieTitle;
+		int movieYear;
+		string movieRating;
+		int movieNumCast;
+		int movieNumDir;
+		vector<vector<string>> movieCastMembers;
+		vector<vector<string>> movieDirectors;
+		vector<int> movieGenres;
 };
 
 

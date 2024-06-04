@@ -14,13 +14,36 @@ using namespace std;
 DB_MovieData::DB_MovieData() {
 	msgs = {}; // Vector to hold all sys/err messages.
 	tableData = {}; // Holds table data in <std> format to be sent to Menus object for display.
-	running = true;
 	input = "";
+	// Vars to be processed to DB -->
+	movieTitle = "";
+	movieYear = -1;
+	movieRating = "";
+	movieNumCast = -1;
+	movieNumDir = -1;
+	movieCastMembers = {};
+	movieDirectors = {};
+	movieGenres = {}; // Stores a list of integers (indicates the index of an existing genre in the database) to be associated with the newly added movie.
 }
 
 
+// Resets all globally accessible values to their defaults
+void DB_MovieData::setDefaultValues() {
+	msgs.clear(); 
+	tableData.clear();
+	input = "";
+	movieTitle = "";
+	movieYear = -1;
+	movieRating = "";
+	movieNumCast = -1;
+	movieNumDir = -1;
+	movieCastMembers.clear();
+	movieDirectors.clear();
+	movieGenres.clear();
+}
+
 // Prompts user for the year the movie was published
-int DB_MovieData::setYear() {
+void DB_MovieData::setYear() {
 	msgs.clear();
 	int year = -1;
 	
@@ -41,11 +64,11 @@ int DB_MovieData::setYear() {
 		}
 	}
 
-	return year;
+	movieYear = year;
 }
 
 // Prompts user for the rating of the movie
-string DB_MovieData::setRating() {
+void DB_MovieData::setRating() {
 	msgs.clear();
 	vector<string> ratings = { "G","PG","PG-13","R" };
 	bool running = true;
@@ -69,11 +92,11 @@ string DB_MovieData::setRating() {
 		}
 	}
 
-	return input;
+	movieRating = input;
 }
 
 // Prompts user for the number of cast members in the movie
-int DB_MovieData::setNumCast() {
+void DB_MovieData::setNumCast() {
 	msgs.clear();
 	int numCast = -1;
 
@@ -95,11 +118,11 @@ int DB_MovieData::setNumCast() {
 		}
 	}
 
-	return numCast;
+	movieNumCast = numCast;
 }
 
 // Prompts user to enter the names of each main cast member
-vector<vector<string>> DB_MovieData::setCast(int numCast) {
+void DB_MovieData::setCast(int numCast) {
 	vector<vector<string>> castMembers = {};
 	vector<string> person = {};
 
@@ -130,11 +153,11 @@ vector<vector<string>> DB_MovieData::setCast(int numCast) {
 		castMembers.push_back(person);
 	}
 
-	return castMembers;
+	movieCastMembers = castMembers;
 }
 
 // Prompts user for number of directors of the movie
-int DB_MovieData::setNumDir() {
+void DB_MovieData::setNumDir() {
 	msgs.clear();
 	int numDir = -1;
 
@@ -156,11 +179,11 @@ int DB_MovieData::setNumDir() {
 		}
 	}
 
-	return numDir;
+	movieNumDir = numDir;
 }
 
 // Prompts user to enter the names of each director
-vector<vector<string>> DB_MovieData::setDir(int numDir) {
+void DB_MovieData::setDir(int numDir) {
 	vector<vector<string>> directors = {};
 	vector<string> person = {};
 
@@ -191,14 +214,14 @@ vector<vector<string>> DB_MovieData::setDir(int numDir) {
 		directors.push_back(person);
 	}
 
-	return directors;
+	movieDirectors = directors;
 }
 
 // Prompts user to select 1 or more genres that the movie falls into.
 // Also allows the user to add a genre to the database if one is missing.
-vector<int> DB_MovieData::setGenre(mysqlx::Table tbl) {
+void DB_MovieData::setGenre(mysqlx::Table tbl) {
 	msgs.clear();
-	tableData.clear();
+	input = "";
 	vector<int> genres = {};
 	tableData = fct.getTableData(tbl);
 
@@ -251,33 +274,93 @@ vector<int> DB_MovieData::setGenre(mysqlx::Table tbl) {
 		}
 	}
 
-	return genres;
+	movieGenres = genres;
 }
 
 // Final screen during the "add movie" process.
 // Displays the user's entered data, asks them to confirm, allows them to modify, and asks to continue.
 void DB_MovieData::validationSCRN() {
+	msgs.clear();
+	input = "";
 
+	while ( !(input == "C") && !(input == "~")) {
+		
+		try {
+			menu.displayMenu(msgs);
+			msgs.clear();
+
+			cout << "Title: " << movieTitle << endl;
+			cout << "Year: " << movieYear << endl;
+			cout << "Rating: " << movieRating << endl;
+			
+			cout << "Cast Member(s): " << movieNumCast << endl;
+			for (int i = 0; i < movieCastMembers.size(); i++) {
+				cout << "Cast Member #" << i << ": ";
+				for (int j = 0; j < movieCastMembers.at(i).size(); j++) {
+					cout << movieCastMembers.at(i).at(j) << " ";
+				}
+				cout << endl;
+			}
+			
+			cout << "Director(s): " << movieNumDir << endl;
+			for (int i = 0; i < movieDirectors.size(); i++) {
+				cout << "Director #" << i << ": ";
+				for (int j = 0; j < movieDirectors.at(i).size(); j++) {
+					cout << movieDirectors.at(i).at(j) << " ";
+				}
+				cout << endl;
+			}
+			
+			cout << "Genres: ";
+			for (auto i : movieGenres) {
+				string index = to_string(i);
+				//compare indexes from "movieGenres" to the copied data from "tbl_genres" to visually display the names of each chosen genre.
+				for (auto j : tableData) {
+					if (index == j[0]) { //if the indexes line up...
+						cout << j[1] << " "; // ...print the name of the genre.
+					}
+				}
+			}
+
+			cout << "\nAfter reviewing your entered data shown above, please choose one of the following options:"
+				 << "\n  Press [C] to confirm selection and add new movie to database."
+				 << "\n  Press [M] to modify your selection."
+				 << "\n  Press [~] to abort this process and return to the Admin Actions menu." << endl;
+			cout << "\nUser Input: ";
+			getline(cin, input);
+			input = fct.strToUpperCase(input);
+
+			if (input == "C") {
+				//send data to DB
+				break;
+			}
+			else if (input == "M") {
+				//modify menu
+				break;
+			}
+			else if (input == "~") {
+				msgs.push_back("");
+				break;
+			}
+			else {
+				msgs.push_back("ERROR: User input [" + input + "] is invalid!");
+			}
+
+		}
+		catch (const mysqlx::Error& err) {
+			msgs.push_back("MYSQLX_ERROR [validationSCRN()]: " + string(err.what()));
+		}
+		catch (exception& ex) {
+			msgs.push_back("ERROR [validationSCRN()]: " + string(ex.what()));
+		}
+	}
 }
 
 
 // Processes user requests to INSERT a new movie (and other associated info) to the database
 vector<string> DB_MovieData::insertMovieData(mysqlx::Schema db) {
-	running = true; //loop*
-	input = "";
-	msgs.clear();
-
-	string title = "";
-	int year = -1;
-	string rating = "";
-	int numCast = -1;
-	int numDir = -1;
-	vector<vector<string>> castMembers = {};
-	vector<vector<string>> directors = {};
-
+	setDefaultValues(); //reset global variables to default values
 	mysqlx::Table genreTbl = db.getTable("tbl_genredata");
-	vector<int> genres = {}; // Stores a list of integers (indicates the index of an existing genre in the database) to be associated with the newly added movie.
-
 
 	/*
 	mysqlx::Table movieTbl = db.getTable("tbl_moviedata");
@@ -290,18 +373,24 @@ vector<string> DB_MovieData::insertMovieData(mysqlx::Schema db) {
 	*/
 
 	try {
+		// Obtain user input data for the new movie.
 		menu.displayMenu({}); //display header
-		msgs.clear();
 		cout << "\nMovie Title: ";
-		getline(cin, title);
+		getline(cin, movieTitle);
 
-		year = setYear();
-		rating = setRating();
-		numCast = setNumCast();
-		castMembers = setCast(numCast);
-		numDir = setNumDir();
-		directors = setDir(numDir);
-		genres = setGenre(genreTbl);
+		setYear();
+		setRating();
+		setNumCast();
+		setCast(movieNumCast);
+		setNumDir();
+		setDir(movieNumDir);
+		setGenre(genreTbl);
+
+		// Display all of the user's entered data for confirmation.
+		validationSCRN();
+
+		// Process new movie data to the database.
+		//function();
 		
 	}
 	catch (const mysqlx::Error& err) {
@@ -318,13 +407,17 @@ vector<string> DB_MovieData::insertMovieData(mysqlx::Schema db) {
 
 // Processes user requests to UPDATE data on the database
 vector<string> DB_MovieData::updateMovieData(mysqlx::Schema db) {
+	setDefaultValues(); //reset global variables to default values
 	// do something...
+
 	return {};
 }
 
 // Processes user requests to DELETE data from the database
 vector<string> DB_MovieData::deleteMovieData(mysqlx::Schema db) {
+	setDefaultValues(); //reset global variables to default values
 	// do something...
+
 	return {};
 }
 
