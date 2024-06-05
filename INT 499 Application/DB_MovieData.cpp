@@ -3,12 +3,27 @@
 #include <string>
 #include <vector>
 #include <exception>
+#include <chrono> //handles date/time stuff
 #include <mysqlx/xdevapi.h>
 using namespace std;
 
 #include "EZTechMovie_Admin_App.h"
 
-
+/*
+* To-Do -->
+* 
+* 1. Implement new function [validInput()] to the other functions.
+* 2. Complete validation of date format.
+* 3. In setGenre() UI...
+*	- Genres Selected = outputs raw numerical format. need to output the name of each genre instead.
+*	- No error message produced if user enters a number outside of [1-16].
+*	- When user enters [G], it proceeds to display UI. Should redisplay same UI with TEST message instead.
+*	- When user enters [C], program proceeds to next UI even if no genres have been selected.
+*		- NOTE: Before UI change, I briefly saw that the UI had changed but I couldn't see how.
+* 4. In validationSCRN() UI...
+*	- Message "ERROR: User input [] is invalid!" generated whenever this UI is first displayed.
+*	- When user enters [M], the modifyNewMovie() UI is successfully generated. In this UI, if the user enters [~] the whole process is aborted. Instead, this entry should return to the previous UI... not abort the whole process.
+*/
 
 
 DB_MovieData::DB_MovieData() {
@@ -42,120 +57,247 @@ void DB_MovieData::setDefaultValues() {
 	movieGenres.clear();
 }
 
+// Takes in a string and verifies it is not empty, and contains no spaces prior to first char.
+bool DB_MovieData::validInput() {
+	if (input.empty()) {
+		msgs.push_back("ERROR [validInput()]: User input is empty! Please enter a value this time...");
+		return false;
+	}
+	else if (isspace(input[0])) {
+		msgs.push_back("ERROR [validInput()]: User input [" + input + "] is invalid! Input cannot begin with a space.");
+		return false;
+	}
+	else {
+		return true;
+	}
+}
+
 // Promots user for the title of the movie
 void DB_MovieData::setTitle() {
-	menu.displayMenu({});
-	cout << "\nMovie Title: ";
-	getline(cin, movieTitle);
+	msgs.clear();
+	input = "";
+	bool notValid = true;
+
+	while (notValid) {
+		menu.displayMenu(msgs);
+		msgs.clear();
+		cout << "Movie Title: ";
+
+		try {
+			getline(cin, input);
+
+			if (validInput()) {
+				movieTitle = input;
+				notValid = false;
+			}
+		}
+		catch (exception& ex) {
+			msgs.push_back("EXCEPTION [setTitle()]: " + string(ex.what()));
+		}
+	}
 }
 
 // Prompts user for the year the movie was published
 void DB_MovieData::setYear() {
 	msgs.clear();
-	int year = -1;
-	
-	while (year == -1) {
+	input = "";
+	movieYear = -1;
+
+	const chrono::system_clock::time_point now{ chrono::system_clock::now() }; //get current time
+	time_t tt = chrono::system_clock::to_time_t(now); //convert to [time_t]
+	tm local_tm = *localtime(&tt); //convert to [tm] with the user's relative timezone in mind
+
+	/*
+	* Manipulate [local_tm] via the following...
+	* 
+	* std::cout << local_tm.tm_year + 1900 << '\n';
+	* std::cout << local_tm.tm_mon + 1 << '\n';
+	* std::cout << local_tm.tm_mday << '\n';
+	* 
+	* Source = https://stackoverflow.com/questions/15957805/extract-year-month-day-etc-from-stdchronotime-point-in-c
+	* 
+	*/
+
+	while (movieYear == -1) {
 		menu.displayMenu(msgs);
 		msgs.clear();
+		cout << "NOTE: Year must be in format [YYYY] with range of [1888 - present]." << endl;
+		cout << "Movie Year: ";
 
-		cout << "\nYear [YYYY]: ";
-		getline(cin, input);
+		try {
+			getline(cin, input);
 
-		//verify year ranges! [18xx-current]
-
-		if (!(fct.strIsInt(input))) {
-			msgs.push_back("ERROR: Not a valid year!");
+			if (validInput()) {
+				if ( !(fct.strIsInt(input)) ) { //verify input is type int
+					msgs.push_back("ERROR [setYear()]: User input [" + input + "] is invalid! Contains non-numerical characters.");
+				}
+				else if ( (1888 <= stoi(input)) && (stoi(input) <= 2024) ) { //verify date range
+					movieYear = stoi(input);
+				}
+				else {
+					msgs.push_back("ERROR [setYear()]: User input [" + input + "] is invalid! Year is not within allowed range.");
+				}
+			}
 		}
-		else {
-			year = stoi(input);
+		catch (exception& ex) {
+			msgs.push_back("EXCEPTION [setYear()]: " + string(ex.what()));
 		}
 	}
-
-	movieYear = year;
 }
 
 // Prompts user for the rating of the movie
 void DB_MovieData::setRating() {
 	msgs.clear();
+	input = "";
+	movieRating = "";
 	vector<string> ratings = { "G","PG","PG-13","R" };
-	bool running = true;
 
-	while (running) {
+	while (movieRating == "") {
 		menu.displayMenu(msgs);
 		msgs.clear();
+		cout << "Movie Rating [G,PG,PG-13,R]: ";
 
-		cout << "\nRating [G,PG,PG-13,R]: ";
-		getline(cin, input);
-		input = fct.strToUpperCase(input);
+		try {
+			getline(cin, input);
+			input = fct.strToUpperCase(input);
 
-		for (auto& i : ratings) {
-			if (input == i) {
-				running = false;
-				break;
+			if (input == "") { //user submits no input
+				msgs.push_back("ERROR [setRating()]: User must enter a valid rating. Cannot be blank.");
 			}
 			else {
-				msgs.push_back("ERROR: Not a valid rating!");
+				for (auto& i : ratings) {
+					if (input == i) {
+						movieRating = input;
+					}
+				}
+
+				if (movieRating == "") { //if user input not in vector "ratings"
+					msgs.push_back("ERROR [setRating()]: User input [" + input + "] is not a valid rating!");
+				}
 			}
 		}
+		catch (exception& ex) {
+			msgs.push_back("EXCEPTION [setRating()]: " + string(ex.what()));
+		}
 	}
-
-	movieRating = input;
 }
 
 // Prompts user for the number of cast members in the movie
 void DB_MovieData::setNumCast() {
 	msgs.clear();
-	int numCast = -1;
+	input = "";
+	movieNumCast = -1;
 
-	while (numCast == -1) {
+	while (movieNumCast == -1) {
 		menu.displayMenu(msgs);
 		msgs.clear();
+		cout << "How many cast members? [1-5]: ";
 
-		cout << "\nHow many cast members? [1-5]: ";
-		getline(cin, input);
+		try {
+			getline(cin, input);
 
-		if ( !(fct.strIsInt(input)) ) { //if entry contains non-numerical data
-			msgs.push_back("ERROR: User entry was not a number!");
+			if (input == "") { //user submits no input
+				msgs.push_back("ERROR [setNumCast()]: User must enter a valid number. Cannot be blank.");
+			}
+			else if ( !(fct.strIsInt(input)) ) { //if not a number
+				msgs.push_back("ERROR [setNumCast()]: User input [" + input + "] is invalid! Please enter a number [1-5].");
+			}
+			else if (((stoi(input) - 1) | (5 - stoi(input))) >= 0) { //if between 1-5 (bit opperation)
+				movieNumCast = stoi(input);
+			}
+			else {
+				msgs.push_back("ERROR [setNumCast()]: User input [" + input + "] is invalid! Please enter a number [1-5].");
+			}
 		}
-		else if ( !(0 < stoi(input) < 6) ) { //if not between 1-5
-			msgs.push_back("ERROR: User entry was not a valid number! Please enter a number [1-5].");
-		}
-		else {
-			numCast = stoi(input);
+		catch (exception& ex) {
+			msgs.push_back("EXCEPTION [setNumCast()]: " + string(ex.what()));
 		}
 	}
-
-	movieNumCast = numCast;
 }
 
 // Prompts user to enter the names of each main cast member
 void DB_MovieData::setCast(int numCast) {
+	msgs.clear();
 	vector<vector<string>> castMembers = {};
 	vector<string> person = {};
+	bool notValid = true;
 
 	for (int i = 0; i < numCast; i++) {
-		menu.displayMenu({});
 		person.clear();
 
-		cout << "\nCast Member #" + to_string(i + 1) + " -->\n" << endl;
+		notValid = true;
+		while (notValid) { //first name
+			try {
+				menu.displayMenu(msgs);
+				msgs.clear();
+				cout << "Cast Member #" + to_string(i + 1) + " -->\n" << endl;
+				cout << "  First Name: ";
+				getline(cin, input);
 
-		cout << "\n  First Name: ";
-		getline(cin, input);
-		person.push_back(input);
-
-		cout << "Enter [~] to skip middle name entry." << endl;
-		cout << "\n  Middle Name: ";
-		getline(cin, input);
-		if (input == "~") {
-			person.push_back("NULL");
+				if (input == "") { //user submits no input
+					msgs.push_back("ERROR [setCast()]: User must enter a valid name. Cannot be blank.");
+				}
+				else {
+					person.push_back(input);
+					notValid = false;
+				}
+			}
+			catch (exception& ex) {
+				msgs.push_back("EXCEPTION [setCast()]: " + string(ex.what()));
+			}
 		}
-		else {
-			person.push_back(input);
+
+		notValid = true;
+		while (notValid) { //middle name
+			try {
+				menu.displayMenu(msgs);
+				msgs.clear();
+				cout << "Cast Member #" + to_string(i + 1) + " -->\n" << endl;
+				cout << "  First Name: " << person[0] << endl;
+				cout << "Enter [~] to skip middle name entry." << endl;
+				cout << "  Middle Name: ";
+				getline(cin, input);
+
+				if (input == "") { //user submits no input
+					msgs.push_back("ERROR [setCast()]: User must enter a valid name. Cannot be blank.");
+				}
+				else if (input == "~") {
+					person.push_back("NULL");
+					notValid = false;
+				}
+				else {
+					person.push_back(input);
+					notValid = false;
+				}
+			}
+			catch (exception& ex) {
+				msgs.push_back("EXCEPTION [setCast()]: " + string(ex.what()));
+			}
 		}
 
-		cout << "\n  Last Name: ";
-		getline(cin, input);
-		person.push_back(input);
+		notValid = true;
+		while (notValid) { //last name
+			try {
+				menu.displayMenu(msgs);
+				msgs.clear();
+				cout << "Cast Member #" + to_string(i + 1) + " -->\n" << endl;
+				cout << "  First Name: " << person[0] << endl;
+				cout << "  Middle Name: " << person[1] << endl;
+				cout << "  Last Name: ";
+				getline(cin, input);
+
+				if (input == "") { //user submits no input
+					msgs.push_back("ERROR [setCast()]: User must enter a valid name. Cannot be blank.");
+				}
+				else {
+					person.push_back(input);
+					notValid = false;
+				}
+			}
+			catch (exception& ex) {
+				msgs.push_back("EXCEPTION [setCast()]: " + string(ex.what()));
+			}
+		}
 
 		castMembers.push_back(person);
 	}
@@ -166,60 +308,119 @@ void DB_MovieData::setCast(int numCast) {
 // Prompts user for number of directors of the movie
 void DB_MovieData::setNumDir() {
 	msgs.clear();
-	int numDir = -1;
+	input = "";
+	movieNumDir = -1;
 
-	while (numDir == -1) {
+	while (movieNumDir == -1) {
 		menu.displayMenu(msgs);
 		msgs.clear();
-
 		cout << "\nHow many directors? [1-3]: ";
-		getline(cin, input);
 
-		if (!(fct.strIsInt(input))) {
-			msgs.push_back("ERROR: User entry was not a number!");
-			break;
+		try {
+			getline(cin, input);
+
+			if (input == "") { //user submits no input
+				msgs.push_back("ERROR [setNumDir()]: User must enter a valid number. Cannot be blank.");
+			}
+			else if (!(fct.strIsInt(input))) { //if not a number
+				msgs.push_back("ERROR [setNumDir()]: User input [" + input + "] is invalid! Please enter a number [1-3].");
+			}
+			else if (((stoi(input) - 1) | (3 - stoi(input))) >= 0) { //if between 1-3 (bit opperation)
+				movieNumDir = stoi(input);
+			}
+			else {
+				msgs.push_back("ERROR [setNumDir()]: User input [" + input + "] is invalid! Please enter a number [1-3].");
+			}
 		}
-		else if ( !(0 < stoi(input) < 4) ) { //if not between 1-3
-			msgs.push_back("ERROR: User entry was not a valid number! Please enter a number [1-3].");
-			numDir = -1;
-			break;
-		}
-		else {
-			numDir = stoi(input);
+		catch (exception& ex) {
+			msgs.push_back("EXCEPTION [setNumDir()]: " + string(ex.what()));
 		}
 	}
-
-	movieNumDir = numDir;
 }
 
 // Prompts user to enter the names of each director
 void DB_MovieData::setDir(int numDir) {
+	msgs.clear();
 	vector<vector<string>> directors = {};
 	vector<string> person = {};
+	bool notValid = true;
 
 	for (int i = 0; i < numDir; i++) {
-		menu.displayMenu({});
 		person.clear();
 
-		cout << "\nDirector #" + to_string(i + 1) + " -->\n" << endl;
+		notValid = true;
+		while (notValid) { //first name
+			try {
+				menu.displayMenu(msgs);
+				msgs.clear();
+				cout << "Director #" + to_string(i + 1) + " -->\n" << endl;
+				cout << "  First Name: ";
+				getline(cin, input);
 
-		cout << "\n  First Name: ";
-		getline(cin, input);
-		person.push_back(input);
-
-		cout << "Enter [~] to skip middle name entry." << endl;
-		cout << "\n  Middle Name: ";
-		getline(cin, input);
-		if (input == "~") {
-			person.push_back("NULL");
+				if (input == "") { //user submits no input
+					msgs.push_back("ERROR [setDir()]: User must enter a valid name. Cannot be blank.");
+				}
+				else {
+					person.push_back(input);
+					notValid = false;
+				}
+			}
+			catch (exception& ex) {
+				msgs.push_back("EXCEPTION [setDir()]: " + string(ex.what()));
+			}
 		}
-		else {
-			person.push_back(input);
+
+		notValid = true;
+		while (notValid) { //middle name
+			try {
+				menu.displayMenu(msgs);
+				msgs.clear();
+				cout << "Director #" + to_string(i + 1) + " -->\n" << endl;
+				cout << "  First Name: " << person[0] << endl;
+				cout << "Enter [~] to skip middle name entry." << endl;
+				cout << "  Middle Name: ";
+				getline(cin, input);
+
+				if (input == "") { //user submits no input
+					msgs.push_back("ERROR [setDir()]: User must enter a valid name. Cannot be blank.");
+				}
+				else if (input == "~") {
+					person.push_back("NULL");
+					notValid = false;
+				}
+				else {
+					person.push_back(input);
+					notValid = false;
+				}
+			}
+			catch (exception& ex) {
+				msgs.push_back("EXCEPTION [setDir()]: " + string(ex.what()));
+			}
 		}
 
-		cout << "\n  Last Name: ";
-		getline(cin, input);
-		person.push_back(input);
+		notValid = true;
+		while (notValid) { //last name
+			try {
+				menu.displayMenu(msgs);
+				msgs.clear();
+				cout << "Director #" + to_string(i + 1) + " -->\n" << endl;
+				cout << "  First Name: " << person[0] << endl;
+				cout << "  Middle Name: " << person[1] << endl;
+				cout << "  Last Name: ";
+				getline(cin, input);
+
+				if (input == "") { //user submits no input
+					msgs.push_back("ERROR [setDir()]: User must enter a valid name. Cannot be blank.");
+				}
+				else {
+					person.push_back(input);
+					notValid = false;
+				}
+			}
+			catch (exception& ex) {
+				msgs.push_back("EXCEPTION [setDir()]: " + string(ex.what()));
+			}
+		}
 
 		directors.push_back(person);
 	}
@@ -249,7 +450,7 @@ void DB_MovieData::setGenre() {
 			cout << "NONE";
 		}
 		else {
-			for (auto& i : genres) {
+			for (auto& i : genres) { //FIX!!!
 				cout << i;
 			}
 		}
@@ -302,30 +503,42 @@ void DB_MovieData::displayNewMovie() {
 	cout << "Rating: " << movieRating << endl;
 
 	cout << "Cast Member(s): " << movieNumCast << endl;
-	for (int i = 0; i < movieCastMembers.size(); i++) {
-		cout << "Cast Member #" << i << ": ";
-		for (int j = 0; j < movieCastMembers.at(i).size(); j++) {
-			cout << movieCastMembers.at(i).at(j) << " ";
+	for (int i = 0; i < movieNumCast; i++) {
+		cout << "  [#" << (i + 1) << "]: ";
+		cout << movieCastMembers.at(i).at(0) << " ";
+		if (!(movieCastMembers.at(i).at(1) == "NULL")) { //if middle name is "NULL", don't print
+			cout << movieCastMembers.at(i).at(1) << " ";
 		}
-		cout << endl;
+		cout << movieCastMembers.at(i).at(2) << endl;
 	}
 
 	cout << "Director(s): " << movieNumDir << endl;
-	for (int i = 0; i < movieDirectors.size(); i++) {
-		cout << "Director #" << i << ": ";
-		for (int j = 0; j < movieDirectors.at(i).size(); j++) {
-			cout << movieDirectors.at(i).at(j) << " ";
+	for (int i = 0; i < movieNumDir; i++) {
+		cout << "  [#" << (i + 1) << "]: ";
+		cout << movieDirectors.at(i).at(0) << " ";
+		if (!(movieDirectors.at(i).at(1) == "NULL")) { //if middle name is "NULL", don't print
+			cout << movieDirectors.at(i).at(1) << " ";
 		}
-		cout << endl;
+		cout << movieDirectors.at(i).at(2) << endl;
 	}
 
 	cout << "Genres: ";
 	for (auto i : movieGenres) {
 		string index = to_string(i);
-		//compare indexes from "movieGenres" to the copied data from "tbl_genres" to visually display the names of each chosen genre.
+		string lastIndex = to_string(movieGenres.back());
+		// Compare indexes from "movieGenres" to the copied data from "tbl_genres" to
+		// visually display the names of each chosen genre.
 		for (auto j : tableData) {
-			if (index == j[0]) { //if the indexes line up...
-				cout << j[1] << " "; // ...print the name of the genre.
+
+			if (index == lastIndex) { //print index WITHOUT a comma
+				if (index == j[0]) { //if the indexes line up...
+					cout << j[1]; //...print the name of the genre.
+				}
+			}
+			else { //print index WITH a comma
+				if (index == j[0]) { //if the indexes line up...
+					cout << j[1] << ", "; //...print the name of the genre.
+				}
 			}
 		}
 	}
@@ -395,7 +608,7 @@ void DB_MovieData::modifyNewMovie() {
 			}
 		}
 		catch (exception& ex) {
-			msgs.push_back("ERROR [modifyNewMovie()]: " + string(ex.what()));
+			msgs.push_back("EXCEPTION [modifyNewMovie()]: " + string(ex.what()));
 		}
 	}
 	
@@ -409,27 +622,26 @@ void DB_MovieData::validationSCRN() {
 	input = "";
 
 	while ( !(input == "C") && !(input == "~") ) {
-		
 		try {
 			cout << "Here's what you've entered for the new movie -->" << endl;
 
-			displayNewMovie();
+			displayNewMovie(); //display all data entered by user
 
 			cout << "\nAfter reviewing your entered data shown above, please choose one of the following options:"
-				 << "\n  Enter [C] to confirm selection and add new movie to database."
 				 << "\n  Enter [M] to modify your selection."
+				 << "\n  Enter [C] to confirm selection and add new movie to database."
 				 << "\n  Enter [~] to abort this process and return to the Admin Actions menu." << endl;
 			cout << "\nUser Input: ";
 			getline(cin, input);
 			input = fct.strToUpperCase(input);
 
-			if (input == "C") { //send to database
-				//send data to DB*
-				msgs.push_back("TEST: Functionality for sending data to database not implemented yet!");
+			if (input == "M") { //send to database
+				modifyNewMovie();
 				break;
 			}
-			else if (input == "M") { //modify
-				modifyNewMovie();
+			else if (input == "C") { //modify
+				//send data to DB*
+				msgs.push_back("TEST: Functionality for sending data to database not implemented yet!");
 				break;
 			}
 			else if (input == "~") { //abort
@@ -438,15 +650,15 @@ void DB_MovieData::validationSCRN() {
 			else {
 				msgs.push_back("ERROR: User input [" + input + "] is invalid!");
 			}
-
 		}
 		catch (const mysqlx::Error& err) {
 			msgs.push_back("MYSQLX_ERROR [validationSCRN()]: " + string(err.what()));
 		}
 		catch (exception& ex) {
-			msgs.push_back("ERROR [validationSCRN()]: " + string(ex.what()));
+			msgs.push_back("EXCEPTION [validationSCRN()]: " + string(ex.what()));
 		}
 	}
+	msgs.clear();
 }
 
 

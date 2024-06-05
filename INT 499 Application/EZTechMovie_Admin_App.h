@@ -104,6 +104,7 @@ class DB_MovieData {
 	public:
 		DB_MovieData();
 		void setDefaultValues();
+		bool validInput();
 		void setTitle();
 		void setYear();
 		void setRating();
