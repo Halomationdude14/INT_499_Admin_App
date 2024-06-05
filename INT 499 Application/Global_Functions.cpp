@@ -7,6 +7,8 @@
 #include <string>
 #include <vector>
 #include <cstdlib>
+#include <chrono>
+#include <ctime>
 #include <mysqlx/xdevapi.h>
 using namespace std;
 
@@ -19,12 +21,29 @@ Global_Functions::Global_Functions() {
 	c = 'X';
 }
 
-// Purpose: Clear the terminal screen.
+// Clear the terminal screen.
 void Global_Functions::clearScreen() {
 	system("cls");
 }
 
-// Purpose: Obtain the user's input when selecting menu options. Validate's input too.
+// Obtains the current year
+int Global_Functions::getCurrYear() {
+	// Get the current time as a time_t object
+	time_t now = time(nullptr);
+
+	// Create a tm structure to hold the local time
+	tm local_time;
+
+	// Use localtime_s (safer version of localtime) to populate the tm structure
+	localtime_s(&local_time, &now);
+
+	// Extract the year (tm_year is years since 1900, so we add 1900)
+	int year = local_time.tm_year + 1900;
+
+	return year;
+}
+
+// Obtain the user's input when selecting menu options. Validate's input too.
 char Global_Functions::getUsrInput() {
 	tempStr = "";
 	c = 'X';
@@ -100,7 +119,7 @@ vector<vector<string>> Global_Functions::getTableData(mysqlx::Table table) {
 	}
 }
 
-// Purpose: Convert all chars in a string to UPPER case.
+// Convert all chars in a string to UPPER case.
 string Global_Functions::strToUpperCase(string str) {
 	tempStr = "";
 	c = 'X';
@@ -117,7 +136,7 @@ string Global_Functions::strToUpperCase(string str) {
 	return tempStr;
 }
 
-// Purpose: Convert all chars in a string to LOWER case.
+// Convert all chars in a string to LOWER case.
 string Global_Functions::strToLowerCase(string str) {
 	tempStr = "";
 	c = 'X';

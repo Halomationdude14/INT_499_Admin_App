@@ -13,6 +13,7 @@ class Global_Functions {
 	public:
 		Global_Functions();
 		void clearScreen();
+		int getCurrYear();
 		char getUsrInput();
 		vector<vector<string>> getTableData(mysqlx::Table);
 		string strToUpperCase(string);
@@ -136,6 +137,7 @@ class DB_MovieData {
 		vector<vector<string>> movieCastMembers;
 		vector<vector<string>> movieDirectors;
 		vector<int> movieGenres;
+		int maxGenres;
 };
 
 
