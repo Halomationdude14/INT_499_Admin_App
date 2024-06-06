@@ -117,6 +117,7 @@ class DB_MovieData {
 		void displayNewMovie();
 		void modifyNewMovie();
 		void validationSCRN();
+		void sendMovieToDB(mysqlx::Schema);
 
 		vector<string> insertMovieData(mysqlx::Schema);
 		vector<string> updateMovieData(mysqlx::Schema);

@@ -8,6 +8,25 @@ using namespace std;
 
 #include "EZTechMovie_Admin_App.h"
 
+/*
+* TO-DO -->
+* 
+* When entering actor/director names, check the DB to see if they already exist.
+*	- When taking in user input for names
+* 
+* At the GenreSelection UI, if user enters [G] the current genre list is cleared. Keep or modify functionality?
+* 
+* Need to ensure the user is not capable of entering duplicate information to the database.
+* For example, if "Pacific Rim" exists in the DB, then stop the user at setTitle() if they enter the same title.
+* 
+* Results of first test of sending info to DB -->
+*	Program is capable of entering data into the proper table, but current algorithm inserts anomalous entries.
+	First test involved 2 actors and 2 directors: 3 actors added (first 2 were duplicates); no directors were added.
+	In tbl_moviecast, only 1 entry (27, 74) [movieID, actorID]. No entries in tbl_moviedirectors or tbl_moviegenres.
+* 
+*/
+
+
 
 DB_MovieData::DB_MovieData() {
 	msgs = {}; // Vector to hold all sys/err messages.
@@ -230,7 +249,7 @@ void DB_MovieData::setCast(int numCast) {
 				//error handling
 				if (validInput()) {
 					if (input == "~") {
-						person.push_back("NULL");
+						person.push_back("");
 						notValid = false;
 					}
 					else {
@@ -349,7 +368,7 @@ void DB_MovieData::setDir(int numDir) {
 				//error handling
 				if (validInput()) {
 					if (input == "~") {
-						person.push_back("NULL");
+						person.push_back("");
 						notValid = false;
 					}
 					else {
@@ -511,7 +530,7 @@ void DB_MovieData::displayNewMovie() {
 	for (int i = 0; i < movieNumCast; i++) {
 		cout << "  [#" << (i + 1) << "]: ";
 		cout << movieCastMembers.at(i).at(0) << " ";
-		if (!(movieCastMembers.at(i).at(1) == "NULL")) { //if middle name is "NULL", don't print
+		if (!(movieCastMembers.at(i).at(1) == "")) { //if middle name is empty, don't print
 			cout << movieCastMembers.at(i).at(1) << " ";
 		}
 		cout << movieCastMembers.at(i).at(2) << endl;
@@ -521,7 +540,7 @@ void DB_MovieData::displayNewMovie() {
 	for (int i = 0; i < movieNumDir; i++) {
 		cout << "  [#" << (i + 1) << "]: ";
 		cout << movieDirectors.at(i).at(0) << " ";
-		if (!(movieDirectors.at(i).at(1) == "NULL")) { //if middle name is "NULL", don't print
+		if (!(movieDirectors.at(i).at(1) == "")) { //if middle name is empty, don't print
 			cout << movieDirectors.at(i).at(1) << " ";
 		}
 		cout << movieDirectors.at(i).at(2) << endl;
@@ -647,11 +666,7 @@ void DB_MovieData::validationSCRN() {
 					modifyNewMovie();
 					input = ""; //reset input
 				}
-				else if (input == "C") { //modify
-					//send data to DB*
-					msgs.push_back("TEST: Functionality for sending data to database not implemented yet!");
-				}
-				else if (input == "~") { //abort
+				else if (input == "C" || input == "~") { //modify OR abort
 					break;
 				}
 				else {
@@ -659,31 +674,109 @@ void DB_MovieData::validationSCRN() {
 				}
 			}
 		}
-		catch (const mysqlx::Error& err) {
-			msgs.push_back("MYSQLX_ERROR [validationSCRN()]: " + string(err.what()));
-		}
 		catch (exception& ex) {
 			msgs.push_back("EXCEPTION [validationSCRN()]: " + string(ex.what()));
 		}
 	}
 }
 
+// After all data is obtained for a new movie, that data is sent to the database.
+void DB_MovieData::sendMovieToDB(mysqlx::Schema db) {
+	try {
+		mysqlx::Table movieTbl = db.getTable("tbl_moviedata");
+		mysqlx::Table actorTbl = db.getTable("tbl_actors");
+		mysqlx::Table movieActorTbl = db.getTable("tbl_moviecast"); //relational
+		mysqlx::Table dirTbl = db.getTable("tbl_directors");
+		mysqlx::Table movieDirTbl = db.getTable("tbl_moviedirectors"); //relational
+		mysqlx::Table movieGenreTbl = db.getTable("tbl_moviegenres"); //relational
+		mysqlx::Table genreTbl = db.getTable("tbl_genredata");
+
+		// Source URL: https://stackoverflow.com/questions/75135560/x-devapi-batch-insert-extremely-slow
+
+		// Link [TableInsert] object to [Table] object and specify which columns are targets of the INSERT statment.
+		mysqlx::TableInsert tblInsertStmt = movieTbl.insert("movieTitle", "movieYear", "numCast", "movieRating");
+		// Specify the values being inserted in the columns specified above.
+		tblInsertStmt.values(movieTitle, movieYear, movieNumCast, movieRating);
+		// Execute the [TableInsert] object (i.e., send data to database)
+		tblInsertStmt.execute();
+
+		movieTbl = db.getTable("tbl_moviedata"); //refresh Table object with newly added data
+		tableData = fct.getTableData(movieTbl);
+		int movieID = stoi(tableData.back().at(0)); //get movieID of most recently added movie
+
+		//repeat process for remaining tables...
+		tblInsertStmt = actorTbl.insert("actor_Fname", "actor_Mname", "actor_Lname");
+		for (auto& i : movieCastMembers) {
+			tblInsertStmt.values(i[0], i[1], i[2]);
+			tblInsertStmt.execute();
+		}
+
+		actorTbl = db.getTable("tbl_actors"); //refresh Table object with newly added data
+		tableData = fct.getTableData(actorTbl);
+		vector<int> actorIDs = {};
+		for (auto& i : movieCastMembers) { //get actor IDs for each newly added actor
+			for (auto& j : tableData) {
+				if ( (i[0] == j[1]) && (i[1] == j[2]) && (i[2] == j[3]) ) { //if first, middle, and last names match...
+					actorIDs.push_back(stoi(j[0])); //...record actor ID
+				}
+				else {
+					msgs.push_back("ERROR [sendMovieToDB()]: Cannot find this person in the database: " + i[0] + " " + i[1] + " " + i[2]
+						+ "\n                          Association between new movie and this actor cannot be established!");
+				}
+			}
+		}
+
+		tblInsertStmt = movieActorTbl.insert("movieID", "actorID");
+		for (auto& i : actorIDs) {
+			tblInsertStmt.values(movieID, i);
+			tblInsertStmt.execute();
+		}
+
+		tblInsertStmt = dirTbl.insert("director_Fname", "director_Mname", "director_Lname");
+		for (auto& i : movieDirectors) {
+			tblInsertStmt.values(i[0], i[1], i[2]);
+			tblInsertStmt.execute();
+		}
+
+		dirTbl = db.getTable("tbl_directors"); //refresh Table object with newly added data
+		tableData = fct.getTableData(dirTbl);
+		vector<int> directorIDs = {};
+		for (auto& i : movieDirectors) { //get director IDs for each newly added director
+			for (auto& j : tableData) {
+				if ((i[0] == j[1]) && (i[1] == j[2]) && (i[2] == j[3])) { //if first, middle, and last names match...
+					directorIDs.push_back(stoi(j[0])); //...record actor ID
+				}
+				else {
+					msgs.push_back("ERROR [sendMovieToDB()]: Cannot find this person in the database: " + i[0] + " " + i[1] + " " + i[2]
+						+ "\n                          Association between new movie and this director cannot be established!");
+				}
+			}
+		}
+
+		tblInsertStmt = movieDirTbl.insert("movieID", "directorID");
+		for (auto& i : directorIDs) {
+			tblInsertStmt.values(movieID, i);
+			tblInsertStmt.execute();
+		}
+
+		tblInsertStmt = movieGenreTbl.insert("movieID", "genreID");
+		for (auto& i : movieGenres) {
+			tblInsertStmt.values(movieID, i);
+			tblInsertStmt.execute();
+		}
+	}
+	catch (const mysqlx::Error& err) {
+		msgs.push_back("MYSQLX_ERROR [sendMovieToDB()]: " + string(err.what()));
+	}
+	catch (exception& ex) {
+		msgs.push_back("EXCEPTION [sendMovieToDB()]: " + string(ex.what()));
+	}
+}
 
 // Processes user requests to INSERT a new movie (and other associated info) to the database
 vector<string> DB_MovieData::insertMovieData(mysqlx::Schema db) {
 	setDefaultValues(); //reset global variables to default values
 	
-
-	/*
-	mysqlx::Table movieTbl = db.getTable("tbl_moviedata");
-	mysqlx::Table actorTbl = db.getTable("tbl_actors");
-	mysqlx::Table genreTbl = db.getTable("tbl_moviecast"); //relational
-	mysqlx::Table dirTbl = db.getTable("tbl_directors");
-	mysqlx::Table movieDirTbl = db.getTable("tbl_moviedirectors"); //relational
-	mysqlx::Table genreTbl = db.getTable("tbl_genredata");
-	mysqlx::Table movieGenreTbl = db.getTable("tbl_moviegenres"); //relational
-	*/
-
 	// Obtain user input data for the new movie.
 	setTitle();
 	setYear();
@@ -694,7 +787,7 @@ vector<string> DB_MovieData::insertMovieData(mysqlx::Schema db) {
 	setDir(movieNumDir);
 	
 	input = ""; //reset input
-	while ( !(input == "C") ) {
+	while ( !(input == "C") ) { //loop required due to 'add genre' feature
 		mysqlx::Table genreTbl = db.getTable("tbl_genredata");
 		tableData = fct.getTableData(genreTbl); //obtain data from table "tbl_genredata"
 		maxGenres = tableData.size();
@@ -704,11 +797,13 @@ vector<string> DB_MovieData::insertMovieData(mysqlx::Schema db) {
 	// Display all of the user's entered data for confirmation.
 	validationSCRN();
 
-	if (input == "~") {
+	if (input == "~") { // Abort process and return to Admin Actions UI
 		msgs.clear();
 		msgs.push_back("SYS: Process aborted! Movie not inserted into database.");
 	}
 	else {
+		sendMovieToDB(db); // Send all movie data to database.
+		msgs.clear();
 		msgs.push_back("SYS: New movie successfully added to the database!");
 	}
 
