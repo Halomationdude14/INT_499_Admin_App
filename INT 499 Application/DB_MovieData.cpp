@@ -27,6 +27,18 @@ using namespace std;
 */
 
 
+/*
+* New Major Bug -->
+* 
+* In sendMovieToDB() function, data is sent to DB, but not correctly.
+* My most recent efforts have fixed issues with inserting actor and director IDs.
+* 
+* PROBLEM: Function creates 2 entries in tbl_moviedata() sometimes.
+		   This makes it difficult for the program to properly link the new movie with the actors/directors.
+* 
+*/
+
+
 
 DB_MovieData::DB_MovieData() {
 	msgs = {}; // Vector to hold all sys/err messages.
@@ -689,8 +701,6 @@ void DB_MovieData::sendMovieToDB(mysqlx::Schema db) {
 		mysqlx::Table dirTbl = db.getTable("tbl_directors");
 		mysqlx::Table movieDirTbl = db.getTable("tbl_moviedirectors"); //relational
 		mysqlx::Table movieGenreTbl = db.getTable("tbl_moviegenres"); //relational
-		mysqlx::Table genreTbl = db.getTable("tbl_genredata");
-		
 
 		/*
 		* Reference: https://stackoverflow.com/questions/75135560/x-devapi-batch-insert-extremely-slow
@@ -699,7 +709,6 @@ void DB_MovieData::sendMovieToDB(mysqlx::Schema db) {
 		* This source provides a very simple example that works along with a better way of writing it using the X dev API library.
 		*/
 		
-
 		// Link [TableInsert] object to [Table] object and specify which columns are targets of the INSERT statment.
 		mysqlx::TableInsert tblInsertStmt = movieTbl.insert("movieTitle", "movieYear", "numCast", "movieRating");
 		// Specify the values being inserted in the columns specified above, and send them to the DB using the "execute()" command.
@@ -707,80 +716,37 @@ void DB_MovieData::sendMovieToDB(mysqlx::Schema db) {
 		// Execute the TableInsert object and send data to database. Store results of INSERT query in Result object "res".
 		mysqlx::Result res = tblInsertStmt.execute();
 		int movieID = res.getAutoIncrementValue();
-
-		/*
-		movieTbl = db.getTable("tbl_moviedata"); //refresh Table object with newly added data
-		tableData = fct.getTableData(movieTbl);
-		int movieID = stoi(tableData.back().at(0)); //get movieID of most recently added movie
-		*/
-
 		
 		//repeat process for remaining tables...
 
-		vector<mysqlx::Result> actorResList = {}; //store results of each added actor
+		vector<int> actorIDs = {}; //store IDs of each added actor
 		tblInsertStmt = actorTbl.insert("actor_Fname", "actor_Mname", "actor_Lname");
 		for (auto& i : movieCastMembers) {
 			tblInsertStmt.values(i[0], i[1], i[2]);
-			mysqlx::Result res = tblInsertStmt.execute();
-			actorResList.push_back(res);
 		}
-
-		/*
-		actorTbl = db.getTable("tbl_actors"); //refresh Table object with newly added data
-		tableData = fct.getTableData(actorTbl);
-		*/
-		vector<int> actorIDs = {};
-		for (auto& i : actorResList) {
-			actorIDs.push_back(i.getAutoIncrementValue());
-		}
-		/*
-		for (auto& i : movieCastMembers) { //get actor IDs for each newly added actor
-			for (auto& j : tableData) {
-				if ( (i[0] == j[1]) && (i[1] == j[2]) && (i[2] == j[3]) ) { //if first, middle, and last names match...
-					actorIDs.push_back(stoi(j[0])); //...record actor ID
-				}
-				else {
-					msgs.push_back("ERROR [sendMovieToDB()]: Cannot find this person in the database: " + i[0] + " " + i[1] + " " + i[2]
-						+ "\n                          Association between new movie and this actor cannot be established!");
-				}
-			}
-		}
-		*/
+		res = tblInsertStmt.execute();
+		actorIDs.push_back(res.getAutoIncrementValue());
 
 		tblInsertStmt = movieActorTbl.insert("movieID", "actorID");
 		for (auto& i : actorIDs) {
 			tblInsertStmt.values(movieID, i).execute();
 		}
 
-		vector<mysqlx::Result> dirResList = {}; //store results of each added director
+		vector<int> directorIDs = {}; //store results of each added director
 		tblInsertStmt = dirTbl.insert("director_Fname", "director_Mname", "director_Lname");
+		/*
 		for (auto& i : movieDirectors) {
 			tblInsertStmt.values(i[0], i[1], i[2]);
-			res = tblInsertStmt.execute();
-			dirResList.push_back(res);
+			mysqlx::Result res = tblInsertStmt.execute();
+			directorIDs.push_back(res.getAutoIncrementValue());
 		}
+		*/
 
-		/*
-		dirTbl = db.getTable("tbl_directors"); //refresh Table object with newly added data
-		tableData = fct.getTableData(dirTbl);
-		*/
-		vector<int> directorIDs = {};
-		for (auto& i : dirResList) {
-			directorIDs.push_back(i.getAutoIncrementValue());
+		for (int i = 0; i < movieDirectors.size(); i++) {
+			tblInsertStmt.values(movieDirectors[i][0], movieDirectors[i][1], movieDirectors[i][2]);
 		}
-		/*
-		for (auto& i : movieDirectors) { //get director IDs for each newly added director
-			for (auto& j : tableData) {
-				if ((i[0] == j[1]) && (i[1] == j[2]) && (i[2] == j[3])) { //if first, middle, and last names match...
-					directorIDs.push_back(stoi(j[0])); //...record actor ID
-				}
-				else {
-					msgs.push_back("ERROR [sendMovieToDB()]: Cannot find this person in the database: " + i[0] + " " + i[1] + " " + i[2]
-						+ "\n                          Association between new movie and this director cannot be established!");
-				}
-			}
-		}
-		*/
+		res = tblInsertStmt.execute();
+		directorIDs.push_back(res.getAutoIncrementValue());
 
 		tblInsertStmt = movieDirTbl.insert("movieID", "directorID");
 		for (auto& i : directorIDs) {
@@ -831,7 +797,6 @@ vector<string> DB_MovieData::insertMovieData(mysqlx::Schema db) {
 	}
 	else {
 		sendMovieToDB(db); // Send all movie data to database.
-		//msgs.clear();
 		msgs.push_back("SYS: New movie successfully added to the database!");
 	}
 
