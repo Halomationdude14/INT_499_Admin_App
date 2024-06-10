@@ -11,7 +11,7 @@ using namespace std;
 /*
 * TO-DO -->
 * 
-* When entering actor/director names, check the DB to see if they already exist.
+* When entering actor/director names, check the DB to see if they already exist. (do the same for titles)
 *	- When taking in user input for names
 * 
 * At the GenreSelection UI, if user enters [G] the current genre list is cleared. Keep or modify functionality?
@@ -690,30 +690,50 @@ void DB_MovieData::sendMovieToDB(mysqlx::Schema db) {
 		mysqlx::Table movieDirTbl = db.getTable("tbl_moviedirectors"); //relational
 		mysqlx::Table movieGenreTbl = db.getTable("tbl_moviegenres"); //relational
 		mysqlx::Table genreTbl = db.getTable("tbl_genredata");
+		
 
-		// Source URL: https://stackoverflow.com/questions/75135560/x-devapi-batch-insert-extremely-slow
+		/*
+		* Reference: https://stackoverflow.com/questions/75135560/x-devapi-batch-insert-extremely-slow
+		* 
+		* This source was a 1-in-a-million for me! Most online guides/forum questions are from 10 years ago or are using those same outdated libraries.
+		* This source provides a very simple example that works along with a better way of writing it using the X dev API library.
+		*/
+		
 
 		// Link [TableInsert] object to [Table] object and specify which columns are targets of the INSERT statment.
 		mysqlx::TableInsert tblInsertStmt = movieTbl.insert("movieTitle", "movieYear", "numCast", "movieRating");
-		// Specify the values being inserted in the columns specified above.
-		tblInsertStmt.values(movieTitle, movieYear, movieNumCast, movieRating);
-		// Execute the [TableInsert] object (i.e., send data to database)
-		tblInsertStmt.execute();
+		// Specify the values being inserted in the columns specified above, and send them to the DB using the "execute()" command.
+		tblInsertStmt.values(movieTitle, movieYear, movieNumCast, movieRating).execute();
+		// Execute the TableInsert object and send data to database. Store results of INSERT query in Result object "res".
+		mysqlx::Result res = tblInsertStmt.execute();
+		int movieID = res.getAutoIncrementValue();
 
+		/*
 		movieTbl = db.getTable("tbl_moviedata"); //refresh Table object with newly added data
 		tableData = fct.getTableData(movieTbl);
 		int movieID = stoi(tableData.back().at(0)); //get movieID of most recently added movie
+		*/
 
+		
 		//repeat process for remaining tables...
+
+		vector<mysqlx::Result> actorResList = {}; //store results of each added actor
 		tblInsertStmt = actorTbl.insert("actor_Fname", "actor_Mname", "actor_Lname");
 		for (auto& i : movieCastMembers) {
 			tblInsertStmt.values(i[0], i[1], i[2]);
-			tblInsertStmt.execute();
+			mysqlx::Result res = tblInsertStmt.execute();
+			actorResList.push_back(res);
 		}
 
+		/*
 		actorTbl = db.getTable("tbl_actors"); //refresh Table object with newly added data
 		tableData = fct.getTableData(actorTbl);
+		*/
 		vector<int> actorIDs = {};
+		for (auto& i : actorResList) {
+			actorIDs.push_back(i.getAutoIncrementValue());
+		}
+		/*
 		for (auto& i : movieCastMembers) { //get actor IDs for each newly added actor
 			for (auto& j : tableData) {
 				if ( (i[0] == j[1]) && (i[1] == j[2]) && (i[2] == j[3]) ) { //if first, middle, and last names match...
@@ -725,22 +745,30 @@ void DB_MovieData::sendMovieToDB(mysqlx::Schema db) {
 				}
 			}
 		}
+		*/
 
 		tblInsertStmt = movieActorTbl.insert("movieID", "actorID");
 		for (auto& i : actorIDs) {
-			tblInsertStmt.values(movieID, i);
-			tblInsertStmt.execute();
+			tblInsertStmt.values(movieID, i).execute();
 		}
 
+		vector<mysqlx::Result> dirResList = {}; //store results of each added director
 		tblInsertStmt = dirTbl.insert("director_Fname", "director_Mname", "director_Lname");
 		for (auto& i : movieDirectors) {
 			tblInsertStmt.values(i[0], i[1], i[2]);
-			tblInsertStmt.execute();
+			res = tblInsertStmt.execute();
+			dirResList.push_back(res);
 		}
 
+		/*
 		dirTbl = db.getTable("tbl_directors"); //refresh Table object with newly added data
 		tableData = fct.getTableData(dirTbl);
+		*/
 		vector<int> directorIDs = {};
+		for (auto& i : dirResList) {
+			directorIDs.push_back(i.getAutoIncrementValue());
+		}
+		/*
 		for (auto& i : movieDirectors) { //get director IDs for each newly added director
 			for (auto& j : tableData) {
 				if ((i[0] == j[1]) && (i[1] == j[2]) && (i[2] == j[3])) { //if first, middle, and last names match...
@@ -752,17 +780,16 @@ void DB_MovieData::sendMovieToDB(mysqlx::Schema db) {
 				}
 			}
 		}
+		*/
 
 		tblInsertStmt = movieDirTbl.insert("movieID", "directorID");
 		for (auto& i : directorIDs) {
-			tblInsertStmt.values(movieID, i);
-			tblInsertStmt.execute();
+			tblInsertStmt.values(movieID, i).execute();
 		}
 
 		tblInsertStmt = movieGenreTbl.insert("movieID", "genreID");
 		for (auto& i : movieGenres) {
-			tblInsertStmt.values(movieID, i);
-			tblInsertStmt.execute();
+			tblInsertStmt.values(movieID, i).execute();
 		}
 	}
 	catch (const mysqlx::Error& err) {
@@ -795,6 +822,7 @@ vector<string> DB_MovieData::insertMovieData(mysqlx::Schema db) {
 	}
 
 	// Display all of the user's entered data for confirmation.
+	// If info is valid, and user enters [C], data sent to database.
 	validationSCRN();
 
 	if (input == "~") { // Abort process and return to Admin Actions UI
@@ -803,14 +831,14 @@ vector<string> DB_MovieData::insertMovieData(mysqlx::Schema db) {
 	}
 	else {
 		sendMovieToDB(db); // Send all movie data to database.
-		msgs.clear();
+		//msgs.clear();
 		msgs.push_back("SYS: New movie successfully added to the database!");
 	}
 
 	return msgs;
 }
 
-// Processes user requests to UPDATE data on the database
+// *Processes user requests to UPDATE data on the database
 vector<string> DB_MovieData::updateMovieData(mysqlx::Schema db) {
 	setDefaultValues(); //reset global variables to default values
 	// do something...
@@ -818,7 +846,7 @@ vector<string> DB_MovieData::updateMovieData(mysqlx::Schema db) {
 	return {};
 }
 
-// Processes user requests to DELETE data from the database
+// *Processes user requests to DELETE data from the database
 vector<string> DB_MovieData::deleteMovieData(mysqlx::Schema db) {
 	setDefaultValues(); //reset global variables to default values
 	// do something...
