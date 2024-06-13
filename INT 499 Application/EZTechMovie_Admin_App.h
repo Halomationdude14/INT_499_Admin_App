@@ -106,6 +106,8 @@ class DB_MovieData {
 		DB_MovieData();
 		void setDefaultValues();
 		bool validInput();
+		vector<string> newPerson();
+
 		void setTitle();
 		void setYear();
 		void setRating();
@@ -128,17 +130,21 @@ class DB_MovieData {
 		Menus menu;
 		vector<string> msgs;
 		vector<vector<string>> tableData;
+		vector<string> tblIndexes;
 		string input;
-		// Vars to be processed to DB -->
 		string movieTitle;
 		int movieYear;
 		string movieRating;
 		int movieNumCast;
 		int movieNumDir;
-		vector<vector<string>> movieCastMembers;
-		vector<vector<string>> movieDirectors;
+
+		vector<vector<string>> oldCastMembers;
+		vector<vector<string>> newCastMembers;
+
+		vector<vector<string>> oldDirectors;
+		vector<vector<string>> movieDirectors; //rename*
+
 		vector<int> movieGenres;
-		int maxGenres;
 };
 
 
