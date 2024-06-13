@@ -11,30 +11,16 @@ using namespace std;
 /*
 * TO-DO -->
 * 
-* When entering actor/director names, check the DB to see if they already exist. (do the same for titles)
-*	- When taking in user input for names
+* When entering actor/director names, check the DB to see if they already exist.
+*	- When taking in movie titles
+*	- When taking in user input for names (actor + director)
 * 
 * At the GenreSelection UI, if user enters [G] the current genre list is cleared. Keep or modify functionality?
 * 
-* Need to ensure the user is not capable of entering duplicate information to the database.
-* For example, if "Pacific Rim" exists in the DB, then stop the user at setTitle() if they enter the same title.
-* 
-* Results of first test of sending info to DB -->
-*	Program is capable of entering data into the proper table, but current algorithm inserts anomalous entries.
-	First test involved 2 actors and 2 directors: 3 actors added (first 2 were duplicates); no directors were added.
-	In tbl_moviecast, only 1 entry (27, 74) [movieID, actorID]. No entries in tbl_moviedirectors or tbl_moviegenres.
-* 
-*/
-
-
-/*
-* New Major Bug -->
-* 
-* In sendMovieToDB() function, data is sent to DB, but not correctly.
-* My most recent efforts have fixed issues with inserting actor and director IDs.
-* 
-* PROBLEM: Function creates 2 entries in tbl_moviedata() sometimes.
-		   This makes it difficult for the program to properly link the new movie with the actors/directors.
+* Add functionality -->
+*	1. Add new genre
+*	2. Update
+*	3. Delete
 * 
 */
 
@@ -697,10 +683,10 @@ void DB_MovieData::sendMovieToDB(mysqlx::Schema db) {
 	try {
 		mysqlx::Table movieTbl = db.getTable("tbl_moviedata");
 		mysqlx::Table actorTbl = db.getTable("tbl_actors");
-		mysqlx::Table movieActorTbl = db.getTable("tbl_moviecast"); //relational
+		mysqlx::Table movieActorTbl = db.getTable("tbl_moviecast");
 		mysqlx::Table dirTbl = db.getTable("tbl_directors");
-		mysqlx::Table movieDirTbl = db.getTable("tbl_moviedirectors"); //relational
-		mysqlx::Table movieGenreTbl = db.getTable("tbl_moviegenres"); //relational
+		mysqlx::Table movieDirTbl = db.getTable("tbl_moviedirectors");
+		mysqlx::Table movieGenreTbl = db.getTable("tbl_moviegenres");
 
 		/*
 		* Reference: https://stackoverflow.com/questions/75135560/x-devapi-batch-insert-extremely-slow
@@ -712,49 +698,45 @@ void DB_MovieData::sendMovieToDB(mysqlx::Schema db) {
 		// Link [TableInsert] object to [Table] object and specify which columns are targets of the INSERT statment.
 		mysqlx::TableInsert tblInsertStmt = movieTbl.insert("movieTitle", "movieYear", "numCast", "movieRating");
 		// Specify the values being inserted in the columns specified above, and send them to the DB using the "execute()" command.
-		tblInsertStmt.values(movieTitle, movieYear, movieNumCast, movieRating).execute();
+		tblInsertStmt.values(movieTitle, movieYear, movieNumCast, movieRating);
 		// Execute the TableInsert object and send data to database. Store results of INSERT query in Result object "res".
 		mysqlx::Result res = tblInsertStmt.execute();
-		int movieID = res.getAutoIncrementValue();
+		int movieID = res.getAutoIncrementValue(); //store ID of newly added movie
 		
 		//repeat process for remaining tables...
 
 		vector<int> actorIDs = {}; //store IDs of each added actor
-		tblInsertStmt = actorTbl.insert("actor_Fname", "actor_Mname", "actor_Lname");
+		/*
+		* NOTE: It is important that [tblInsertStmt] be refreshed upon each loop.
+		*		This is to prevent duplicate info from being sent to the database.
+		*/
 		for (auto& i : movieCastMembers) {
+			tblInsertStmt = actorTbl.insert("actor_Fname", "actor_Mname", "actor_Lname");
 			tblInsertStmt.values(i[0], i[1], i[2]);
+			res = tblInsertStmt.execute();
+			actorIDs.push_back(res.getAutoIncrementValue());
 		}
-		res = tblInsertStmt.execute();
-		actorIDs.push_back(res.getAutoIncrementValue());
 
-		tblInsertStmt = movieActorTbl.insert("movieID", "actorID");
 		for (auto& i : actorIDs) {
+			tblInsertStmt = movieActorTbl.insert("movieID", "actorID");
 			tblInsertStmt.values(movieID, i).execute();
 		}
 
-		vector<int> directorIDs = {}; //store results of each added director
-		tblInsertStmt = dirTbl.insert("director_Fname", "director_Mname", "director_Lname");
-		/*
+		vector<int> directorIDs = {}; //store IDs of each added director
 		for (auto& i : movieDirectors) {
+			tblInsertStmt = dirTbl.insert("director_Fname", "director_Mname", "director_Lname");
 			tblInsertStmt.values(i[0], i[1], i[2]);
-			mysqlx::Result res = tblInsertStmt.execute();
+			res = tblInsertStmt.execute();
 			directorIDs.push_back(res.getAutoIncrementValue());
 		}
-		*/
-
-		for (int i = 0; i < movieDirectors.size(); i++) {
-			tblInsertStmt.values(movieDirectors[i][0], movieDirectors[i][1], movieDirectors[i][2]);
-		}
-		res = tblInsertStmt.execute();
-		directorIDs.push_back(res.getAutoIncrementValue());
-
-		tblInsertStmt = movieDirTbl.insert("movieID", "directorID");
+		
 		for (auto& i : directorIDs) {
+			tblInsertStmt = movieDirTbl.insert("movieID", "directorID");
 			tblInsertStmt.values(movieID, i).execute();
 		}
 
-		tblInsertStmt = movieGenreTbl.insert("movieID", "genreID");
 		for (auto& i : movieGenres) {
+			tblInsertStmt = movieGenreTbl.insert("movieID", "genreID");
 			tblInsertStmt.values(movieID, i).execute();
 		}
 	}
