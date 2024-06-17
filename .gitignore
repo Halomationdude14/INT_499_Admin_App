@@ -362,5 +362,9 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 
-# Include "/lib" and all subfolders
+# Include "lib" and all subfolders
 !lib/*
+
+# Ensure that all ".dll" and ".lib" files are included under the "lib" folder
+!lib/**/*.dll
+!lib/**/*.lib
