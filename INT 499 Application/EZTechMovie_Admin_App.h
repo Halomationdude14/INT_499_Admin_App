@@ -112,9 +112,9 @@ class DB_MovieData {
 		void setYear();
 		void setRating();
 		void setNumCast();
-		void setCast(int numCast);
+		void setCast();
 		void setNumDir();
-		void setDir(int numDir);
+		void setDir(int numDir); //remove int param*
 		void setGenre();
 		void displayNewMovie();
 		void modifyNewMovie();

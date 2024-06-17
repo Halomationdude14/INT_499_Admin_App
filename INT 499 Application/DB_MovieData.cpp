@@ -337,32 +337,29 @@ void DB_MovieData::setNumCast() {
 }
 
 // Prompts user to enter the names of each main cast member
-void DB_MovieData::setCast(int numCast) {
+void DB_MovieData::setCast() {
 	msgs.clear();
-	vector<vector<string>> oldCast = {};
-	vector<vector<string>> newCast = {};
-	vector<string> person = {};
+	vector<vector<string>> oldCast = {}; //format = [int, string, string, string]
+	vector<vector<string>> newCast = {}; //format = [string, string, string]
 	bool running = true;
 
-	// Record indexes from "tbl_actors"
-	for (auto& i : tableData) {
-		tblIndexes.push_back(i[0]);
-	}
-
-	for (int i = 0; i < numCast; i++) {
+	for (int i = 0; i < movieNumCast; i++) {
+		
+		// Record indexes from "tbl_actors"
+		for (auto& j : tableData) {
+			tblIndexes.push_back(j[0]);
+		}
 		
 		running = true;
 		while (running) {
 			menu.displayTable(msgs, tableData); // Display list of available indexes for "tbl_actors"
 			msgs.clear();
-			person = {};
 
-			cout << "Select one or more actors for the new movie -->" << endl
-				 << "  Enter [#] to add an existing actor (# corresponds to index of actor)." << endl
+			cout << "Actor (" << (i + 1) << "/" << movieNumCast << ") -->" << endl
+				 << "  Enter [#] to select an existing actor (# corresponds to actor ID)." << endl
 				 << "  Enter [N] to add a new actor to the database." << endl
 				 << "\nUser Input: ";
 			getline(cin, input);
-
 
 			// Error handling + data processing
 			if (validInput()) {
@@ -372,19 +369,15 @@ void DB_MovieData::setCast(int numCast) {
 
 					if ( find(tblIndexes.begin(), tblIndexes.end(), input) != tblIndexes.end() ) { //if user input == existing index in table
 
-						for (auto& i : tblIndexes) {
-							if (input == i) {
-								person = tableData.at(stoi(i));
+						vector<string> person = tableData.at(stoi(input)-1); //NOTE: This action creates a person with format [int, string, string, string]
 
-								// Verify that the chosen actor has not already been chosen by the user
-								if ( find(oldCast.begin(), oldCast.end(), person) != oldCast.end() ) {
-									msgs.push_back("ERROR [setCast()]: Actor with index [" + input + "] has already been selected! Cannot be added twice.");
-								}
-								else {
-									oldCast.push_back(person); //add user selection if no duplicates exist
-									running = false;
-								}
-							}
+						// Verify that the chosen actor has not already been chosen by the user
+						if ( find(oldCast.begin(), oldCast.end(), person) != oldCast.end() ) {
+							msgs.push_back("ERROR [setCast()]: Actor with ID [" + input + "] has already been selected! Cannot be added twice.");
+						}
+						else {
+							oldCast.push_back(person); //add user selection if no duplicates exist
+							running = false;
 						}
 					}
 					else {
@@ -644,6 +637,7 @@ void DB_MovieData::displayNewMovie() {
 	menu.displayMenu(msgs);
 	msgs.clear();
 
+	cout << "Here's what you've entered for the new movie -->" << endl << endl;
 	cout << "Title: " << movieTitle << endl;
 	cout << "Year: " << movieYear << endl;
 	cout << "Rating: " << movieRating << endl;
@@ -755,7 +749,7 @@ void DB_MovieData::modifyNewMovie() {
 				}
 				else if (input == "4") {
 					setNumCast();
-					setCast(movieNumCast);
+					setCast();
 					break;
 				}
 				else if (input == "5") {
@@ -769,6 +763,9 @@ void DB_MovieData::modifyNewMovie() {
 				}
 				else if (input == "~") { //abort change request
 					break;
+				}
+				else { //if input is valid, but not a selectable option...
+					notValid = true; //...keep loop going
 				}
 			}
 			else { //if input is invalid...
@@ -789,8 +786,6 @@ void DB_MovieData::validationSCRN() {
 
 	while ( !(input == "C") && !(input == "~") ) {
 		try {
-			cout << "Here's what you've entered for the new movie -->" << endl;
-
 			displayNewMovie(); //display all data entered by user
 
 			cout << "\nAfter reviewing your entered data shown above, please choose one of the following options:"
@@ -822,8 +817,74 @@ void DB_MovieData::validationSCRN() {
 	}
 }
 
-// After all data is obtained for a new movie, that data is sent to the database.
+/*
+* Reference: https://stackoverflow.com/questions/75135560/x-devapi-batch-insert-extremely-slow
+* Once user enters all requires data into the terminal for a new movie, this function processes that data to the database.
+*/
 void DB_MovieData::sendMovieToDB(mysqlx::Schema db) {
+
+	/*
+	* HOW TO SEND DATA TO DB USING [xdevapi.h] -->
+	*
+	* 1. Create [Table] object.
+	*
+	*		NOTE: Schema object required! Assume user has already created the following object --> mysqlx::Schema db
+	*
+	*		mysqlx::Table tbl = db.getTable("table_name"); { Replace "table_name" with the exact name of the table you wish to interact with from the database }
+	*
+	* 2. Create [TableInsert] object using [Table] object.
+	*
+	*		mysqlx::TableInsert tblInsert = tbl.insert();
+	*
+	*		NOTE: The example above will insert all values for all available columns in the table.
+					An error is thrown is there are more/less values being inserted than there are columns in the table.
+					This is the equivalence of { INSERT INTO tbl_actors VALUES(1, 'FirstName', 'MiddleName', 'LastName') } in SQL.
+	*
+	*									##### OR #####
+	*
+	*		mysqlx::TableInsert tblInsert = tbl.insert("column1", "column2", "column3");
+	*
+	*		NOTE: The example above will only accept values for the 3 specified columns.
+					An error is thrown if there are more/less values being inserted than the number of columns specified in ".insert()".
+					This is the equivalence of { INSERT INTO tbl_actors("column1", "column2", "column3") VALUES('FirstName', 'MiddleName', 'LastName') } in SQL.
+	*
+	* 3. Populate [TableInsert] object with data to be inserted into database.
+	*
+	*		tblInsert.values(val1, val2, val3, val4);
+	*
+	*		NOTE: The example above adds 4 different values to "tblInsert". These are the values we want to add to the database.
+					Assume that either the corresponding table in the database has 4 columns, or the previous C++ statement from step 2 specifies 4 unique columns.
+	*
+	* 4. Process the [TableInsert] object to the database and record the change in a [Result] object.
+	*
+	*		mysqlx::Result res = tblInsert.execute();
+	*
+	*		NOTE: It is not required that you store the results in a [Result] object every time.
+					This is for your ease of convenience if you need to review the latest change to the database.
+	*
+	* 5. FULL EXAMPLES -->
+	*		mysqlx::Schema db; (assume 'db' is configured beforehand*)
+	*		mysqlx::Table tbl = db.getTable("table_name");
+	*
+	*
+	*		##### Example 001 #####
+	*
+	*		mysqlx::TableInsert tblInsert = tbl.insert(); (assume the mysql table has 4 columns*)
+	*		tblInsert.values(val1, val2, val3, val4);
+	*		mysqlx::Result res = tblInsert.execute();
+	*
+	* 		##### Example 002 #####
+	*
+	*		mysqlx::TableInsert tblInsert = tbl.insert("column2", "column3", "column4");
+	*		tblInsert.values(val1, val2, val3);
+	*		mysqlx::Result res = tblInsert.execute();
+	*
+	* 		##### Example 003 #####
+	*
+	*		mysqlx::TableInsert tblInsert = tbl.insert().values(val1, val2, val3, val4).execute();
+	*
+	*/
+
 	try {
 		mysqlx::Table movieTbl = db.getTable("tbl_moviedata");
 		mysqlx::Table actorTbl = db.getTable("tbl_actors");
@@ -832,13 +893,6 @@ void DB_MovieData::sendMovieToDB(mysqlx::Schema db) {
 		mysqlx::Table movieDirTbl = db.getTable("tbl_moviedirectors");
 		mysqlx::Table movieGenreTbl = db.getTable("tbl_moviegenres");
 
-		/*
-		* Reference: https://stackoverflow.com/questions/75135560/x-devapi-batch-insert-extremely-slow
-		* 
-		* This source was a 1-in-a-million for me! Most online guides/forum questions are from 10 years ago or are using those same outdated libraries.
-		* This source provides a very simple example that works along with a better way of writing it using the X dev API library.
-		*/
-		
 		// Link [TableInsert] object to [Table] object and specify which columns are targets of the INSERT statment.
 		mysqlx::TableInsert tblInsertStmt = movieTbl.insert("movieTitle", "movieYear", "numCast", "movieRating");
 		// Specify the values being inserted in the columns specified above, and send them to the DB using the "execute()" command.
@@ -858,11 +912,9 @@ void DB_MovieData::sendMovieToDB(mysqlx::Schema db) {
 			actorIDs.push_back(stoi(i[0]));
 		}
 
-		/*
-		* NOTE: It is important that [tblInsertStmt] be refreshed upon each loop.
-		*		This is to prevent duplicate info from being sent to the database.
-		*/
+		// Insert any new actors into the database and obtain their IDs.
 		for (auto& i : newCastMembers) {
+			// NOTE: It is important that [tblInsertStmt] be refreshed upon each loop. This is to prevent duplicate info from being sent to the database.
 			tblInsertStmt = actorTbl.insert("actor_Fname", "actor_Mname", "actor_Lname");
 			tblInsertStmt.values(i[0], i[1], i[2]);
 			res = tblInsertStmt.execute();
@@ -922,7 +974,7 @@ vector<string> DB_MovieData::insertMovieData(mysqlx::Schema db) {
 
 	mysqlx::Table actorTbl = db.getTable("tbl_actors");
 	tableData = fct.getTableData(actorTbl); //obtain data from table "tbl_actors"
-	setCast(movieNumCast);
+	setCast();
 	
 	setNumDir();
 	/*
