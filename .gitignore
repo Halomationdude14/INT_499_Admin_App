@@ -366,5 +366,5 @@ FodyWeavers.xsd
 !lib/*
 
 # Ensure that all ".dll" and ".lib" files are included under the "lib" folder
-!lib/**/*.dll
-!lib/**/*.lib
+!lib/debug/lib64/debug/
+!lib/debug/lib64/vs14/debug/
