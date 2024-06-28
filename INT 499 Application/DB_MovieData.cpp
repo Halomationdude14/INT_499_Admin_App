@@ -13,7 +13,7 @@ using namespace std;
 * TO-DO -->
 * 
 * When entering actor/director names, check the DB to see if they already exist.
-*	- When taking in user input for names (actor + director)
+*	- When taking in user input for names (director)
 * 
 * At the GenreSelection UI, if user enters [G] the current genre list is cleared. Keep or modify functionality?
 * 
@@ -21,6 +21,19 @@ using namespace std;
 *	1. Add new genre
 *	2. Update
 *	3. Delete
+* 
+* Update how program sets actors/directors. If this was a real database, those tables would be VERY large! It would be unreasonable to have the user scroll through hundreds/thousands of people to select.
+* A better approach would be to implement a search feature -->
+*	1. User may search by first, middle, and/or last names.
+*	2. Special formatting is required since user entry is obtained from a single line.
+*		[2.1] Use a SPACE to separate each name for the search.
+			  For example, entering "John Wayne Patrick" would search for a first name of "John", middle name of "Wayne", and last name of "Patrick".
+			  NOTE: User may skip searching for either first/middle/last name by simply pressing SPACE twice. For example, entering "John  " would only search for people with the first name of "John".
+*		[2.2] Use an UNDERSCORE to indicate that there is a space in a single name for special cases where a person may have 2+ words as their first/middle/last name.
+			  For example, entering "John_Vann D. Goh" searches for any first names that match "John Vann".
+*		[2.3] User may enter a short name to get a list of people with those characters in their name.
+			  For example, entering "Mar D B" would display a list of people who's first names start with "Mar", who's middle names start with "D", and who's last names start with "B".
+*	3. Program must ignore possible input errors: entering more than 3 names for one person, entering too many spaces, entering too many underscores, etc.
 * 
 */
 
@@ -196,7 +209,7 @@ void DB_MovieData::setTitle() {
 				}
 
 				while (duplicate == true) { //if duplicate...
-					msgs.push_back("SYS: Duplicate movie title found in database for [" + input + "]");
+					msgs.push_back("WARNING: Duplicate found! A movie title [" + input + "] already exists in the database.");
 					menu.displayMenu(msgs);
 					msgs.clear();
 
@@ -388,13 +401,36 @@ void DB_MovieData::setCast() {
 				else { //if input is NOT int
 					input = fct.strToUpperCase(input);
 
-					if (input == "N") {
-						newCast.push_back(newPerson());
-						running = false;
+					if (input != "N") {
+						msgs.push_back("ERROR [setCast()]: User input [" + input + "] is invalid!");
 					}
-					else {
-						msgs.push_back("ERROR [setGenre()]: User input [" + input + "] is invalid!");
+
+					while (input == "N") {
+						// Obtain name for new actor, and verify that they don't exist in "tbl_actors".
+						vector<string> newActor = newPerson(); //person to be processed
+						input = "N"; //reset input to "N" because newPerson() changes this variable.
+						vector<string> lowercase = {}; //to be used for comparison
+						vector<string> oldActor = {}; //to be used for comparison
+						bool duplicate = false;
+
+						if ( !(newActor.empty()) ) {
+							lowercase = { fct.strToLowerCase(newActor[0]), fct.strToLowerCase(newActor[1]), fct.strToLowerCase(newActor[2]) };
+						}
+						
+						for (auto& i : tableData) {
+							oldActor = { fct.strToLowerCase(i[1]), fct.strToLowerCase(i[2]), fct.strToLowerCase(i[3]) };
+							if (lowercase == oldActor) {
+								duplicate = true;
+								msgs.push_back("WARNING: An actor with the name of [" + newActor[0] + ", " + newActor[1] + ", " + newActor[2] + "] already exists in the database!");
+							}
+						}
+
+						if (duplicate == false) {
+							input = "";
+							running = false;
+						}
 					}
+
 				}
 			}
 		}

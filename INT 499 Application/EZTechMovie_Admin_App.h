@@ -62,14 +62,14 @@ class Menus {
 		char SLCT_mainMenu(char);
 		//###################################
 
-		// SCOPE: { Main Menu --> Display menu }
+		// SCOPE: { Main Menu > Display menu }
 		void SCRN_displayMenu(vector<string>);
 		char SLCT_displayMenu(char);
 		void SCRN_displayTable(vector<string>, vector<vector<string>>);
 		char SLCT_displayTable(char);
 		//###################################
 
-		// SCOPE: { Main Menu --> Admin Actions menu } (*Not including any UIs/processes past choosing to INSERT/UPDATE/DELETE a specific table*)
+		// SCOPE: { Main Menu > Admin Actions menu } (*Not including any UIs/processes past choosing to INSERT/UPDATE/DELETE a specific table*)
 		void SCRN_adminActions(vector<string>);
 		char SLCT_adminActions(char);
 		void SCRN_modMovieMenu(vector<string>);
@@ -83,15 +83,12 @@ class Menus {
 		string tempStr;
 		char currMenu;
 		char prevMenu;
-		bool noEdit_Table;
 
 		// Each vector contains strings that list a number/letter + a description. These are what comprise the selectable options in each menu.
 		vector<string> base_Menu;
 		vector<string> start_Menu;
 		vector<string> main_Menu;
 		vector<string> displayTables_Menu;
-		vector<string> editTable_Menu;
-		vector<string> noEditTable_Menu;
 		vector<string> adminActions_Menu;
 		vector<string> modifyMovie_Menu;
 		vector<string> modifyCust_Menu;

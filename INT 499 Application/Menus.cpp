@@ -34,23 +34,17 @@ Menus::Menus() {
 	tempStr = "";
 	currMenu = '1'; // default value is '1' for start screen.
 	prevMenu = '1'; // contains value of the last menu displayed for regression.
-	
-	// True = user may not swap from display-mode to edit-mode for a given table
-	// False = user can swap from display-mode to edit-mode for a given table
-	noEdit_Table = true;
 
-	base_Menu = {" [0] Previous Menu"};
+	base_Menu = {" [0] Return to Previous Menu"};
 	start_Menu = {" [1] Sign In"," [0] Exit Application"};
 	main_Menu = {" [1] Display Tables", " [2] Admin Actions", " [0] Sign Out"};
 	displayTables_Menu = {" [A] tbl_plans"," [B] tbl_actors"," [C] tbl_custdata"," [D] tbl_moviedata"," [E] tbl_paymentinfo",
 		" [F] tbl_directors"," [G] tbl_genredata"," [H] tbl_moviedirectors"," [I] tbl_moviegenres"," [J] tbl_moviecast",
 		" [K] tbl_custactivity_dvd"," [L] tbl_custactivity_stream"," [M] tbl_dvdrentalhistory"," [0] Return to Main Menu"};
-	editTable_Menu = {" [1] Add Entry*"," [2] Update Entry*"," [3] Delete Entry*"," [0] Return to Previous Menu"};
-	noEditTable_Menu = {"[0] Return to Previous Menu"};
 
-	adminActions_Menu = {" [1] Add/Remove Movie"," [2] Modify Customer Data"," [0] Return to Main Menu"};
-	modifyMovie_Menu = {" [1] Add New Movie"," [2] Update Movie Info"," [3] Delete Movie"," [0] Previous Menu"};
-	modifyCust_Menu = {" [1] Add New Customer"," [2] Update Customer Info"," [3] Delete Customer"," [0] Previous Menu"};
+	adminActions_Menu = {" [1] Modify Movie Data"," [2] Modify Customer Data"," [0] Return to Main Menu"};
+	modifyMovie_Menu = {" [1] Add New Movie"," [2] Update Movie Info*"," [3] Delete Movie*"," [0] Previous Menu"};
+	modifyCust_Menu = {" [1] Add New Customer*"," [2] Update Customer Info*"," [3] Delete Customer*"," [0] Previous Menu"};
 }
 
 // Displays partial UI: header + message (if not empty*)
@@ -260,15 +254,12 @@ char Menus::SLCT_displayMenu(char input) {
 		case 'E':
 		case 'F':
 		case 'G':
-			noEdit_Table = false; //Tables [A-G] may be edited
-			return '5';
 		case 'H':
 		case 'I':
 		case 'J':
 		case 'K':
 		case 'L':
 		case 'M':
-			noEdit_Table = true; //Tables [H-M] may NOT be edited
 			return '5';
 		default:
 			return 'X';
@@ -277,13 +268,7 @@ char Menus::SLCT_displayMenu(char input) {
 
 // SCREEN: Display table menu
 void Menus::SCRN_displayTable(vector<string> msg, vector<vector<string>> tblData) {
-	if (noEdit_Table == true) {
-		displayTable(msg, noEditTable_Menu, tblData);
-	}
-	else {
-		displayTable(msg, editTable_Menu, tblData);
-	}
-	
+	displayTable(msg, base_Menu, tblData);
 	if (!(currMenu == '5')) {
 		prevMenu = currMenu;
 		currMenu = '5';
@@ -292,27 +277,11 @@ void Menus::SCRN_displayTable(vector<string> msg, vector<vector<string>> tblData
 
 // SELECTION: Display table menu
 char Menus::SLCT_displayTable(char input) {
-	if (noEdit_Table == true) {
-		switch (input) {
-			case '0':
-				return '4'; //display menu
-			default:
-				return 'X';
-		}
-	}
-	else {
-		switch (input) {
-			case '0':
-				return '4'; //display menu
-			case '1': //add new entry
-				return '5';
-			case '2': //delete existing entry
-				return '5';
-			case '3': //update existing entry
-				return '5'; //***add new UIs for add/delete/update entries***
-			default:
-				return 'X';
-		}
+	switch (input) {
+		case '0':
+			return '4'; //display menu
+		default:
+			return 'X';
 	}
 }
 
@@ -331,9 +300,9 @@ char Menus::SLCT_adminActions(char input) {
 		case '0':
 			return '3'; //main menu
 		case '1':
-			return '7';
+			return '7'; //Modify Movie Data menu
 		case '2':
-			return '8';
+			return '8'; //Modify Customer Data menu
 		default:
 			return 'X';
 	}
@@ -353,12 +322,10 @@ char Menus::SLCT_modMovieMenu(char input) {
 	switch (input) {
 		case '0':
 			return '6'; //Previous menu
-		case '1': //add
-			return '7';
+		case '1': //insert
 		case '2': //update
-			return '7';
 		case '3': //delete
-			return '7';
+			return '7'; //NOTE: Must set to value other than '7' due to UI processing
 		default:
 			return 'X';
 	}
@@ -378,12 +345,10 @@ char Menus::SLCT_modCustMenu(char input) {
 	switch (input) {
 		case '0':
 			return '6'; //Previous menu
-		case '1': //add
-			return '8';
+		case '1': //insert
 		case '2': //update
-			return '8';
 		case '3': //delete
-			return '8';
+			return '8'; //return same UI ref num; main() will handle these options
 		default:
 			return 'X';
 	}

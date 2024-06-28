@@ -25,6 +25,7 @@ char currUI = '1'; // Depicts the current UI being displayed. Default is '1' to 
 char usrInput = 'X';
 bool running = true;
 bool conn = false;
+bool edit_mode = false; // Used in Admin_Actions menu when user is presented with INSERT/UPDATE/DELETE options. Set to FALSE immediately after those options are no longer displayed.
 string User = "";
 string Pass = "";
 string currTbl = "";
@@ -253,17 +254,17 @@ void static processUserInput(char input) {
 		case '4': //display menu
 			c = menu.SLCT_displayMenu(input);
 			break;
-		case '5': //display table*
+		case '5': //display table
 			c = menu.SLCT_displayTable(input);
 			break;
 		case '6': //admin actions menu
 			c = menu.SLCT_adminActions(input);
 			break;
 		case '7': //modify movie data menu
-			c = menu.SLCT_modMovieMenu(input);
+			c = menu.SLCT_modMovieMenu(input); //NOTE: currUI set to '7' always!
 			break;
 		case '8': //modify customer data menu
-			c = menu.SLCT_modCustMenu(input);
+			c = menu.SLCT_modCustMenu(input); //NOTE: currUI set to '8' always!
 			break;
 		default:
 			break;
@@ -335,36 +336,38 @@ int main() {
 				usrInput = fct.getUsrInput();
 				processUserInput(usrInput); //table name set if [UI == 4] AND user input was valid
 
-				if (!(usrInput == 'X')) {
-					switch (currUI) { //when user is presented with options to ADD/UPDATE/DELETE
-						case '5':
-							//generic table edit method******
-							break;
-						case '7': //Admin::Modify Movie Data
+				if (edit_mode == true) {
+					switch (currUI) { //when user is presented with options to INSERT/UPDATE/DELETE
+						case '7': //AdminActions::Modify Movie Data
 							switch (usrInput) {
 								case '1': //INSERT
 									addMsg(movie.insertMovieData(db));
 									break;
 								case '2': //UPDATE
 									//addMsg(movie.updateMovieData(db));
+									addMsg("SYS: Functionality not implemented yet! Will be added in a future release.");
 									break;
 								case '3': //DELETE
 									//addMsg(movie.deleteMovieData(db));
+									addMsg("SYS: Functionality not implemented yet! Will be added in a future release.");
 									break;
 								default:
 									break;
 							}
 							break;
-						case '8': //Admin::Modify Customer Data
+						case '8': //AdminActions::Modify Customer Data
 							switch (usrInput) {
 								case '1': //INSERT
 									//addMsg(cust.insertCustData(db));
+									addMsg("SYS: Functionality not implemented yet! Will be added in a future release.");
 									break;
 								case '2': //UPDATE
 									//addMsg(cust.updateCustData(db));
+									addMsg("SYS: Functionality not implemented yet! Will be added in a future release.");
 									break;
 								case '3': //DELETE
 									//addMsg(cust.deleteCustData(db));
+									addMsg("SYS: Functionality not implemented yet! Will be added in a future release.");
 									break;
 								default:
 									break;
@@ -375,6 +378,13 @@ int main() {
 					}
 				}
 				
+				if (currUI == '7' || currUI == '8') {
+					edit_mode = true;
+				}
+				else {
+					edit_mode = false;
+				}
+
 				sess.close(); //close the Session object to avoid errors
 			}
 			catch (const mysqlx::Error& err) {
