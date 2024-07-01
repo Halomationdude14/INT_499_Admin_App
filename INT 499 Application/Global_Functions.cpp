@@ -28,16 +28,16 @@ void Global_Functions::clearScreen() {
 
 // Obtains the current year
 int Global_Functions::getCurrYear() {
-	// Get the current time as a time_t object
+	// Get the current time as a time_t object.
 	time_t now = time(nullptr);
 
-	// Create a tm structure to hold the local time
+	// Create a tm structure to hold the local time.
 	tm local_time;
 
-	// Use localtime_s (safer version of localtime) to populate the tm structure
+	// Use localtime_s (safer version of localtime) to populate the tm structure.
 	localtime_s(&local_time, &now);
 
-	// Extract the year (tm_year is years since 1900, so we add 1900)
+	// Extract the year (tm_year is years since 1900, so we add 1900).
 	int year = local_time.tm_year + 1900;
 
 	return year;
@@ -64,7 +64,7 @@ char Global_Functions::getUsrInput() {
 	return c;
 }
 
-// Converts <mysqlx::RowResult> to vector<vector<string>> format
+// Converts <mysqlx::RowResult> to vector<vector<string>> format.
 vector<vector<string>> Global_Functions::getTableData(mysqlx::Table table) {
 	vector<string> msgs = {}; // Vector to hold all sys/err messages.
 	vector<vector<string>> tableData = {}; // Holds table data in <std> format to be sent to Menus object for display.

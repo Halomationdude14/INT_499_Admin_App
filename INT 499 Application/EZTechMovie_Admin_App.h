@@ -112,9 +112,10 @@ class DB_MovieData {
 		void setCast();
 		void setNumDir();
 		void setDir(int numDir); //remove int param*
+		void addGenre(mysqlx::Schema);
 		void setGenre();
 		void displayNewMovie();
-		void modifyNewMovie();
+		void modifyNewMovie(mysqlx::Schema);
 		void validationSCRN();
 		void sendMovieToDB(mysqlx::Schema);
 
@@ -134,14 +135,12 @@ class DB_MovieData {
 		string movieRating;
 		int movieNumCast;
 		int movieNumDir;
-
 		vector<vector<string>> oldCastMembers;
 		vector<vector<string>> newCastMembers;
-
 		vector<vector<string>> oldDirectors;
-		vector<vector<string>> movieDirectors; //rename*
-
-		vector<int> movieGenres;
+		vector<vector<string>> newDirectors;
+		vector<int> movieGenreIDs;
+		vector<string> movieGenreNames;
 };
 
 
@@ -151,9 +150,10 @@ class DB_CustData {
 
 	public:
 		DB_CustData();
-		void insertCustData();
-		void updateCustData();
-		void deleteCustData();
+
+		vector<string> insertCustData(mysqlx::Schema);
+		vector<string> updateCustData(mysqlx::Schema);
+		vector<string> deleteCustData(mysqlx::Schema);
 
 	protected:
 		Global_Functions fct;

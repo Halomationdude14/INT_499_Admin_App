@@ -8,34 +8,53 @@ using namespace std;
 #include "EZTechMovie_Admin_App.h"
 
 /*
-* B = base menu
-* 0 = EXIT PROGRAM
-* 1 = start menu
-* 2 = login screen
-* 3 = main menu
-*	4 = display tables menu
-*		5 = display table
-*			A = Add Entry
-*			B = Update Entry
-* 			C = Delete Entry
-*	6 = admin actions
-*		7 = Modify Movie Data
-*			A = Add New Movie
-* 			B = Update Movie Info
-* 			C = Delete Movie
-* 		8 = Modify Customer Data
-* 			A = Add New Customer
-* 			B = Update Customer Info
-* 			C = Delete Customer
+* Program UI Outline --> (~ indicates an active process; no unique UI ID)
+* 
+* B = Base Menu
+* 0 = STOP PROGRAM
+* 1 = Start Screen
+* 2 = Login Screen
+* 3 = Main Menu
+*	4 = Display Tables Menu
+*		5 = Display table
+*			~ = Add Entry
+*			~ = Update Entry
+* 			~ = Delete Entry
+*	6 = Admin Actions Menu
+*		7 = Modify Movie Data Menu
+*			~ = Add New Movie
+* 			~ = Update Movie Info
+* 			~ = Delete Movie
+* 		8 = Modify Customer Data Menu
+* 			~ = Add New Customer
+* 			~ = Update Customer Info
+* 			~ = Delete Customer
+* 
+*		? = Modify Actors
+*			~ = Add New a
+* 			~ = Update a Info
+* 			~ = Delete a
+* 		? = Modify Directors
+* 			~ = Add New a
+* 			~ = Update a Info
+* 			~ = Delete a
+* 		? = Modify Genres
+* 			~ = Add New a
+* 			~ = Update a Info
+* 			~ = Delete a
+* 		? = Modify
+* 			~ = Add New a
+* 			~ = Update a Info
+* 			~ = Delete a
 */
 
 
 Menus::Menus() {
 	tempStr = "";
-	currMenu = '1'; // default value is '1' for start screen.
-	prevMenu = '1'; // contains value of the last menu displayed for regression.
+	currMenu = '1'; // Default value is '1' for start screen.
+	prevMenu = '1'; // Stores value of the last menu displayed for regression.
 
-	base_Menu = {" [0] Return to Previous Menu"};
+	base_Menu = {" [0] Previous Menu"};
 	start_Menu = {" [1] Sign In"," [0] Exit Application"};
 	main_Menu = {" [1] Display Tables", " [2] Admin Actions", " [0] Sign Out"};
 	displayTables_Menu = {" [A] tbl_plans"," [B] tbl_actors"," [C] tbl_custdata"," [D] tbl_moviedata"," [E] tbl_paymentinfo",

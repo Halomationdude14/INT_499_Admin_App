@@ -1,10 +1,11 @@
 
 /*
-INT 499 Capstone for Information Technology
-Interactive Assignment
-Date: 2024-04-22
-Author: Paul Oram
-NOTE: This is a modified version of the original code that has been reworked to integrate into the final project (MySQL DB).
+* 
+* Author: Paul M. Oram
+* Date Started: 2024-04-22
+* Last Updated: 2024-07-01
+* Purpose: Sample terminal program in C++ to demonstrate how to use the <mysqlx/xdevapi.h> library which allows interaction with a MySQL server/database.
+* 
 */
 
 #include <iostream>
@@ -15,31 +16,34 @@ using namespace std;
 #include "EZTechMovie_Admin_App.h"
 
 
-Global_Functions fct;
-Menus menu;
-DB_MovieData movie; // Allows for manipulation of "tbl_moviedata"
-DB_CustData cust; // Allows for manipulation of "tbl_custdata"
 
-vector<string> msgs = {}; // Vector to hold all sys/err messages.
-char currUI = '1'; // Depicts the current UI being displayed. Default is '1' to display the greeting screen.
-char usrInput = 'X';
-bool running = true;
-bool conn = false;
-bool edit_mode = false; // Used in Admin_Actions menu when user is presented with INSERT/UPDATE/DELETE options. Set to FALSE immediately after those options are no longer displayed.
+
+Global_Functions fct;		// Object assists in generic processes throughout program. Simple, general-use functions.
+Menus menu;					// Object assists in displaying information to the terminal screen.
+DB_MovieData movie;			// Allows for manipulation of "tbl_moviedata".
+DB_CustData cust;			// Allows for manipulation of "tbl_custdata".
+vector<string> msgs = {};	// Stores all SYS/ERR notifications: to be displayed below the header.
+char currUI = '1';			// Value corresponds to the current UI being displayed. Default is '1' to display the greeting screen.
+char usrInput = 'X';		// Stores value entered by user. Used for navigating through the menus. Default is 'X' -> this value throws an error if returned.
+bool running = true;		// Used by loops in main(): true = loop | false = don't loop.
+bool conn = false;			// Indicates status of connection to MySQL Server/Database: true = connection | false = no connection.
+bool edit_mode = false;		// Used in Admin_Actions menu when user is presented with INSERT/UPDATE/DELETE options. Set to FALSE immediately after those options are no longer displayed.
 string User = "";
 string Pass = "";
-string currTbl = "";
-vector<vector<string>> tableData = {}; // Holds table data in <std> format to be sent to Menus object for display.
+string currTbl = "";		// Stores the name of the table that is either currently being displayed or will be displayed next.
+vector<vector<string>> tableData = {}; // vector<vector<string>> var that stores converted table data from the database; can be sent to Menus object for display.
 
 
-// Adds a vector<string> to the end of 'msgs'
+
+
+// Adds a vector<string> to the end of 'msgs'.
 void static addMsg(vector<string> message) {
 	if (message.size() > 0) {
 		msgs.insert(msgs.end(), message.begin(), message.end());
 	}
 }
 
-// Adds a string to the end of 'msgs'
+// Adds a string to the end of 'msgs'.
 void static addMsg(string message) {
 	if (message.size() > 0) {
 		msgs.push_back(message);
@@ -48,6 +52,7 @@ void static addMsg(string message) {
 
 // Performs a check to see if the username and password are valid for a connection to the MySQL server.
 bool static verifyLogin() {
+	
 	try {
 		cout << "Login to the EZTechMovie MySQL Server -->\n\n";
 		cout << "Username: ";
@@ -56,21 +61,22 @@ bool static verifyLogin() {
 		getline(cin, Pass);
 
 		mysqlx::Session sess = mysqlx::getSession("localhost", 33060, User, Pass);
-		addMsg("SYS [MySQL]: Connection to MySQL server successful!");
+		addMsg("SYS [verifyLogin()]: Connection to MySQL server successful!");
 		sess.close();
 		return true;
 	}
+
 	catch (const mysqlx::Error& err) {
-		addMsg("MYSQLX_ERROR [verifyLogin()]: " + string(err.what()));
+		addMsg("MYSQLX_EXCEPTION [verifyLogin()]: " + string(err.what()));
 		return false;
 	}
 	catch (exception& ex) {
-		addMsg("ERROR [verifyLogin()]: " + string(ex.what()));
+		addMsg("EXCEPTION [verifyLogin()]: " + string(ex.what()));
 		return false;
 	}
 }
 
-// Assign the name of the chosen table to 'currTbl' [pertains to 'display table' menu]
+// When in the 'Display Table' menus, this function assigns the name of the chosen table to [currTbl].
 void static setTableName(char input) {
 
 	switch (input) {
@@ -113,19 +119,20 @@ void static setTableName(char input) {
 		case 'M':
 			currTbl = "tbl_dvdrentalhistory";
 			break;
-		case '0': //return to main menu
+		case '0': // Return to main menu.
 			currTbl = "";
 			break;
 		default:
 			currTbl = "";
-			string str = "ERROR [MySQL|setTable()]: Table does not exist in the database for user input [" + to_string(input) + "] !";
+			string str = "ERROR [setTableName()]: Table does not exist in the database for user input [" + to_string(input) + "] !";
 			addMsg(str);
 			break;
 	}
 }
 
-// Converts <mysqlx::RowResult> to vector<vector<string>> format
+// Converts <mysqlx::RowResult> to vector<vector<string>> format.
 void static getTableData(mysqlx::Table table) {
+	
 	try {
 		mysqlx::RowResult result = table.select("*").execute();
 
@@ -135,38 +142,39 @@ void static getTableData(mysqlx::Table table) {
 				mysqlx::Value val = row[i];
 				string strValue;
 
+				// The data stored in [val] is converted from <mysqlx::> format to its corresponding <std::> format and then to <std::string> format.
 				switch (val.getType()) {
-				case mysqlx::Value::Type::UINT64:
-					strValue = to_string(val.get<uint64_t>());
-					break;
-				case mysqlx::Value::Type::INT64:
-					strValue = to_string(val.get<int64_t>());
-					break;
-				case mysqlx::Value::Type::FLOAT:
-					strValue = to_string(val.get<float>());
-					break;
-				case mysqlx::Value::Type::DOUBLE:
-					strValue = to_string(val.get<double>());
-					break;
-				case mysqlx::Value::Type::BOOL:
-					strValue = to_string(val.get<bool>());
-					break;
-				case mysqlx::Value::Type::STRING:
-					strValue = val.get<string>();
-					break;
-				case mysqlx::Value::Type::VNULL:
-					strValue = "<NULL>";
-					break;
-				default:
-					strValue = "<ERR>";
-					break;
+					case mysqlx::Value::Type::UINT64:
+						strValue = to_string(val.get<uint64_t>());
+						break;
+					case mysqlx::Value::Type::INT64:
+						strValue = to_string(val.get<int64_t>());
+						break;
+					case mysqlx::Value::Type::FLOAT:
+						strValue = to_string(val.get<float>());
+						break;
+					case mysqlx::Value::Type::DOUBLE:
+						strValue = to_string(val.get<double>());
+						break;
+					case mysqlx::Value::Type::BOOL:
+						strValue = to_string(val.get<bool>());
+						break;
+					case mysqlx::Value::Type::STRING:
+						strValue = val.get<string>();
+						break;
+					case mysqlx::Value::Type::VNULL:
+						strValue = "<NULL>";
+						break;
+					default:
+						strValue = "<ERR>";
+						break;
 				}
-
 				rowData.push_back(strValue);
 			}
 			tableData.push_back(rowData);
 		}
 	}
+
 	catch (const mysqlx::Error& err) {
 		addMsg("MYSQLX_ERROR [getTableData()]: " + string(err.what()));
 	}
@@ -179,43 +187,43 @@ void static getTableData(mysqlx::Table table) {
 void static callDisplayMethod() {
 
 	switch (currUI) {
-		case 'B': //base menu
+		case 'B': // Base menu
 			menu.SCRN_BASE(msgs);
 			break;
-		case '0': //EXIT PROGRAM
+		case '0': // EXIT PROGRAM
 			msgs.clear();
 			msgs.push_back("\n***** [ Closing Application ] *****\n");
 			menu.displayMenu(msgs);
 			break;
-		case '1': //start menu
+		case '1': // Start menu
 			menu.SCRN_start(msgs);
 			break;
-		case '2': //login screen
+		case '2': // Login screen
 			menu.SCRN_login(msgs);
 			break;
-		case '3': //main menu
+		case '3': // Main menu
 			menu.SCRN_mainMenu(msgs);
 			break;
-		case '4': //display menu
+		case '4': // Display menu
 			menu.SCRN_displayMenu(msgs);
 			break;
-		case '5': //display table
+		case '5': // Display table
 			menu.SCRN_displayTable(msgs, tableData);
 			break;
-		case '6': //admin actions menu
+		case '6': // Admin_Actions menu
 			menu.SCRN_adminActions(msgs);
 			break;
-		case '7': //modify menu data menu
+		case '7': // Modify menu data menu
 			menu.SCRN_modMovieMenu(msgs);
 			break;
-		case '8': //modify customer data menu
+		case '8': // Modify customer data menu
 			menu.SCRN_modCustMenu(msgs);
 			break;
 		default:
 			string s(1, currUI);
 			string str = "CRITICAL ERROR: CODE MALFUNCTION! Program tried to call non-existent UI with ID = [" + s + "]. Displaying previous UI!";
 			addMsg(str);
-			currUI = menu.getCurrMenu(); //may need to change this to menu.getPrevMenu() eventually
+			currUI = menu.getCurrMenu(); //may need to change this to menu.getPrevMenu() eventually...
 			break;
 	}
 	msgs.clear();
@@ -232,15 +240,15 @@ void static processUserInput(char input) {
 	* If the user's input was valid, the currUI will be updated via the RETURN.
 	*/
 	switch (currUI) {
-		case 'B': //base screen
+		case 'B': // Base screen
 			c = menu.SLCT_BASE(input);
 			break;
-		case '0': //EXIT PROGRAM
-			break; //do nothing; main() will handle this
-		case '1': //start screen
+		case '0': // EXIT PROGRAM
+			break; // Do nothing; main() will handle this.
+		case '1': // Start screen
 			c = menu.SLCT_start(input);
 			break;
-		case '2': //login screen
+		case '2': // Login screen
 			if (conn == true) {
 				c = '3';
 			}
@@ -248,28 +256,29 @@ void static processUserInput(char input) {
 				c = '1';
 			}
 			break;
-		case '3': //main menu
+		case '3': // Main menu
 			c = menu.SLCT_mainMenu(input);
 			break;
-		case '4': //display menu
+		case '4': // Display menu
 			c = menu.SLCT_displayMenu(input);
 			break;
-		case '5': //display table
+		case '5': // Display table
 			c = menu.SLCT_displayTable(input);
 			break;
-		case '6': //admin actions menu
+		case '6': // Admin_Actions menu
 			c = menu.SLCT_adminActions(input);
 			break;
-		case '7': //modify movie data menu
-			c = menu.SLCT_modMovieMenu(input); //NOTE: currUI set to '7' always!
+		case '7': // Modify movie data menu
+			c = menu.SLCT_modMovieMenu(input); // NOTE: Always sets [currUI] to '7'.
 			break;
-		case '8': //modify customer data menu
-			c = menu.SLCT_modCustMenu(input); //NOTE: currUI set to '8' always!
+		case '8': // Modify customer data menu
+			c = menu.SLCT_modCustMenu(input); // NOTE: Always sets [currUI] to '8'.
 			break;
 		default:
 			break;
 	}
 
+	// Error handling + data processing.
 	if (c == 'X') {
 		string s(1, input);
 		string str = "ERROR: User input [" + s + "] is invalid!";
@@ -288,38 +297,36 @@ void static processUserInput(char input) {
 
 int main() {
 
-	// Start the application
+	// MAIN PROGRAM LOOP!
 	while (running) {
-		usrInput = 'X'; //reset user input to avoid possible mis-inputs.
-
+		usrInput = 'X'; // Reset user input to avoid possible mis-inputs.
 		callDisplayMethod();
 
-		if (currUI == '0') { //stop program
+		if (currUI == '0') { // Stop program!
 			running = false;
 		}
-		else if (currUI == '2') { //perform login
+		else if (currUI == '2') { // Perform login process.
 			conn = verifyLogin();
 			if (conn == false) {
 				msgs.push_back("SYS [MySQL]: Could not establish connection to MySQL server!");
 			}
 		}
 		else {
-			usrInput = fct.getUsrInput();
+			usrInput = fct.getUsrInput(); // Obtain user input.
 		}
+		processUserInput(usrInput); // Process user input. (if input is 'X', this does nothing)
 
-		processUserInput(usrInput);
-
-		// Create connection to MySQL server
+		// Create connection to MySQL server.
 		while (conn) {
 			
-			usrInput = 'X'; //reset user input to avoid possible mis-inputs.
-			tableData.clear(); //clear variable to avoid displaying a table previously displayed.
+			usrInput = 'X'; // Reset user input to avoid possible mis-inputs.
+			tableData.clear(); // Clear variable to avoid displaying a table previously displayed.
 
 			try {
 				mysqlx::Session sess = mysqlx::getSession("localhost", 33060, User, Pass);
 				mysqlx::Schema db = sess.getSchema("eztechmoviedb");
 				
-				if (currUI == '1') { //stop program
+				if (currUI == '1') { // Close the connection the the MySQL server.
 					msgs.push_back("SYS [MySQL]: Connection to MySQL server closed.");
 					User = "";
 					Pass = "";
@@ -327,47 +334,42 @@ int main() {
 					conn = false;
 				}
 				
-				if (currUI == '5') { //If UI is displaying a table
+				if (currUI == '5') { // If UI is to display a table, get table data in <std::> format first.
 					mysqlx::Table tbl = db.getTable(currTbl);
 					getTableData(tbl);
 				}
 
 				callDisplayMethod();
 				usrInput = fct.getUsrInput();
-				processUserInput(usrInput); //table name set if [UI == 4] AND user input was valid
+				processUserInput(usrInput); // NOTE: Table name set if [UI == 4] AND user input was valid.
 
-				if (edit_mode == true) {
-					switch (currUI) { //when user is presented with options to INSERT/UPDATE/DELETE
-						case '7': //AdminActions::Modify Movie Data
+				if (edit_mode == true) { // When user is presented with options to INSERT/UPDATE/DELETE...
+					switch (currUI) { 
+						case '7': // Admin_Actions::Modify Movie Data
 							switch (usrInput) {
 								case '1': //INSERT
 									addMsg(movie.insertMovieData(db));
 									break;
 								case '2': //UPDATE
-									//addMsg(movie.updateMovieData(db));
-									addMsg("SYS: Functionality not implemented yet! Will be added in a future release.");
+									addMsg(movie.updateMovieData(db));
 									break;
 								case '3': //DELETE
-									//addMsg(movie.deleteMovieData(db));
-									addMsg("SYS: Functionality not implemented yet! Will be added in a future release.");
+									addMsg(movie.deleteMovieData(db));
 									break;
 								default:
 									break;
 							}
 							break;
-						case '8': //AdminActions::Modify Customer Data
+						case '8': // Admin_Actions::Modify Customer Data
 							switch (usrInput) {
 								case '1': //INSERT
-									//addMsg(cust.insertCustData(db));
-									addMsg("SYS: Functionality not implemented yet! Will be added in a future release.");
+									addMsg(cust.insertCustData(db));
 									break;
 								case '2': //UPDATE
-									//addMsg(cust.updateCustData(db));
-									addMsg("SYS: Functionality not implemented yet! Will be added in a future release.");
+									addMsg(cust.updateCustData(db));
 									break;
 								case '3': //DELETE
-									//addMsg(cust.deleteCustData(db));
-									addMsg("SYS: Functionality not implemented yet! Will be added in a future release.");
+									addMsg(cust.deleteCustData(db));
 									break;
 								default:
 									break;
@@ -379,14 +381,15 @@ int main() {
 				}
 				
 				if (currUI == '7' || currUI == '8') {
-					edit_mode = true;
+					edit_mode = true; // Set to 'true' when user is presented with INSERT/UPDATE/DELETE options.
 				}
 				else {
 					edit_mode = false;
 				}
 
-				sess.close(); //close the Session object to avoid errors
+				sess.close(); // Close the Session object to avoid errors.
 			}
+
 			catch (const mysqlx::Error& err) {
 				addMsg("MYSQLX_ERROR [main()]: " + string(err.what()));
 			}
@@ -395,6 +398,7 @@ int main() {
 			}
 		}
 	}
+	
 	return 0;
 }
 
