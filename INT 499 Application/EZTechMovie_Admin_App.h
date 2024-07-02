@@ -105,16 +105,17 @@ class DB_MovieData {
 		bool validInput();
 		vector<string> newPerson();
 
-		void setTitle();
+		void setTitle(mysqlx::Schema);
 		void setYear();
 		void setRating();
 		void setNumCast();
 		void addNewCast(mysqlx::Table);
 		void setCast(mysqlx::Schema);
 		void setNumDir();
-		void setDir(int); //remove int param*
-		void addNewGenre(mysqlx::Schema);
-		void setGenre();
+		void addNewDir(mysqlx::Table);
+		void setDir(mysqlx::Schema);
+		void addNewGenre(mysqlx::Table);
+		void setGenre(mysqlx::Schema);
 		void displayNewMovie();
 		void modifyNewMovie(mysqlx::Schema);
 		void validationSCRN();

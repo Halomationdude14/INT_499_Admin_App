@@ -12,10 +12,7 @@ using namespace std;
 /*
 * TO-DO -->
 * 
-* 1. When entering actor/director names, check the DB to see if they already exist.
-*		- When taking in user input for names (director).
-* 
-* 2. Update how program sets actors/directors. If this was a real database, those tables would be VERY large! It would be unreasonable to have the user scroll through hundreds/thousands of people to select.
+* 1. Update how program sets actors/directors. If this was a real database, those tables would be VERY large! It would be unreasonable to have the user scroll through hundreds/thousands of people to select.
 *    A better approach would be to implement a search feature -->
 *		1. User may search by first, middle, and/or last names.
 *		2. Special formatting is required since user entry is obtained from a single line.
@@ -28,9 +25,10 @@ using namespace std;
 				  For example, entering "Mar D B" would display a list of people who's first names start with "Mar", who's middle names start with "D", and who's last names start with "B".
 *		3. Program must ignore possible input errors: entering more than 3 names for one person, entering too many spaces, entering too many underscores, etc.
 * 
-* 3. Add a title to the header indicating that the user in in the process of "adding a new movie" to the database.
-* 4. When adding new genres to the database, program does NOT check for duplicate entries first.
-* 5. When selecting genres to link to the new movie, add an option to CLEAR the user selection and start over (in case user makes a mistake).
+* 2. Add a title to the header indicating that the user in in the process of "adding a new movie" to the database.
+* 3. When adding new genres to the database, program does NOT check for duplicate entries first.
+* 4. When selecting genres to link to the new movie, add an option to CLEAR the user selection and start over (in case user makes a mistake).
+* 5. Apply similar changes to [validationSCRN()] function which were done to [setTitle()] and [setGenre()]. Incorporate Schema object to reduce on code.
 * 
 */
 
@@ -179,7 +177,7 @@ vector<string> DB_MovieData::newPerson() {
 }
 
 // Promots user for the title of the movie.
-void DB_MovieData::setTitle() {
+void DB_MovieData::setTitle(mysqlx::Schema db) {
 	msgs.clear();
 	tblIndexes.clear();
 	input = "";
@@ -187,12 +185,16 @@ void DB_MovieData::setTitle() {
 	bool notValid = true;
 	bool duplicate = false;
 
-	// Record existing movie titles from table {tbl_moviedata}.
-	for (auto& i : tableData) {
-		tblIndexes.push_back(i[1]); // NOTE: Reusing this variable to store titles instead of indexes.
-	}
 
 	while (notValid) {
+		mysqlx::Table movieTbl = db.getTable("tbl_moviedata");
+		tableData = fct.getTableData(movieTbl); // Obtain data from table {tbl_moviedata}.
+
+		// Record existing movie titles from table {tbl_moviedata}.
+		for (auto& i : tableData) {
+			tblIndexes.push_back(i[1]); // NOTE: Reusing this variable to store titles instead of indexes.
+		}
+
 		menu.displayMenu(msgs);
 		msgs.clear();
 
@@ -251,6 +253,9 @@ void DB_MovieData::setTitle() {
 
 		catch (exception& ex) {
 			msgs.push_back("EXCEPTION [setTitle()]: " + string(ex.what()));
+		}
+		catch (const mysqlx::Error& err) {
+			msgs.push_back("MYSQLX_ERROR [setTitle()]: " + string(err.what()));
 		}
 	}
 }
@@ -384,7 +389,14 @@ void DB_MovieData::addNewCast(mysqlx::Table tbl) {
 		oldActor = { fct.strToLowerCase(i[1]), fct.strToLowerCase(i[2]), fct.strToLowerCase(i[3]) };
 		if (lowercase == oldActor) {
 			duplicate = true;
-			msgs.push_back("ERROR [addNewCast()]: Duplication error! The actor [" + newActor[0] + ", " + newActor[1] + ", " + newActor[2] + "] already exists in the database.");
+
+			string name = newActor[0];
+			if (!(newActor[1].empty())) {
+				name.append(" " + newActor[1]);
+			}
+			name.append(" " + newActor[2]);
+
+			msgs.push_back("ERROR [addNewCast()]: Duplication error! The actor [" + name + "] already exists in the database.");
 		}
 	}
 
@@ -435,7 +447,7 @@ void DB_MovieData::setCast(mysqlx::Schema db) {
 
 					vector<string> person = tableData.at(stoi(input)-1); // This action creates a person with format [index, firstName, middleName, lastName].
 
-					// Verify that the chosen actor has not already been chosen by the user.
+					// Verify that the chosen actor has not already been selected previously by the user.
 					if ( find(movieCastMembers.begin(), movieCastMembers.end(), person) != movieCastMembers.end() ) {
 						msgs.push_back("ERROR [setCast()]: Actor with ID [" + input + "] has already been selected! Cannot be added twice.");
 					}
@@ -445,7 +457,7 @@ void DB_MovieData::setCast(mysqlx::Schema db) {
 					}
 				}
 				else {
-					msgs.push_back("ERROR [setCast()]: User input [" + input + "] is invalid! Input does not correlate to an actor's ID in the database.");
+					msgs.push_back("ERROR [setCast()]: User input [" + input + "] is invalid! Input does not correlate to any Actor IDs in the database.");
 				}
 			}
 
@@ -499,98 +511,106 @@ void DB_MovieData::setNumDir() {
 	}
 }
 
-// Prompts user to enter the names of each director.
-void DB_MovieData::setDir(int numDir) {
-	msgs.clear();
-	vector<vector<string>> directors = {};
-	vector<string> person = {};
-	bool notValid = true;
+// Allows the user to add a new director to the database.
+void DB_MovieData::addNewDir(mysqlx::Table tbl) {
+	vector<string> newDir = newPerson();
+	vector<string> lowercase = { fct.strToLowerCase(newDir[0]), fct.strToLowerCase(newDir[1]), fct.strToLowerCase(newDir[2]) };
+	vector<string> oldDir = {}; // Stores a single director from the database (used for comparison).
+	bool duplicate = false;
 
-	for (int i = 0; i < numDir; i++) {
-		person.clear();
+	// Compare new director to existing directors: verify no duplicates.
+	for (auto& i : tableData) {
+		oldDir = { fct.strToLowerCase(i[1]), fct.strToLowerCase(i[2]), fct.strToLowerCase(i[3]) };
+		if (lowercase == oldDir) {
+			duplicate = true;
 
-		// First Name
-		notValid = true;
-		while (notValid) {
-			try {
-				menu.displayMenu(msgs);
-				msgs.clear();
-				cout << "Director #" + to_string(i + 1) + " -->\n" << endl;
-				cout << "  First Name: ";
-				getline(cin, input);
-
-				// Error handling
-				if (validInput()) {
-					person.push_back(input);
-					notValid = false;
-				}
+			string name = newDir[0];
+			if ( !(newDir[1].empty()) ) {
+				name.append(" " + newDir[1]);
 			}
+			name.append(" " + newDir[2]);
 
-			catch (exception& ex) {
-				msgs.push_back("EXCEPTION [setDir()]: " + string(ex.what()));
-			}
+			msgs.push_back("ERROR [addNewDir()]: Duplication error! The director [" + name + "] already exists in the database.");
 		}
-
-		// Middle Name
-		notValid = true;
-		while (notValid) {
-			try {
-				menu.displayMenu(msgs);
-				msgs.clear();
-				cout << "Director #" + to_string(i + 1) + " -->\n" << endl;
-				cout << "  First Name: " << person[0] << endl;
-				cout << "Enter [~] to skip middle name entry." << endl;
-				cout << "  Middle Name: ";
-				getline(cin, input);
-
-				// Error handling
-				if (validInput()) {
-					if (input == "~") {
-						person.push_back("");
-						notValid = false;
-					}
-					else {
-						person.push_back(input);
-						notValid = false;
-					}
-				}
-			}
-			catch (exception& ex) {
-				msgs.push_back("EXCEPTION [setDir()]: " + string(ex.what()));
-			}
-		}
-
-		// Last Name
-		notValid = true;
-		while (notValid) {
-			try {
-				menu.displayMenu(msgs);
-				msgs.clear();
-				cout << "Director #" + to_string(i + 1) + " -->\n" << endl;
-				cout << "  First Name: " << person[0] << endl;
-				cout << "  Middle Name: " << person[1] << endl;
-				cout << "  Last Name: ";
-				getline(cin, input);
-
-				// Error handling
-				if (validInput()) {
-					person.push_back(input);
-					notValid = false;
-				}
-			}
-			catch (exception& ex) {
-				msgs.push_back("EXCEPTION [setDir()]: " + string(ex.what()));
-			}
-		}
-
-		directors.push_back(person);
 	}
 
-	movieDirectors = directors;
+	// If no duplicates are found, add new director to database and break the loop.
+	if (duplicate == false) {
+		try {
+			mysqlx::TableInsert tblInsertStmt = tbl.insert("director_Fname", "director_Mname", "director_Lname");
+			tblInsertStmt.values(newDir[0], newDir[1], newDir[2]).execute();
+			msgs.push_back("SYS: Director successfully added to the database!");
+		}
+		catch (const mysqlx::Error& err) {
+			msgs.push_back("MYSQLX_ERROR [addNewDir()]: " + string(err.what()));
+		}
+	}
+}
+
+// Prompts user to enter the names of each director.
+void DB_MovieData::setDir(mysqlx::Schema db) {
+	msgs.clear();
+	int counter = movieDirectors.size() + 1;
+	bool running = true;
+
+
+	while (running) {
+		mysqlx::Table directorTbl = db.getTable("tbl_directors");
+		tableData = fct.getTableData(directorTbl); // Obtain data from table {tbl_directors}.
+
+		// Record indexes from table {tbl_directors}.
+		for (auto& j : tableData) {
+			tblIndexes.push_back(j[0]);
+		}
+
+		menu.displayTable(msgs, tableData); // Display list of available indexes for table {tbl_directors}.
+		msgs.clear();
+
+		cout << "Director (" << counter << "/" << movieNumDir << ") -->" << endl
+			<< "  [#] Select a director (# corresponds to director ID)." << endl
+			<< "  [N] Add a new director to the database." << endl
+			<< "\nUser Input: ";
+		getline(cin, input);
+
+		// Error handling + data processing
+		if (validInput()) {
+
+			if (fct.strIsInt(input)) { // If input is int...
+
+				if (find(tblIndexes.begin(), tblIndexes.end(), input) != tblIndexes.end()) { // If user input == existing index in table...
+
+					vector<string> person = tableData.at(stoi(input) - 1); // This action creates a person with format [index, firstName, middleName, lastName].
+
+					// Verify that the chosen director has not already been selected previously by the user.
+					if (find(movieDirectors.begin(), movieDirectors.end(), person) != movieDirectors.end()) {
+						msgs.push_back("ERROR [setDir()]: Director with ID [" + input + "] has already been selected! Cannot be added twice.");
+					}
+					else {
+						movieDirectors.push_back(person); // Add user selection if no duplicates exist.
+						running = false;
+					}
+				}
+				else {
+					msgs.push_back("ERROR [setDir()]: User input [" + input + "] is invalid! Input does not correlate to any director IDs in the database.");
+				}
+			}
+
+			else { // If input is NOT int...
+				input = fct.strToUpperCase(input);
+
+				if (input == "N") { // Obtain name for new director, and verify that they don't exist in table {tbl_directors}
+					addNewDir(directorTbl);
+				}
+				else {
+					msgs.push_back("ERROR [setDir()]: User input [" + input + "] is invalid!");
+				}
+			}
+		}
+	}
 }
 
 // Allows the user to add a new genre to the database.
-void DB_MovieData::addNewGenre(mysqlx::Schema db) {
+void DB_MovieData::addNewGenre(mysqlx::Table tbl) {
 	msgs.clear();
 	bool running = true;
 	string genre = "";
@@ -621,8 +641,7 @@ void DB_MovieData::addNewGenre(mysqlx::Schema db) {
 
 	// Send new genre to the table {tbl_genredata}.
 	try {
-		mysqlx::Table genreTbl = db.getTable("tbl_genredata");
-		mysqlx::TableInsert tblInsertStmt = genreTbl.insert("genreTitle").values(genre);
+		mysqlx::TableInsert tblInsertStmt = tbl.insert("genreTitle").values(genre);
 		tblInsertStmt.execute();
 	}
 	catch (const mysqlx::Error& err) {
@@ -633,7 +652,7 @@ void DB_MovieData::addNewGenre(mysqlx::Schema db) {
 
 // Prompts user to select 1 or more genres that the movie falls into.
 // Also allows the user to add a genre to the database if one is missing.
-void DB_MovieData::setGenre() {
+void DB_MovieData::setGenre(mysqlx::Schema db) {
 	msgs.clear();
 	input = "";
 	vector<int> genreIDs = {};
@@ -643,91 +662,103 @@ void DB_MovieData::setGenre() {
 
 	// Get genre data: which genres to link to new movie (optional to add a new genre to the db).
 	while (running) {
-		menu.displayTable(msgs, tableData); // Display list of available genres.
-		msgs.clear();
+		
+		try {
+			mysqlx::Table genreTbl = db.getTable("tbl_genredata");
+			tableData = fct.getTableData(genreTbl); // Obtain data from table {tbl_genredata}.
+			menu.displayTable(msgs, tableData); // Display list of available genres.
+			msgs.clear();
 
-		cout << "Select one or more genres for the new movie -->" << endl
-			 << "  [#] Select a genre (# corresponds to index of genre)." << endl
-			 << "  [G] Add a new genre to the database." << endl
-			 << "  [C] Confirm selection and continue." << endl;
+			cout << "Select one or more genres for the new movie -->" << endl
+				<< "  [#] Select a genre (# corresponds to index of genre)." << endl
+				<< "  [G] Add a new genre to the database." << endl
+				<< "  [C] Confirm selection and continue." << endl;
 
-		cout << "\nGenres Selected = ";
-		if (genreIDs.size() == 0 && movieGenreIDs.size() == 0) { // If no genres have been selected...
-			cout << "NONE";
-		}
-		else {
-			for (auto& i : movieGenreNames) { // Displays each genre (by name) that the user has selected previously.
-				string last = movieGenreNames.back();
+			cout << "\nGenres Selected = ";
+			if (genreIDs.size() == 0 && movieGenreIDs.size() == 0) { // If no genres have been selected...
+				cout << "NONE";
+			}
+			else {
+				for (auto& i : movieGenreNames) { // Displays each genre (by name) that the user has selected previously.
+					string last = movieGenreNames.back();
 
-				if (i == last && genreNames.empty()) { // Print WITHOUT comma.
-					cout << i;
+					if (i == last && genreNames.empty()) { // Print WITHOUT comma.
+						cout << i;
+					}
+					else { // Print WITH comma.
+						cout << i << ", ";
+					}
 				}
-				else { // Print WITH comma.
-					cout << i << ", ";
+
+				for (auto& i : genreNames) { // Displays each genre (by name) that the user has selected recently.
+					string last = genreNames.back();
+
+					if (i == last) { // Print WITHOUT comma.
+						cout << i;
+					}
+					else { // Print WITH comma.
+						cout << i << ", ";
+					}
 				}
 			}
 
-			for (auto& i : genreNames) { // Displays each genre (by name) that the user has selected recently.
-				string last = genreNames.back();
+			cout << "\nUser Input: ";
+			getline(cin, input);
 
-				if (i == last) { // Print WITHOUT comma.
-					cout << i;
+			// Error handling + data processing.
+			if (validInput()) {
+
+				// Verify genre selection.
+				if (fct.strIsInt(input)) { // If input is int...
+					bool validIndex = false;
+
+					for (auto& i : tableData) { // Verify that user input corresponds to an existing index in the table {tbl_genredata}.
+						if (input == i[0]) { // If input == index...
+							validIndex = true;
+
+							// This statement searches through [movieGenreIDs] and [genreIDs] to see if the user has already selected the genre associated with the user's last input.
+							if (find(movieGenreIDs.begin(), movieGenreIDs.end(), stoi(input)) != movieGenreIDs.end() ||
+								find(genreIDs.begin(), genreIDs.end(), stoi(input)) != genreIDs.end()) {
+								msgs.push_back("ERROR [setGenre()]: Genre with index [" + input + "] has already been selected! Cannot be added twice.");
+							}
+							else {
+								genreIDs.push_back(stoi(input));
+								genreNames.push_back(i[1]);
+							}
+						}
+					}
+
+					if (validIndex == false) { // If input is NOT in the table {tbl_genredata}...
+						msgs.push_back("ERROR [setGenre()]: User input [" + input + "] is not within the allowed numerical range! Please enter a number between[1-" + to_string(tableData.size()) + "].");
+					}
 				}
-				else { // Print WITH comma.
-					cout << i << ", ";
-				}
-			}
-		}
 
-		cout << "\nUser Input: ";
-		getline(cin, input);
+				else { // If input is NOT int...
+					input = fct.strToUpperCase(input);
 
-		// Error handling + data processing.
-		if (validInput()) {
-
-			// Verify genre selection.
-			if (fct.strIsInt(input)) { // If input is int...
-				bool validIndex = false;
-
-				for (auto& i : tableData) { // Verify that user input corresponds to an existing index in the table {tbl_genredata}.
-					if (input == i[0]) { // If input == index...
-						validIndex = true;
-
-						// This statement searches through [movieGenreIDs] and [genreIDs] to see if the user has already selected the genre associated with the user's last input.
-						if ( find(movieGenreIDs.begin(), movieGenreIDs.end(), stoi(input)) != movieGenreIDs.end() ||
-							find(genreIDs.begin(), genreIDs.end(), stoi(input)) != genreIDs.end() ) {
-							msgs.push_back("ERROR [setGenre()]: Genre with index [" + input + "] has already been selected! Cannot be added twice.");
+					if (input == "G") {
+						addNewGenre(genreTbl); // Add new genre to the database.
+					}
+					else if (input == "C") {
+						if (genreIDs.size() == 0 && movieGenreIDs.size() == 0) {
+							msgs.push_back("ERROR [setGenre()]: No genres selected! Please select at least 1 genre for the movie before continuing.");
 						}
 						else {
-							genreIDs.push_back(stoi(input));
-							genreNames.push_back(i[1]);
+							running = false;
 						}
 					}
-				}
-
-				if (validIndex == false) { // If input is NOT in the table {tbl_genredata}...
-					msgs.push_back("ERROR [setGenre()]: User input [" + input + "] is not within the allowed numerical range! Please enter a number between[1-" + to_string(tableData.size()) + "].");
-				}
-			}
-
-			else { // If input is NOT int...
-				input = fct.strToUpperCase(input);
-
-				if (input == "G") {
-					running = false; // Send back to insertMovieData() to add new genre to the database and to refresh [tableData] with the newly added genre.
-				}
-				else if (input == "C") {
-					if (genreIDs.size() == 0 && movieGenreIDs.size() == 0) {
-						msgs.push_back("ERROR [setGenre()]: No genres selected! Please select at least 1 genre for the movie before continuing.");
-					}
 					else {
-						running = false;
+						msgs.push_back("ERROR [setGenre()]: User input [" + input + "] is invalid!");
 					}
 				}
-				else {
-					msgs.push_back("ERROR [setGenre()]: User input [" + input + "] is invalid!");
-				}
 			}
+		}
+
+		catch (const mysqlx::Error& err) {
+			msgs.push_back("MYSQLX_ERROR [setGenre()]: " + string(err.what()));
+		}
+		catch (exception& ex) {
+			msgs.push_back("EXCEPTION [setGenre()]: " + string(ex.what()));
 		}
 	}
 
@@ -749,7 +780,6 @@ void DB_MovieData::displayNewMovie() {
 	cout << "  Year: " << movieYear << endl;
 	cout << "  Rating: " << movieRating << endl;
 
-
 	cout << "  Cast Member(s): " << movieNumCast << endl;
 	for (int i = 0; i < movieNumCast; i++) {
 		cout << "    [#" << (i + 1) << "]: ";
@@ -760,19 +790,15 @@ void DB_MovieData::displayNewMovie() {
 		cout << movieCastMembers.at(i).at(3) << endl;
 	}
 
-
 	cout << "  Director(s): " << movieNumDir << endl;
 	for (int i = 0; i < movieNumDir; i++) {
 		cout << "    [#" << (i + 1) << "]: ";
-		cout << movieDirectors.at(i).at(0) << " ";
-		if ( !(movieDirectors.at(i).at(1).empty()) ) { // If middle name is empty, don't print.
+		cout << movieDirectors.at(i).at(1) << " ";
+		if ( !(movieDirectors.at(i).at(2).empty()) ) { // If middle name is empty, don't print.
 			cout << movieDirectors.at(i).at(1) << " ";
 		}
-		cout << movieDirectors.at(i).at(2) << endl;
+		cout << movieDirectors.at(i).at(3) << endl;
 	}
-
-	//***add here for rework on directors vector***
-
 
 	cout << "  Genre(s): ";
 	for (auto& i : movieGenreNames) {
@@ -786,6 +812,7 @@ void DB_MovieData::displayNewMovie() {
 			cout << i << ", ";
 		}
 	}
+
 	cout << endl;
 }
 
@@ -821,11 +848,9 @@ void DB_MovieData::modifyNewMovie(mysqlx::Schema db) {
 				input = fct.strToUpperCase(input);
 
 				if (input == "1") {
-					mysqlx::Table movieTbl = db.getTable("tbl_moviedata");
-					tableData = fct.getTableData(movieTbl); // Obtain data from table {tbl_moviedata}.
 					movieTitle = "";
 					while (movieTitle == "") {
-						setTitle();
+						setTitle(db);
 					}
 					break;
 				}
@@ -846,26 +871,19 @@ void DB_MovieData::modifyNewMovie(mysqlx::Schema db) {
 					break;
 				}
 				else if (input == "5") {
+					movieDirectors.clear();
 					setNumDir();
-					mysqlx::Table directorTbl = db.getTable("tbl_directors");
-					tableData = fct.getTableData(directorTbl); // Obtain data from table {tbl_directors}.
-					setDir(movieNumDir); //rework*
+					while (movieDirectors.size() < movieNumDir) {
+						setDir(db);
+					}
 					break;
 				}
 				else if (input == "6") {
 					movieGenreIDs.clear();
 					movieGenreNames.clear();
 					input = "";
-
-					while (!(input == "C")) {
-						mysqlx::Table genreTbl = db.getTable("tbl_genredata");
-						tableData = fct.getTableData(genreTbl); // Obtain data from table {tbl_genredata}.
-						setGenre();
-
-						if (input == "G") { // User chose to add a new genre.
-							addNewGenre(db);
-							input = "";
-						}
+					while ( !(input == "C") ) {
+						setGenre(db);
 					}
 					break;
 				}
@@ -891,6 +909,9 @@ void DB_MovieData::modifyNewMovie(mysqlx::Schema db) {
 
 		catch (exception& ex) {
 			msgs.push_back("EXCEPTION [modifyNewMovie()]: " + string(ex.what()));
+		}
+		catch (const mysqlx::Error& err) {
+			msgs.push_back("MYSQLX_ERROR [modifyNewMovie()]: " + string(err.what()));
 		}
 	}
 }
@@ -1065,11 +1086,8 @@ void DB_MovieData::sendMovieToDB(mysqlx::Schema db) {
 vector<string> DB_MovieData::insertMovieData(mysqlx::Schema db) {
 	setDefaultValues(); // Reset global variables to default values.
 
-
-	mysqlx::Table movieTbl = db.getTable("tbl_moviedata");
-	tableData = fct.getTableData(movieTbl); // Obtain data from table {tbl_moviedata}.
 	while (movieTitle == "") {
-		setTitle();
+		setTitle(db);
 	}
 
 	setYear();
@@ -1081,20 +1099,13 @@ vector<string> DB_MovieData::insertMovieData(mysqlx::Schema db) {
 	}
 
 	setNumDir();
-	mysqlx::Table directorTbl = db.getTable("tbl_directors");
-	tableData = fct.getTableData(directorTbl); // Obtain data from table {tbl_directors}.
-	setDir(movieNumDir); //rework*
+	while (movieDirectors.size() < movieNumDir) {
+		setDir(db);
+	}
 
 	input = "";
-	while (!(input == "C")) {
-		mysqlx::Table genreTbl = db.getTable("tbl_genredata");
-		tableData = fct.getTableData(genreTbl); // Obtain data from table {tbl_genredata}.
-		setGenre();
-
-		if (input == "G") { // User chose to add a new genre.
-			addNewGenre(db);
-			input = "";
-		}
+	while ( !(input == "C") ) {
+		setGenre(db);
 	}
 
 	input = "";
