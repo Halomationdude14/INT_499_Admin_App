@@ -109,10 +109,11 @@ class DB_MovieData {
 		void setYear();
 		void setRating();
 		void setNumCast();
-		void setCast();
+		void addNewCast(mysqlx::Table);
+		void setCast(mysqlx::Schema);
 		void setNumDir();
-		void setDir(int numDir); //remove int param*
-		void addGenre(mysqlx::Schema);
+		void setDir(int); //remove int param*
+		void addNewGenre(mysqlx::Schema);
 		void setGenre();
 		void displayNewMovie();
 		void modifyNewMovie(mysqlx::Schema);
@@ -135,10 +136,8 @@ class DB_MovieData {
 		string movieRating;
 		int movieNumCast;
 		int movieNumDir;
-		vector<vector<string>> oldCastMembers;
-		vector<vector<string>> newCastMembers;
-		vector<vector<string>> oldDirectors;
-		vector<vector<string>> newDirectors;
+		vector<vector<string>> movieCastMembers;
+		vector<vector<string>> movieDirectors;
 		vector<int> movieGenreIDs;
 		vector<string> movieGenreNames;
 };
