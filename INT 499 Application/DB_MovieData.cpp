@@ -25,9 +25,14 @@ using namespace std;
 *			[2.3] User may enter a short name to get a list of people with those characters in their name.
 				  For example, entering "Mar D B" would display a list of people who's first names start with "Mar", who's middle names start with "D", and who's last names start with "B".
 *		3. Program must ignore possible input errors: entering more than 3 names for one person, entering too many spaces, entering too many underscores, etc.
+*		4. If the table contains 50+ entries, use search function automatically.
 * 
 * 2. Add a title to the header indicating that the user in in the process of "adding a new movie" to the database.
-* 3. When selecting genres to link to the new movie, add an option to CLEAR the user selection and start over (in case user makes a mistake).
+* 3. 
+* 4. Improve functionality for detecting duplicate entries when attempting to add new Actors/Directors to the database.
+	- Program currently prevents entries if first, mid, and last names all match.
+	- Program SHOULD prioritize first and last names too. If first+last names match, prompt the user to update existing person/record.
+* 5. 
 * 
 */
 
@@ -198,7 +203,6 @@ void DB_MovieData::setTitle(mysqlx::Schema db) {
 
 		menu.displayMenu(msgs);
 		msgs.clear();
-
 		std::cout << "Movie Title: ";
 
 		try {
@@ -435,9 +439,9 @@ void DB_MovieData::setCast(mysqlx::Schema db) {
 			msgs.clear();
 
 			std::cout << "Actor (" << counter << "/" << movieNumCast << ") -->" << endl
-					<< "  [#] Select an actor (# corresponds to actor ID)." << endl
-					<< "  [N] Add a new actor to the database." << endl
-					<< "\nUser Input: ";
+				<< "  [#] Select an actor (# corresponds to actor ID)." << endl
+				<< "  [N] Add a new actor to the database." << endl
+				<< "\nUser Input: ";
 			std::getline(cin, input);
 
 			// Error handling + data processing
@@ -578,9 +582,9 @@ void DB_MovieData::setDir(mysqlx::Schema db) {
 			msgs.clear();
 
 			std::cout << "Director (" << counter << "/" << movieNumDir << ") -->" << endl
-					<< "  [#] Select a director (# corresponds to director ID)." << endl
-					<< "  [N] Add a new director to the database." << endl
-					<< "\nUser Input: ";
+				<< "  [#] Select a director (# corresponds to director ID)." << endl
+				<< "  [N] Add a new director to the database." << endl
+				<< "\nUser Input: ";
 			std::getline(cin, input);
 
 			// Error handling + data processing
@@ -642,9 +646,8 @@ void DB_MovieData::addNewGenre(mysqlx::Table tbl) {
 			msgs.clear();
 			input = "";
 
-			std::cout << "\nEnter the genre you would like to add to the database -->" << endl;
-
-			std::cout << "\nUser Input: ";
+			std::cout << "\nEnter the genre you would like to add to the database -->" << endl
+				<< "\nUser Input: ";
 			std::getline(cin, input);
 
 			// Error handling + data processing.
@@ -652,7 +655,6 @@ void DB_MovieData::addNewGenre(mysqlx::Table tbl) {
 				
 				// Verify no duplicates.
 				for (auto& i : tableData) {
-
 					if (fct.strToUpperCase(input) == fct.strToUpperCase(i[1])) {
 						duplicate = true;
 					}
@@ -703,30 +705,18 @@ void DB_MovieData::setGenre(mysqlx::Schema db) {
 			msgs.clear();
 
 			std::cout << "Select one or more genres for the new movie -->" << endl
-					<< "  [#] Select a genre (# corresponds to index of genre)." << endl
-					<< "  [G] Add a new genre to the database." << endl
-					<< "  [C] Confirm selection and continue." << endl;
+				<< "  [#] Select a genre (# corresponds to index of genre)." << endl
+				<< "  [G] Add a new genre to the database." << endl
+				<< "  [~] Clear your current selection of genres." << endl
+				<< "  [C] Confirm selection and continue." << endl;
 
 			std::cout << "\nGenres Selected = ";
-			if (genreIDs.size() == 0 && movieGenreIDs.size() == 0) { // If no genres have been selected...
+			if (genreIDs.size() == 0) { // If no genres have been selected...
 				std::cout << "NONE" << endl;
 			}
 			else {
-				for (auto& i : movieGenreNames) { // Displays each genre (by name) that the user has selected previously.
-					string last = movieGenreNames.back();
-
-					if (i == last && genreNames.empty()) { // Print WITHOUT comma.
-						std::cout << i;
-					}
-					else { // Print WITH comma.
-						std::cout << i << ", ";
-					}
-				}
-
-				for (auto& i : genreNames) { // Displays each genre (by name) that the user has selected recently.
-					string last = genreNames.back();
-
-					if (i == last) { // Print WITHOUT comma.
+				for (auto& i : genreNames) { // Displays each genre (by name) that the user has selected.
+					if (i == genreNames.back()) { // Print WITHOUT comma.
 						std::cout << i;
 					}
 					else { // Print WITH comma.
@@ -742,7 +732,6 @@ void DB_MovieData::setGenre(mysqlx::Schema db) {
 			// Error handling + data processing.
 			if (validInput()) {
 
-				// Verify genre selection.
 				if (fct.strIsInt(input)) { // If input is int...
 					bool validIndex = false;
 
@@ -750,9 +739,8 @@ void DB_MovieData::setGenre(mysqlx::Schema db) {
 						if (input == i[0]) { // If input == index...
 							validIndex = true;
 
-							// This statement searches through [movieGenreIDs] and [genreIDs] to see if the user has already selected the genre associated with the user's last input.
-							if (find(movieGenreIDs.begin(), movieGenreIDs.end(), stoi(input)) != movieGenreIDs.end() ||
-								find(genreIDs.begin(), genreIDs.end(), stoi(input)) != genreIDs.end()) {
+							// Verify that the user cannot select the same genre more than once.
+							if ( find(genreIDs.begin(), genreIDs.end(), stoi(input)) != genreIDs.end() ) {
 								msgs.push_back("ERROR [setGenre()]: Genre with index [" + input + "] has already been selected! Cannot be added twice.");
 							}
 							else {
@@ -773,8 +761,18 @@ void DB_MovieData::setGenre(mysqlx::Schema db) {
 					if (input == "G") {
 						addNewGenre(genreTbl); // Add new genre to the database.
 					}
-					else if (input == "C") {
-						if (genreIDs.size() == 0 && movieGenreIDs.size() == 0) {
+					else if (input == "~") { // Clear genre selection.
+						if (genreIDs.empty()) {
+							msgs.push_back("ERROR [setGenre()]: Cannot clear genre selection! No genres have been selected.");
+						}
+						else {
+							genreIDs.clear();
+							genreNames.clear();
+							msgs.push_back("SYS: Genre selection cleared.");
+						}
+					}
+					else if (input == "C") { // Close loop and continue with process.
+						if (genreIDs.size() == 0) {
 							input = ""; // Reset [input] to keep loop active.
 							msgs.push_back("ERROR [setGenre()]: No genres selected! Please select at least 1 genre for the movie before continuing.");
 						}
@@ -859,16 +857,16 @@ void DB_MovieData::modifyNewMovie(mysqlx::Schema db) {
 			notValid = false; // Close the loop (if an error is caught, this value is set to TRUE).
 
 			std::cout << "\nWhat would you like to change?"
-					<< "\n  [1] Title"
-					<< "\n  [2] Year"
-					<< "\n  [3] Rating"
-					<< "\n  [4] Cast Member(s)"
-					<< "\n  [5] Director(s)"
-					<< "\n  [6] Genre(s)"
-					<< "\n  [~] Cancel this change request and return to the previous UI." << endl;
+				<< "\n  [1] Title"
+				<< "\n  [2] Year"
+				<< "\n  [3] Rating"
+				<< "\n  [4] Cast Member(s)"
+				<< "\n  [5] Director(s)"
+				<< "\n  [6] Genre(s)"
+				<< "\n  [~] Cancel this change request and return to the previous UI." << endl;
 
 			std::cout << "\nWARNING: This process will delete all previously entered data for whichever field you choose to modify!"
-					<< "\nYou will have to re-enter all data for any chosen field again!" << endl;
+				<< "\nYou will have to re-enter all data for any chosen field again!" << endl;
 
 			std::cout << "\nUser Input: ";
 			std::getline(cin, input);
@@ -961,10 +959,10 @@ void DB_MovieData::validationSCRN(mysqlx::Schema db) {
 			displayNewMovie(); // Display all data entered by user for the new movie.
 
 			std::cout << "\nReview the information shown above and select one of the following options:"
-					<< "\n  [M] Modify information."
-					<< "\n  [C] Confirm information and add new movie to database."
-					<< "\n  [~] Abort process and return to the Admin Actions menu." << endl
-					<< "\nUser Input: ";
+				<< "\n  [M] Modify information."
+				<< "\n  [C] Confirm information and add new movie to database."
+				<< "\n  [~] Abort process and return to the Admin Actions menu." << endl
+				<< "\nUser Input: ";
 			std::getline(cin, input);
 
 			// Error handling + data processing
@@ -1001,8 +999,6 @@ void DB_MovieData::validationSCRN(mysqlx::Schema db) {
 void DB_MovieData::sendMovieToDB(mysqlx::Schema db) {
 
 	/*
-	* Reference: https://stackoverflow.com/questions/75135560/x-devapi-batch-insert-extremely-slow
-	* 
 	* HOW TO SEND DATA TO DB USING [xdevapi.h] -->
 	*
 	* 1. Create [Table] object.

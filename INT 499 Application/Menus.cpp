@@ -12,7 +12,7 @@ using namespace std;
 * 
 * B = Base Menu
 * 0 = STOP PROGRAM
-* 1 = Start Screen
+* 1 = Welcome Screen
 * 2 = Login Screen
 * 3 = Main Menu
 *	4 = Display Tables Menu
@@ -50,16 +50,15 @@ using namespace std;
 
 
 Menus::Menus() {
-	tempStr = "";
 	currMenu = '1'; // Default value is '1' for start screen.
 	prevMenu = '1'; // Stores value of the last menu displayed for regression.
-
 	base_Menu = {" [0] Previous Menu"};
 	start_Menu = {" [1] Sign In"," [0] Exit Application"};
 	main_Menu = {" [1] Display Tables", " [2] Admin Actions", " [0] Sign Out"};
+	
 	displayTables_Menu = {" [A] tbl_plans"," [B] tbl_actors"," [C] tbl_custdata"," [D] tbl_moviedata"," [E] tbl_paymentinfo",
 		" [F] tbl_directors"," [G] tbl_genredata"," [H] tbl_moviedirectors"," [I] tbl_moviegenres"," [J] tbl_moviecast",
-		" [K] tbl_custactivity_dvd"," [L] tbl_custactivity_stream"," [M] tbl_dvdrentalhistory"," [0] Return to Main Menu"};
+		" [K] tbl_custactivity_dvd"," [L] tbl_custactivity_stream"," [M] tbl_dvdrentalhistory"," [Z] NULL Table (for testing purposes only!!!)"," [0] Return to Main Menu"};
 
 	adminActions_Menu = {" [1] Modify Movie Data"," [2] Modify Customer Data"," [0] Return to Main Menu"};
 	modifyMovie_Menu = {" [1] Add New Movie"," [2] Update Movie Info*"," [3] Delete Movie*"," [0] Previous Menu"};
@@ -175,25 +174,6 @@ char Menus::getPrevMenu() const {
 	return prevMenu;
 }
 
-// SCREEN: Base screen (used for testing purposes and dead end UIs)
-void Menus::SCRN_BASE(vector<string> msg) {
-	displayMenu(msg, base_Menu);
-	if (!(currMenu == 'B')) {
-		prevMenu = currMenu;
-		currMenu = 'B';
-	}
-}
-
-// SELECTION: Base screen
-char Menus::SLCT_BASE(char input) {
-	if (input == '0') {
-		return prevMenu;
-	}
-	else {
-		return 'X';
-	}
-}
-
 // SCREEN: Start screen
 void Menus::SCRN_start(vector<string> msg) {
 	displayMenu(msg, start_Menu);
@@ -279,6 +259,8 @@ char Menus::SLCT_displayMenu(char input) {
 		case 'K':
 		case 'L':
 		case 'M':
+			return '5';
+		case 'Z': //for testing purposes only!
 			return '5';
 		default:
 			return 'X';
