@@ -55,11 +55,9 @@ Menus::Menus() {
 	base_Menu = {" [0] Previous Menu"};
 	start_Menu = {" [1] Sign In"," [0] Exit Application"};
 	main_Menu = {" [1] Display Tables", " [2] Admin Actions", " [0] Sign Out"};
-	
 	displayTables_Menu = {" [A] tbl_plans"," [B] tbl_actors"," [C] tbl_custdata"," [D] tbl_moviedata"," [E] tbl_paymentinfo",
 		" [F] tbl_directors"," [G] tbl_genredata"," [H] tbl_moviedirectors"," [I] tbl_moviegenres"," [J] tbl_moviecast",
-		" [K] tbl_custactivity_dvd"," [L] tbl_custactivity_stream"," [M] tbl_dvdrentalhistory"," [Z] NULL Table (for testing purposes only!!!)"," [0] Return to Main Menu"};
-
+		" [K] tbl_custactivity_dvd"," [L] tbl_custactivity_stream"," [M] tbl_dvdrentalhistory"," [0] Return to Main Menu"};
 	adminActions_Menu = {" [1] Modify Movie Data"," [2] Modify Customer Data"," [0] Return to Main Menu"};
 	modifyMovie_Menu = {" [1] Add New Movie"," [2] Update Movie Info*"," [3] Delete Movie*"," [0] Previous Menu"};
 	modifyCust_Menu = {" [1] Add New Customer*"," [2] Update Customer Info*"," [3] Delete Customer*"," [0] Previous Menu"};
@@ -259,8 +257,6 @@ char Menus::SLCT_displayMenu(char input) {
 		case 'K':
 		case 'L':
 		case 'M':
-			return '5';
-		case 'Z': //for testing purposes only!
 			return '5';
 		default:
 			return 'X';

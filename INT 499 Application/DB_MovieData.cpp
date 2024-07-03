@@ -28,11 +28,9 @@ using namespace std;
 *		4. If the table contains 50+ entries, use search function automatically.
 * 
 * 2. Add a title to the header indicating that the user in in the process of "adding a new movie" to the database.
-* 3. 
-* 4. Improve functionality for detecting duplicate entries when attempting to add new Actors/Directors to the database.
+* 3. Improve functionality for detecting duplicate entries when attempting to add new Actors/Directors to the database.
 	- Program currently prevents entries if first, mid, and last names all match.
 	- Program SHOULD prioritize first and last names too. If first+last names match, prompt the user to update existing person/record.
-* 5. 
 * 
 */
 
