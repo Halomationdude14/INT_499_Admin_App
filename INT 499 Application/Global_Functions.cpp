@@ -64,7 +64,7 @@ char Global_Functions::getUsrInput() {
 	return c;
 }
 
-// Converts <mysqlx::RowResult> to vector<vector<string>> format.
+// Converts the data stored in a <mysqlx::Table> object to vector<vector<string>> format.
 vector<vector<string>> Global_Functions::getTableData(mysqlx::Table table) {
 	vector<string> msgs = {}; // Vector to hold all sys/err messages.
 	vector<vector<string>> tableData = {}; // Holds table data in <std> format to be sent to Menus object for display.
@@ -74,49 +74,53 @@ vector<vector<string>> Global_Functions::getTableData(mysqlx::Table table) {
 
 		for (mysqlx::Row row : result) {
 			vector<string> rowData;
+
 			for (int i = 0; i < row.colCount(); ++i) {
 				mysqlx::Value val = row[i];
-				string strValue;
+				tempStr = "";
 
 				switch (val.getType()) {
-				case mysqlx::Value::Type::UINT64:
-					strValue = to_string(val.get<uint64_t>());
-					break;
-				case mysqlx::Value::Type::INT64:
-					strValue = to_string(val.get<int64_t>());
-					break;
-				case mysqlx::Value::Type::FLOAT:
-					strValue = to_string(val.get<float>());
-					break;
-				case mysqlx::Value::Type::DOUBLE:
-					strValue = to_string(val.get<double>());
-					break;
-				case mysqlx::Value::Type::BOOL:
-					strValue = to_string(val.get<bool>());
-					break;
-				case mysqlx::Value::Type::STRING:
-					strValue = val.get<string>();
-					break;
-				case mysqlx::Value::Type::VNULL:
-					strValue = "<NULL>";
-					break;
-				default:
-					strValue = "<ERR>";
-					break;
+					case mysqlx::Value::Type::UINT64:
+						tempStr = to_string(val.get<uint64_t>());
+						break;
+					case mysqlx::Value::Type::INT64:
+						tempStr = to_string(val.get<int64_t>());
+						break;
+					case mysqlx::Value::Type::FLOAT:
+						tempStr = to_string(val.get<float>());
+						break;
+					case mysqlx::Value::Type::DOUBLE:
+						tempStr = to_string(val.get<double>());
+						break;
+					case mysqlx::Value::Type::BOOL:
+						tempStr = to_string(val.get<bool>());
+						break;
+					case mysqlx::Value::Type::STRING:
+						tempStr = val.get<string>();
+						break;
+					case mysqlx::Value::Type::VNULL:
+						tempStr = "NULL";
+						break;
+					default:
+						tempStr = "<ERROR>";
+						break;
 				}
 
-				rowData.push_back(strValue);
+				rowData.push_back(tempStr);
 			}
+
 			tableData.push_back(rowData);
 		}
-		return tableData;
 	}
+
 	catch (const mysqlx::Error& err) {
 		msgs.push_back("MYSQLX_ERROR [getTableData()]: " + string(err.what()));
 	}
 	catch (exception& ex) {
 		msgs.push_back("ERROR [getTableData()]: " + string(ex.what()));
 	}
+
+	return tableData;
 }
 
 // Convert all chars in a string to UPPER case.
@@ -133,23 +137,7 @@ string Global_Functions::strToUpperCase(string str) {
 			tempStr.push_back(c);
 		}
 	}
-	return tempStr;
-}
 
-// Convert all chars in a string to LOWER case.
-string Global_Functions::strToLowerCase(string str) {
-	tempStr = "";
-	c = 'X';
-
-	for (int i = 0; i < str.size(); ++i) {
-		c = str.at(i);
-		if (isalpha(c) and isupper(c)) {
-			tempStr.push_back(tolower(c));
-		}
-		else {
-			tempStr.push_back(c);
-		}
-	}
 	return tempStr;
 }
 

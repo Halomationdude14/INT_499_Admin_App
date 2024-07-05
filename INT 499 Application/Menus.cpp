@@ -10,7 +10,6 @@ using namespace std;
 /*
 * Program UI Outline --> (~ indicates an active process; no unique UI ID)
 * 
-* B = Base Menu
 * 0 = STOP PROGRAM
 * 1 = Welcome Screen
 * 2 = Login Screen
@@ -31,34 +30,30 @@ using namespace std;
 * 			~ = Delete Customer
 * 
 *		? = Modify Actors
-*			~ = Add New a
-* 			~ = Update a Info
-* 			~ = Delete a
+*			~ = Add New Actor
+* 			~ = Update Actor Info
+* 			~ = Delete Actor
 * 		? = Modify Directors
-* 			~ = Add New a
-* 			~ = Update a Info
-* 			~ = Delete a
+* 			~ = Add New Director
+* 			~ = Update Director Info
+* 			~ = Delete Director
 * 		? = Modify Genres
-* 			~ = Add New a
-* 			~ = Update a Info
-* 			~ = Delete a
-* 		? = Modify
-* 			~ = Add New a
-* 			~ = Update a Info
-* 			~ = Delete a
+* 			~ = Add New Genre
+* 			~ = Update Genre Info
+* 			~ = Delete Genre
 */
 
 
 Menus::Menus() {
-	currMenu = '1'; // Default value is '1' for start screen.
-	prevMenu = '1'; // Stores value of the last menu displayed for regression.
+	currMenu = '1'; // Default value is '1' for the welcome screen.
+	prevMenu = '1'; // Stores identifier of the last menu displayed for regression.
 	base_Menu = {" [0] Previous Menu"};
 	start_Menu = {" [1] Sign In"," [0] Exit Application"};
 	main_Menu = {" [1] Display Tables", " [2] Admin Actions", " [0] Sign Out"};
-	displayTables_Menu = {" [A] tbl_plans"," [B] tbl_actors"," [C] tbl_custdata"," [D] tbl_moviedata"," [E] tbl_paymentinfo",
-		" [F] tbl_directors"," [G] tbl_genredata"," [H] tbl_moviedirectors"," [I] tbl_moviegenres"," [J] tbl_moviecast",
-		" [K] tbl_custactivity_dvd"," [L] tbl_custactivity_stream"," [M] tbl_dvdrentalhistory"," [0] Return to Main Menu"};
-	adminActions_Menu = {" [1] Modify Movie Data"," [2] Modify Customer Data"," [0] Return to Main Menu"};
+	displayTables_Menu = {" [A] tbl_plans"," [B] tbl_moviedata"," [C] tbl_actors"," [D] tbl_directors"," [E] tbl_genredata",
+		" [F] tbl_moviecast"," [G] tbl_moviedirectors"," [H] tbl_moviegenres"," [I] tbl_custdata"," [J] tbl_paymentinfo",
+		" [K] tbl_custactivity_stream"," [L] tbl_custactivity_dvd"," [M] tbl_dvdrentalhistory"," [0] Previous Menu"};
+	adminActions_Menu = {" [1] Modify Movie Data"," [2] Modify Customer Data"," [0] Previous Menu"};
 	modifyMovie_Menu = {" [1] Add New Movie"," [2] Update Movie Info*"," [3] Delete Movie*"," [0] Previous Menu"};
 	modifyCust_Menu = {" [1] Add New Customer*"," [2] Update Customer Info*"," [3] Delete Customer*"," [0] Previous Menu"};
 }
@@ -71,9 +66,8 @@ void Menus::displayMenu(vector<string> msg) {
 	cout << "####### Welcome to the EZTechMovie Database Administration Application #######" << endl;
 	cout << "##############################################################################" << endl << endl;
 
-	// Display sys/err messages if the array is not empty.
-	// REWORK: May not need the "if" stmt.
-	if (msg.size() > 0) {
+	// Display sys/err messages if the vector is not empty.
+	if (!(msg.empty())) {
 		for (auto& i : msg) {
 			cout << i << endl;
 		}
@@ -89,9 +83,8 @@ void Menus::displayMenu(vector<string> msg, vector<string> menu) {
 	cout << "####### Welcome to the EZTechMovie Database Administration Application #######" << endl;
 	cout << "##############################################################################" << endl << endl;
 
-	// Display sys/err messages if the array is not empty.
-	// REWORK: May not need the "if" stmt.
-	if (msg.size() > 0) {
+	// Display sys/err messages if the vector is not empty.
+	if (!(msg.empty())) {
 		for (auto& i : msg) {
 			cout << i << endl;
 		}
@@ -121,9 +114,8 @@ void Menus::displayTable(vector<string> msg, vector<vector<string>> tblData) {
 	}
 	cout << endl;
 
-	// Display sys/err messages if the array is not empty.
-	// REWORK: May not need the "if" stmt.
-	if (msg.size() > 0) {
+	// Display sys/err messages if the vector is not empty.
+	if (!(msg.empty())) {
 		for (auto& i : msg) {
 			cout << i << endl;
 		}
@@ -148,9 +140,8 @@ void Menus::displayTable(vector<string> msg, vector<string> menu, vector<vector<
 	}
 	cout << endl;
 
-	// Display sys/err messages if the array is not empty.
-	// REWORK: May not need the "if" stmt.
-	if (msg.size() > 0) {
+	// Display sys/err messages if the vector is not empty.
+	if (!(msg.empty())) {
 		for (auto& i : msg) {
 			cout << i << endl;
 		}

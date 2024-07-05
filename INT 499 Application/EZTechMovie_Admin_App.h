@@ -15,9 +15,6 @@ class Global_Functions {
 		char getUsrInput();
 		vector<vector<string>> getTableData(mysqlx::Table);
 		string strToUpperCase(string);
-
-		string strToLowerCase(string); //delete??? (don't think this is used at all anymore)
-
 		char charToUpperCase(char);
 		bool strIsInt(string&);
 
@@ -36,9 +33,8 @@ class Menus {
 		void displayMenu(vector<string>, vector<string>);
 		void displayTable(vector<string>, vector<vector<string>>);
 		void displayTable(vector<string>, vector<string>, vector<vector<string>>);
-
 		char getCurrMenu() const;
-		char getPrevMenu() const; //dont think this is used at all... may still serve a purpose.
+		char getPrevMenu() const;
 
 		/*
 		* [SCRN] = Functions that display a specific UI and update the currMenu variable.

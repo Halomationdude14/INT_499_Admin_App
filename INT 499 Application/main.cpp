@@ -20,18 +20,15 @@ using namespace std;
 * Admin App TO-DO List -->
 * 
 * 1. Display name of current UI below header.
-* 2. Function migrated from main() to Global_Functions class. Update accordingly.
-* 3. [Global_Functions.cpp] Provide search function for large tables (i.e., tables with 50+ entries).
+* 2. [Global_Functions.cpp] Provide search function for large tables (i.e., tables with 50+ entries).
 	 Should be available in both "Display Tables" menu/UI and during "add new movie" process which is why this function exists in the 'Global_Functions.cpp' class.
-* 4. Reorganize how DB tables are listed in "Display Tables" menu.
-* 5. Improve how tables are displayed.
-* 6. [main.cpp] "char usrInput" -> Can only hold 1 value (0-9) (A-Z). What if UI has two digits (i.e., 10, 11, 12, etc...)? Change from char to int or string?
+* 3. Improve how tables are displayed.
+* 4. [main.cpp] "char usrInput" -> Can only hold 1 value (0-9) (A-Z). What if UI has two digits (i.e., 10, 11, 12, etc...)? Change from char to int or string?
 	- Also, need to have two default values for this var: one value for ERROR (i.e, 'X'), and one neutral value (i.e., '*').
-* 7. Add functionality -> when user chooses to close app, close window and remove closing text from terminal.
-* 8. In places where the user is NOT required to press the <ENTER> key to submit their input, remove the text "User Input: " to avoid confusion. Ensure that this text is kept in places where manual entry via <ENTER> key is required.
-* 9. Consider adding color/decoration to text to make app more vivid.
-* 10. At the login screen, when user is entering password, DON'T display the password as they type. Instead, display an asterisk for each char typed (*).
-* 11. For any user entry line that takes in a value automatically, if user presses <ENTER> without entering any other values, the error msg is displayed weird " ] is invalid!nput [ ".
+* 5. Add functionality -> when user chooses to close app, close window and remove closing text from terminal.
+* 6. In places where the user is NOT required to press the <ENTER> key to submit their input, remove the text "User Input: " to avoid confusion. Ensure that this text is kept in places where manual entry via <ENTER> key is required.
+* 7. At the login screen, when user is entering password, DON'T display the password as they type. Instead, display an asterisk for each char typed (*).
+* 8. For any user entry line that takes in a value automatically, if user presses <ENTER> without entering any other values, the error msg is displayed weird " ] is invalid!nput [ ".
 * 
 * 
 * Admin App Considerations -->
@@ -39,6 +36,7 @@ using namespace std;
 * 1. In places where the user is NOT required to press the <ENTER> key to submit their input, remove the text "User Input: " to avoid confusion.
 Ensure that this text is kept in places where manual entry via <ENTER> key is required.
 * 2. Instead of typing a single character to navigate through the menus, use arrow keys to select different menu options.
+* 3. Add color/decoration to text to make app more vivid.
 * 
 * 
 * Other TO-DO Items -->
@@ -101,9 +99,16 @@ bool static verifyLogin() {
 		cout << "Password: ";
 		getline(cin, Pass);
 
+		/*
+		* Create a 'Session' object that attempts to establish a connection to a locally stored MySQL server.
+		* NOTE: If user desires to connect to a cloud-based MySQL server, additional configuration options will need to be implemented.
+		*		Currently, this program is designed to only connect to locally stored MySQL servers.
+		*/
 		mysqlx::Session sess = mysqlx::getSession("localhost", 33060, User, Pass);
+
 		addMsg("SYS: Connection to MySQL server successful!");
-		sess.close();
+		
+		sess.close(); // Close the connection to avoid errors.
 
 		return true;
 	}
@@ -119,112 +124,54 @@ bool static verifyLogin() {
 }
 
 // When in the 'Display Table' menus, this function assigns the name of the chosen table to [currTbl].
-void static setTableName(char input) {
+void static setTableName() {
 
-	switch (input) {
+	switch (usrInput) {
 		case 'A':
 			currTbl = "tbl_plans";
 			break;
 		case 'B':
-			currTbl = "tbl_actors";
-			break;
-		case 'C':
-			currTbl = "tbl_custdata";
-			break;
-		case 'D':
 			currTbl = "tbl_moviedata";
 			break;
-		case 'E':
-			currTbl = "tbl_paymentinfo";
+		case 'C':
+			currTbl = "tbl_actors";
 			break;
-		case 'F':
+		case 'D':
 			currTbl = "tbl_directors";
 			break;
-		case 'G':
+		case 'E':
 			currTbl = "tbl_genredata";
 			break;
-		case 'H':
-			currTbl = "tbl_moviedirectors";
-			break;
-		case 'I':
-			currTbl = "tbl_moviegenres";
-			break;
-		case 'J':
+		case 'F':
 			currTbl = "tbl_moviecast";
 			break;
+		case 'G':
+			currTbl = "tbl_moviedirectors";
+			break;
+		case 'H':
+			currTbl = "tbl_moviegenres";
+			break;
+		case 'I':
+			currTbl = "tbl_custdata";
+			break;
+		case 'J':
+			currTbl = "tbl_paymentinfo";
+			break;
 		case 'K':
-			currTbl = "tbl_custactivity_dvd";
+			currTbl = "tbl_custactivity_stream";
 			break;
 		case 'L':
-			currTbl = "tbl_custactivity_stream";
+			currTbl = "tbl_custactivity_dvd";
 			break;
 		case 'M':
 			currTbl = "tbl_dvdrentalhistory";
 			break;
-		case '0': // Return to main menu.
+		case '0':
 			currTbl = "NULL";
 			break;
 		default:
 			currTbl = "NULL";
 			break;
-	}
-}
-
-/*
-* Converts the data stored in a <mysqlx::Table> object to vector<vector<string>> format.
-* Checks if <mysqlx::Table> object exists in database before attempting opperations.
-*/
-void static getTableData(mysqlx::Table table) {
-	tableData.clear(); // Clear variable to avoid displaying a table previously displayed.
-		
-	try {
-		mysqlx::RowResult result = table.select("*").execute();
-
-		for (mysqlx::Row row : result) {
-			vector<string> rowData;
-
-			for (int i = 0; i < row.colCount(); ++i) {
-				mysqlx::Value val = row[i];
-				string strValue;
-
-				// The data stored in [val] is converted from <mysqlx::> format to its corresponding <std::> format and then to <std::string> format.
-				switch (val.getType()) {
-					case mysqlx::Value::Type::UINT64:
-						strValue = to_string(val.get<uint64_t>());
-						break;
-					case mysqlx::Value::Type::INT64:
-						strValue = to_string(val.get<int64_t>());
-						break;
-					case mysqlx::Value::Type::FLOAT:
-						strValue = to_string(val.get<float>());
-						break;
-					case mysqlx::Value::Type::DOUBLE:
-						strValue = to_string(val.get<double>());
-						break;
-					case mysqlx::Value::Type::BOOL:
-						strValue = to_string(val.get<bool>());
-						break;
-					case mysqlx::Value::Type::STRING:
-						strValue = val.get<string>();
-						break;
-					case mysqlx::Value::Type::VNULL:
-						strValue = "<NULL>";
-						break;
-					default:
-						strValue = "<ERR>";
-						break;
-				}
-				rowData.push_back(strValue);
-			}
-			tableData.push_back(rowData);
-		}
-	}
-
-	catch (const mysqlx::Error& err) {
-		addMsg("MYSQLX_ERROR [getTableData()]: " + string(err.what()));
-	}
-	catch (exception& ex) {
-		addMsg("ERROR [getTableData()]: " + string(ex.what()));
 	}
 }
 
@@ -290,7 +237,7 @@ void static callDisplayMethod() {
 	}
 }
 
-// Processes a char through Menus.cpp and updates the current UI based on the user's selection.
+// Processes a char through [Menus.cpp] and updates the current UI based on the user's selection.
 void static processUserInput() {
 	char c = 'X';
 	
@@ -298,7 +245,7 @@ void static processUserInput() {
 	* Each case represents a specific UI.
 	* Once the UI is determined, a call is made to process the user's input based on the available options for that UI.
 	* The only exception for this is the login screen (case 2).
-	* If the user's input was valid, the currUI will be updated via the RETURN.
+	* If the user's input was valid, [currUI] will be updated.
 	*/
 	switch (currUI) {
 		case '1': // Welcome screen
@@ -347,7 +294,7 @@ void static processUserInput() {
 	}
 	else {
 		if (currUI == '4') {
-			setTableName(usrInput); // When UI is at the Display menu, process the user's input to prep for displaying table data on the next UI.
+			setTableName(); // When UI is at the Display menu, process the user's input to prep for displaying table data on the next UI.
 		}
 		currUI = c; // Update current UI reference as long as [c] is valid.
 	}
@@ -411,26 +358,26 @@ int main() {
 						* If it exists, then [tbl] is updated. If not, then [tbl] is NOT updated and an error is thrown.
 						*/
 						tbl = db.getTable(currTbl, true);
-						getTableData(tbl);
+						tableData = fct.getTableData(tbl);
 						break;
 					default:
 						break;
 				}
 
 				callDisplayMethod();
-				processUserInput(); // NOTE: Table name set if [UI == 4] AND user input was valid.
+				processUserInput();
 
 				if (edit_mode == true) { // When user is presented with options to INSERT/UPDATE/DELETE...
 					switch (currUI) { 
 						case '7': // Admin_Actions::Modify Movie Data
 							switch (usrInput) {
-								case '1': //INSERT
+								case '1':
 									addMsg(movie.insertMovieData(db));
 									break;
-								case '2': //UPDATE
+								case '2':
 									addMsg(movie.updateMovieData(db));
 									break;
-								case '3': //DELETE
+								case '3':
 									addMsg(movie.deleteMovieData(db));
 									break;
 								default:
@@ -439,13 +386,13 @@ int main() {
 							break;
 						case '8': // Admin_Actions::Modify Customer Data
 							switch (usrInput) {
-								case '1': //INSERT
+								case '1':
 									addMsg(cust.insertCustData(db));
 									break;
-								case '2': //UPDATE
+								case '2':
 									addMsg(cust.updateCustData(db));
 									break;
-								case '3': //DELETE
+								case '3':
 									addMsg(cust.deleteCustData(db));
 									break;
 								default:
@@ -457,8 +404,9 @@ int main() {
 					}
 				}
 				
+				// Update the status of [edit_mode] based on which UI is to be displayed next.
 				if (currUI == '7' || currUI == '8') {
-					edit_mode = true; // Set to 'true' when user is presented with INSERT/UPDATE/DELETE options.
+					edit_mode = true;
 				}
 				else {
 					edit_mode = false;
@@ -478,13 +426,9 @@ int main() {
 		}
 	}
 	
-	// DELETE WHEN DONE!!!
 	if (currUI == '0') {
-		msgs.clear();
-		addMsg("\n***** [ Closing Application ] *****\n");
-		menu.displayMenu(msgs);
+		menu.displayMenu({});
 	}
-	// ###################
 
 	return 0;
 }

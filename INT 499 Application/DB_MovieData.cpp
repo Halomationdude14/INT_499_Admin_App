@@ -32,6 +32,12 @@ using namespace std;
 	- Program currently prevents entries if first, mid, and last names all match.
 	- Program SHOULD prioritize first and last names too. If first+last names match, prompt the user to update existing person/record.
 * 
+* BUGS -->
+* 
+* 001: Discovered in functions [setCast()] and [setDir()].
+	   It is possible that the indexes in [tblIndexes] could contain 1 or more values that are greater than the total amount of indexes in this var.
+	   See the details left in the comment around lines 466-474 in [DB_MovieData.cpp].
+* 
 */
 
 
@@ -49,7 +55,7 @@ DB_MovieData::DB_MovieData() {
 	movieNumDir = -1;
 
 	// These 2 vector store actors/directors in the following format.
-	// Format =  [index, firstName, middleName, lastName]
+	// Format = [index, firstName, middleName, lastName]
 	movieCastMembers = {};
 	movieDirectors = {};
 
@@ -130,7 +136,7 @@ vector<string> DB_MovieData::newPerson() {
 			// Error handling
 			if (validInput()) {
 				if (input == "~") {
-					person.push_back("");
+					person.push_back("NULL");
 					notValid = false;
 				}
 				else {
@@ -394,7 +400,7 @@ void DB_MovieData::addNewCast(mysqlx::Table tbl) {
 			duplicate = true;
 
 			string name = newActor[0];
-			if (!(newActor[1].empty())) {
+			if (newActor[1] != "NULL") {
 				name.append(" " + newActor[1]);
 			}
 			name.append(" " + newActor[2]);
@@ -407,7 +413,15 @@ void DB_MovieData::addNewCast(mysqlx::Table tbl) {
 	if (duplicate == false) {
 		try {
 			mysqlx::TableInsert tblInsertStmt = tbl.insert("actor_Fname", "actor_Mname", "actor_Lname");
-			tblInsertStmt.values(newActor[0], newActor[1], newActor[2]).execute();
+
+			mysqlx::Value nullVal;
+			if (newActor[1] == "NULL") {
+				tblInsertStmt.values(newActor[0], nullVal, newActor[2]).execute();
+			}
+			else {
+				tblInsertStmt.values(newActor[0], newActor[1], newActor[2]).execute();
+			}
+
 			msgs.push_back("SYS: Actor successfully added to the database!");
 		}
 		catch (const mysqlx::Error& err) {
@@ -448,6 +462,16 @@ void DB_MovieData::setCast(mysqlx::Schema db) {
 				if (fct.strIsInt(input)) { // If input is int...
 
 					if (find(tblIndexes.begin(), tblIndexes.end(), input) != tblIndexes.end()) { // If user input == existing index in table...
+
+						/*
+						* ANOM: It is possible that the indexes in [tblIndexes] could contain 1 or more values that are greater than the total amount of indexes in this var.
+						* 
+						* For example, if [tblIndexes] = {1, 2, 3, 4, 10}...
+						* Then the index [10] > tblIndexes.size()
+						* 
+						* This poses a logical problem in the way the code processes the user's input!
+						* The same applies to the logic in the function [setDir()].
+						*/
 
 						vector<string> person = tableData.at(stoi(input) - 1); // This action creates a person with format [index, firstName, middleName, lastName].
 
@@ -537,7 +561,7 @@ void DB_MovieData::addNewDir(mysqlx::Table tbl) {
 			duplicate = true;
 
 			string name = newDir[0];
-			if ( !(newDir[1].empty()) ) {
+			if (newDir[1] != "NULL") {
 				name.append(" " + newDir[1]);
 			}
 			name.append(" " + newDir[2]);
@@ -550,7 +574,15 @@ void DB_MovieData::addNewDir(mysqlx::Table tbl) {
 	if (duplicate == false) {
 		try {
 			mysqlx::TableInsert tblInsertStmt = tbl.insert("director_Fname", "director_Mname", "director_Lname");
-			tblInsertStmt.values(newDir[0], newDir[1], newDir[2]).execute();
+
+			mysqlx::Value nullVal;
+			if (newDir[1] == "NULL") {
+				tblInsertStmt.values(newDir[0], nullVal, newDir[2]).execute();
+			}
+			else {
+				tblInsertStmt.values(newDir[0], newDir[1], newDir[2]).execute();
+			}
+
 			msgs.push_back("SYS: Director successfully added to the database!");
 		}
 		catch (const mysqlx::Error& err) {
@@ -811,7 +843,7 @@ void DB_MovieData::displayNewMovie() {
 	std::cout << "  Cast Member(s): " << movieNumCast << endl;
 	for (int i = 0; i < movieNumCast; i++) {
 		std::cout << "    [#" << (i + 1) << "]: " << movieCastMembers.at(i).at(1) << " ";
-		if ( !(movieCastMembers.at(i).at(2).empty()) ) { // If middle name is empty, don't print.
+		if (movieCastMembers.at(i).at(2) != "NULL") { // If middle name is "NULL", don't print.
 			std::cout << movieCastMembers.at(i).at(2) << " ";
 		}
 		std::cout << movieCastMembers.at(i).at(3) << endl;
@@ -820,8 +852,8 @@ void DB_MovieData::displayNewMovie() {
 	std::cout << "  Director(s): " << movieNumDir << endl;
 	for (int i = 0; i < movieNumDir; i++) {
 		std::cout << "    [#" << (i + 1) << "]: " << movieDirectors.at(i).at(1) << " ";
-		if ( !(movieDirectors.at(i).at(2).empty()) ) { // If middle name is empty, don't print.
-			std::cout << movieDirectors.at(i).at(1) << " ";
+		if (movieDirectors.at(i).at(2) != "NULL") { // If middle name is "NULL", don't print.
+			std::cout << movieDirectors.at(i).at(2) << " ";
 		}
 		std::cout << movieDirectors.at(i).at(3) << endl;
 	}
@@ -1069,11 +1101,12 @@ void DB_MovieData::sendMovieToDB(mysqlx::Schema db) {
 		mysqlx::Table movieGenreTbl = db.getTable("tbl_moviegenres");
 
 
-		// Link [TableInsert] object to [Table] object and specify which columns are targets of the INSERT statment.
+		// Link TableInsert object to Table object and specify which columns are targets of the INSERT statement.
 		mysqlx::TableInsert tblInsertStmt = movieTbl.insert("movieTitle", "movieYear", "numCast", "movieRating");
-		// Specify the values being inserted in the columns specified above, and send them to the DB using the "execute()" command.
+		// Specify the values to be inserted in each of the columns defined in the previous statement.
 		tblInsertStmt.values(movieTitle, movieYear, movieNumCast, movieRating);
-		// Execute the TableInsert object and send data to database. Store results of INSERT query in Result object "res".
+
+		// Execute the TableInsert object to send data to database. Store results of INSERT query in Result object [res].
 		mysqlx::Result res = tblInsertStmt.execute();
 		movieID = res.getAutoIncrementValue();
 		
