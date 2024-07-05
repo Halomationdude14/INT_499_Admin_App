@@ -32,12 +32,6 @@ using namespace std;
 	- Program currently prevents entries if first, mid, and last names all match.
 	- Program SHOULD prioritize first and last names too. If first+last names match, prompt the user to update existing person/record.
 * 
-* BUGS -->
-* 
-* 001: Discovered in functions [setCast()] and [setDir()].
-	   It is possible that the indexes in [tblIndexes] could contain 1 or more values that are greater than the total amount of indexes in this var.
-	   See the details left in the comment around lines 466-474 in [DB_MovieData.cpp].
-* 
 */
 
 
@@ -81,6 +75,20 @@ void DB_MovieData::setDefaultValues() {
 	movieDirectors.clear();
 	movieGenreIDs.clear();
 	movieGenreNames.clear();
+}
+
+// Adds any messages in [message] to the end of [msgs].
+void DB_MovieData::addMsg(vector<string> message) {
+	if (message.size() > 0) {
+		msgs.insert(msgs.end(), message.begin(), message.end());
+	}
+}
+
+// Adds a string to the end of [msgs].
+void DB_MovieData::addMsg(string message) {
+	if (message.size() > 0) {
+		msgs.push_back(message);
+	}
 }
 
 // Takes in a string and verifies it is not empty, and contains no spaces prior to first char.
@@ -198,7 +206,7 @@ void DB_MovieData::setTitle(mysqlx::Schema db) {
 
 	while (notValid) {
 		mysqlx::Table movieTbl = db.getTable("tbl_moviedata");
-		tableData = fct.getTableData(movieTbl); // Obtain data from table {tbl_moviedata}.
+		fct.getTableData(movieTbl, &tableData, &msgs); // Obtain data from table {tbl_moviedata}.
 
 		// Record existing movie titles from table {tbl_moviedata}.
 		for (auto& i : tableData) {
@@ -433,6 +441,8 @@ void DB_MovieData::addNewCast(mysqlx::Table tbl) {
 // Prompts user to enter the names of each main cast member.
 void DB_MovieData::setCast(mysqlx::Schema db) {
 	msgs.clear();
+	tblIndexes.clear();
+	vector<string> tempMsg = {}; // Assists with [fct.getTableData()].
 	int counter = movieCastMembers.size() + 1;
 	bool running = true;
 
@@ -440,7 +450,8 @@ void DB_MovieData::setCast(mysqlx::Schema db) {
 	while (running) {
 		try {
 			mysqlx::Table actorTbl = db.getTable("tbl_actors");
-			tableData = fct.getTableData(actorTbl); // Obtain data from table {tbl_actors}.
+			fct.getTableData(actorTbl, &tableData, &tempMsg); // Obtain data from table {tbl_actors}.
+			addMsg(tempMsg);
 
 			// Record indexes from table {tbl_actors}.
 			for (auto& j : tableData) {
@@ -462,24 +473,15 @@ void DB_MovieData::setCast(mysqlx::Schema db) {
 				if (fct.strIsInt(input)) { // If input is int...
 
 					if (find(tblIndexes.begin(), tblIndexes.end(), input) != tblIndexes.end()) { // If user input == existing index in table...
-
-						/*
-						* ANOM: It is possible that the indexes in [tblIndexes] could contain 1 or more values that are greater than the total amount of indexes in this var.
-						* 
-						* For example, if [tblIndexes] = {1, 2, 3, 4, 10}...
-						* Then the index [10] > tblIndexes.size()
-						* 
-						* This poses a logical problem in the way the code processes the user's input!
-						* The same applies to the logic in the function [setDir()].
-						*/
-
-						vector<string> person = tableData.at(stoi(input) - 1); // This action creates a person with format [index, firstName, middleName, lastName].
+						vector<string> person = {};
+						fct.getRow(tableData, stoi(input), &person, &tempMsg); // This action creates a person with format [index, firstName, middleName, lastName].
+						addMsg(tempMsg);
 
 						// Verify that the chosen actor has not already been selected previously by the user.
 						if (find(movieCastMembers.begin(), movieCastMembers.end(), person) != movieCastMembers.end()) {
 							msgs.push_back("ERROR [setCast()]: Actor with ID [" + input + "] has already been selected! Cannot be added twice.");
 						}
-						else {
+						else if (!person.empty()) {
 							movieCastMembers.push_back(person); // Add user selection if no duplicates exist.
 							running = false;
 						}
@@ -503,10 +505,12 @@ void DB_MovieData::setCast(mysqlx::Schema db) {
 		}
 
 		catch (exception& ex) {
-			msgs.push_back("EXCEPTION [validationSCRN()]: " + string(ex.what()));
+			msgs.push_back("EXCEPTION [setCast()]: " + string(ex.what()));
+			break;
 		}
 		catch (const mysqlx::Error& err) {
-			msgs.push_back("MYSQLX_ERROR [validationSCRN()]: " + string(err.what()));
+			msgs.push_back("MYSQLX_ERROR [setCast()]: " + string(err.what()));
+			break;
 		}
 	}
 }
@@ -594,6 +598,8 @@ void DB_MovieData::addNewDir(mysqlx::Table tbl) {
 // Prompts user to enter the names of each director.
 void DB_MovieData::setDir(mysqlx::Schema db) {
 	msgs.clear();
+	tblIndexes.clear();
+	vector<string> t = {}; // Assists with [fct.getTableData()].
 	int counter = movieDirectors.size() + 1;
 	bool running = true;
 
@@ -601,7 +607,8 @@ void DB_MovieData::setDir(mysqlx::Schema db) {
 	while (running) {
 		try {
 			mysqlx::Table directorTbl = db.getTable("tbl_directors");
-			tableData = fct.getTableData(directorTbl); // Obtain data from table {tbl_directors}.
+			fct.getTableData(directorTbl, &tableData, &t); // Obtain data from table {tbl_directors}.
+			addMsg(t);
 
 			// Record indexes from table {tbl_directors}.
 			for (auto& j : tableData) {
@@ -623,14 +630,15 @@ void DB_MovieData::setDir(mysqlx::Schema db) {
 				if (fct.strIsInt(input)) { // If input is int...
 
 					if (find(tblIndexes.begin(), tblIndexes.end(), input) != tblIndexes.end()) { // If user input == existing index in table...
-
-						vector<string> person = tableData.at(stoi(input) - 1); // This action creates a person with format [index, firstName, middleName, lastName].
+						vector<string> person = {};
+						fct.getRow(tableData, stoi(input), &person, &t); // This action creates a person with format [index, firstName, middleName, lastName].
+						addMsg(t);
 
 						// Verify that the chosen director has not already been selected previously by the user.
 						if (find(movieDirectors.begin(), movieDirectors.end(), person) != movieDirectors.end()) {
 							msgs.push_back("ERROR [setDir()]: Director with ID [" + input + "] has already been selected! Cannot be added twice.");
 						}
-						else {
+						else if (!person.empty()) {
 							movieDirectors.push_back(person); // Add user selection if no duplicates exist.
 							running = false;
 						}
@@ -654,10 +662,12 @@ void DB_MovieData::setDir(mysqlx::Schema db) {
 		}
 
 		catch (exception& ex) {
-			msgs.push_back("EXCEPTION [validationSCRN()]: " + string(ex.what()));
+			msgs.push_back("EXCEPTION [setDir()]: " + string(ex.what()));
+			break;
 		}
 		catch (const mysqlx::Error& err) {
-			msgs.push_back("MYSQLX_ERROR [validationSCRN()]: " + string(err.what()));
+			msgs.push_back("MYSQLX_ERROR [setDir()]: " + string(err.what()));
+			break;
 		}
 	}
 }
@@ -722,6 +732,7 @@ void DB_MovieData::addNewGenre(mysqlx::Table tbl) {
 void DB_MovieData::setGenre(mysqlx::Schema db) {
 	msgs.clear();
 	input = "";
+	vector<string> tempMsg = {}; // Assists with [fct.getTableData()].
 	vector<int> genreIDs = {};
 	vector<string> genreNames = {};
 
@@ -730,7 +741,8 @@ void DB_MovieData::setGenre(mysqlx::Schema db) {
 	while ( !(input == "C") ) {
 		try {
 			mysqlx::Table genreTbl = db.getTable("tbl_genredata");
-			tableData = fct.getTableData(genreTbl); // Obtain data from table {tbl_genredata}.
+			fct.getTableData(genreTbl, &tableData, &tempMsg); // Obtain data from table {tbl_genredata}.
+			addMsg(tempMsg);
 			menu.displayTable(msgs, tableData); // Display list of available genres.
 			msgs.clear();
 
@@ -1018,9 +1030,11 @@ void DB_MovieData::validationSCRN(mysqlx::Schema db) {
 
 		catch (exception& ex) {
 			msgs.push_back("EXCEPTION [validationSCRN()]: " + string(ex.what()));
+			break;
 		}
 		catch (const mysqlx::Error& err) {
 			msgs.push_back("MYSQLX_ERROR [validationSCRN()]: " + string(err.what()));
+			break;
 		}
 	}
 }

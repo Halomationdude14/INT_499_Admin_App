@@ -17,7 +17,7 @@ using namespace std;
 
 // Default Constructor
 Global_Functions::Global_Functions() {
-	tempStr = ""; // General use string.
+	tempStr = "";
 	c = 'X';
 }
 
@@ -65,6 +65,7 @@ char Global_Functions::getUsrInput() {
 }
 
 // Converts the data stored in a <mysqlx::Table> object to vector<vector<string>> format.
+/*
 vector<vector<string>> Global_Functions::getTableData(mysqlx::Table table) {
 	vector<string> msgs = {}; // Vector to hold all sys/err messages.
 	vector<vector<string>> tableData = {}; // Holds table data in <std> format to be sent to Menus object for display.
@@ -114,13 +115,108 @@ vector<vector<string>> Global_Functions::getTableData(mysqlx::Table table) {
 	}
 
 	catch (const mysqlx::Error& err) {
-		msgs.push_back("MYSQLX_ERROR [getTableData()]: " + string(err.what()));
+		cout << "MYSQLX_ERROR [getTableData()]: " + string(err.what());
 	}
 	catch (exception& ex) {
-		msgs.push_back("ERROR [getTableData()]: " + string(ex.what()));
+		cout << "ERROR [getTableData()]: " + string(ex.what());
 	}
 
 	return tableData;
+}
+*/
+
+// NOTE: This function returns two vars using pointers!
+void Global_Functions::getTableData(mysqlx::Table table, vector<vector<string>>* tableData, vector<string>* msgs) {
+	vector<string> message = {}; // Vector to hold all sys/err messages.
+	vector<vector<string>> tblData = {}; // Holds table data in <std> format to be sent to Menus object for display.
+
+	try {
+		mysqlx::RowResult result = table.select("*").execute();
+
+		for (mysqlx::Row row : result) {
+			vector<string> rowData;
+
+			for (int i = 0; i < row.colCount(); ++i) {
+				mysqlx::Value val = row[i];
+				tempStr = "";
+
+				switch (val.getType()) {
+					case mysqlx::Value::Type::UINT64:
+						tempStr = to_string(val.get<uint64_t>());
+						break;
+					case mysqlx::Value::Type::INT64:
+						tempStr = to_string(val.get<int64_t>());
+						break;
+					case mysqlx::Value::Type::FLOAT:
+						tempStr = to_string(val.get<float>());
+						break;
+					case mysqlx::Value::Type::DOUBLE:
+						tempStr = to_string(val.get<double>());
+						break;
+					case mysqlx::Value::Type::BOOL:
+						tempStr = to_string(val.get<bool>());
+						break;
+					case mysqlx::Value::Type::STRING:
+						tempStr = val.get<string>();
+						break;
+					case mysqlx::Value::Type::VNULL:
+						tempStr = "NULL";
+						break;
+					default:
+						tempStr = "<ERROR>";
+						break;
+				}
+
+				rowData.push_back(tempStr);
+			}
+
+			tblData.push_back(rowData);
+		}
+	}
+
+	catch (const mysqlx::Error& err) {
+		message.push_back("MYSQLX_ERROR [getTableData()]: " + string(err.what()));
+	}
+	catch (exception& ex) {
+		message.push_back("EXCEPTION [getTableData()]: " + string(ex.what()));
+	}
+
+	tempStr.clear();
+	*tableData = tblData;
+	*msgs = message;
+}
+
+// Searches through a set of table data in <std::> format for a row with a specified ID.
+// NOTE: This function returns two vars using pointers!
+void Global_Functions::getRow(vector<vector<string>> tableData, int ID, vector<string>* rowData, vector<string>* msgs) {
+	vector<string> message = {}; // Vector to hold all sys/err messages.
+	vector<string> row = {}; // Vector to hold a single row from a table in <std::> format.
+
+	try {
+		if (tableData.empty()) {
+			message.push_back("ERROR [getRow()]: No table data to process! Cannot retrieve row data.");
+		}
+		else {
+			for (auto& i : tableData) {
+				if (strIsInt(i[0])) {
+					if (stoi(i[0]) == ID) {
+						row = i;
+					}
+				}
+				else { // In case the wrong table is put through this function (i.e., tables with a first column that is not of type [int]).
+					message.push_back("ERROR [getRow()]: First column of table is not of type [int]! Aborting process.");
+					break;
+				}
+			}
+		}
+	}
+
+	catch (exception& ex) {
+		message.push_back("EXCEPTION [getRow()]: " + string(ex.what()));
+	}
+
+	*rowData = row;
+	*msgs = message;
 }
 
 // Convert all chars in a string to UPPER case.

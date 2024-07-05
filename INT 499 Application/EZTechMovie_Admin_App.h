@@ -13,7 +13,8 @@ class Global_Functions {
 		void clearScreen();
 		int getCurrYear();
 		char getUsrInput();
-		vector<vector<string>> getTableData(mysqlx::Table);
+		void getTableData(mysqlx::Table, vector<vector<string>>*, vector<string>*);
+		void getRow(vector<vector<string>>, int, vector<string>*, vector<string>*);
 		string strToUpperCase(string);
 		char charToUpperCase(char);
 		bool strIsInt(string&);
@@ -83,6 +84,8 @@ class DB_MovieData {
 	public:
 		DB_MovieData();
 		void setDefaultValues();
+		void addMsg(vector<string>);
+		void addMsg(string);
 		bool validInput();
 		vector<string> newPerson();
 

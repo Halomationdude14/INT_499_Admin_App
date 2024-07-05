@@ -75,14 +75,14 @@ vector<vector<string>> tableData = {}; // vector<vector<string>> var that stores
 
 
 
-// Adds a vector<string> to the end of 'msgs'.
+// Adds any messages in [message] to the end of [msgs].
 void static addMsg(vector<string> message) {
 	if (message.size() > 0) {
 		msgs.insert(msgs.end(), message.begin(), message.end());
 	}
 }
 
-// Adds a string to the end of 'msgs'.
+// Adds a string to the end of [msgs].
 void static addMsg(string message) {
 	if (message.size() > 0) {
 		msgs.push_back(message);
@@ -114,7 +114,7 @@ bool static verifyLogin() {
 	}
 
 	catch (const mysqlx::Error& err) {
-		addMsg("MYSQLX_EXCEPTION [verifyLogin()]: " + string(err.what()));
+		addMsg("MYSQLX_ERROR [verifyLogin()]: " + string(err.what()));
 		return false;
 	}
 	catch (exception& ex) {
@@ -358,7 +358,7 @@ int main() {
 						* If it exists, then [tbl] is updated. If not, then [tbl] is NOT updated and an error is thrown.
 						*/
 						tbl = db.getTable(currTbl, true);
-						tableData = fct.getTableData(tbl);
+						fct.getTableData(tbl, &tableData, &msgs);
 						break;
 					default:
 						break;
@@ -420,7 +420,7 @@ int main() {
 				break;
 			}
 			catch (exception& ex) {
-				addMsg("ERROR [main()]: " + string(ex.what()));
+				addMsg("EXCEPTION [main()]: " + string(ex.what()));
 				break;
 			}
 		}
