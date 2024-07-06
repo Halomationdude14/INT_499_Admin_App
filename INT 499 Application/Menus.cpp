@@ -70,6 +70,10 @@ Menus::Menus() {
 	modifyCust_Menu = {" [1] Add New Customer*"," [2] Update Customer Info*"," [3] Delete Customer*"," [0] Previous Menu"};
 }
 
+
+
+
+
 // Displays base UI: header
 void Menus::displayMenu() {
 	fct.clearScreen();
@@ -81,7 +85,7 @@ void Menus::displayMenu(vector<string> msg) {
 	displayMenu();
 
 	// Display sys/err messages if the vector is not empty.
-	if (!(msg.empty())) {
+	if (!msg.empty()) {
 		for (auto& i : msg) {
 			cout << i << endl;
 		}
@@ -106,7 +110,7 @@ void Menus::displayMenu(vector<string> msg, string nav) {
 	}
 
 	// Display sys/err messages if the vector is not empty.
-	if (!(msg.empty())) {
+	if (!msg.empty()) {
 		for (auto& i : msg) {
 			cout << i << endl;
 		}
@@ -124,54 +128,89 @@ void Menus::displayMenu(vector<string> msg, string nav, vector<string> menu) {
 	}
 }
 
-// Displays partial UI: header + message + selected table from the database
+
+// Displays partial UI (header + message) + selected table from the database.
 void Menus::displayTable(vector<string> msg, vector<vector<string>> tblData) {
 	displayMenu();
+	vector<int> colSizes = {};
+	string encase = "";
 
-	// Display table data
-	for (const auto& row : tblData) {
-		for (const auto& col : row) {
-			cout << col << " ";
+	if (!tblData.empty()) {
+		
+		// Obtain length of largest variables per column.
+		for (const auto& row : tblData) {
+
+			// Initialize [colSizes] with first row.
+			if (colSizes.empty()) {
+				for (const auto& var : row) {
+					colSizes.push_back(var.size());
+				}
+			}
+
+			// Search for longer variables and update [colSizes] as needed.
+			for (int i = 0; i < row.size(); i++) {
+				if (row[i].size() > colSizes[i]) {
+					colSizes[i] = row[i].size();
+				}
+			}
 		}
-		cout << endl;
+
+		// Establish the upper+lower encasement for the display.
+		for (int i = 0; i < colSizes.size(); i++) {
+			encase.append("+-");
+			for (int j = 0; j < colSizes[i]; j++) {
+				encase.append("-");
+			}
+
+			if (i != colSizes.size() - 1) {
+				encase.append("-");
+			}
+			else {
+				encase.append("-+\n");
+			}
+		}
+
+		cout << encase;
+
+		// Display table data.
+		for (int i = 0; i < tblData.size(); i++) {
+			for (int k = 0; k < tblData[i].size(); k++) {
+				cout << "| " << tblData[i][k];
+				for (int j = tblData[i][k].size(); j < colSizes[k]; j++) {
+					cout << " ";
+				}
+
+				if (k != tblData[i].size() - 1) {
+					cout << " ";
+				}
+				else {
+					cout << " |\n";
+				}
+			}
+		}
+
+		cout << encase << endl;
 	}
-	cout << endl;
 
 	// Display sys/err messages if the vector is not empty.
-	if (!(msg.empty())) {
-		for (auto& i : msg) {
+	if (!msg.empty()) {
+		for (const auto& i : msg) {
 			cout << i << endl;
 		}
 		cout << endl;
 	}
 }
 
-// Displays full UI w/a selected table from the database
+// Displays full UI + selected table from the database.
 void Menus::displayTable(vector<string> msg, vector<string> menu, vector<vector<string>> tblData) {
-	displayMenu();
-
-	// Display table data
-	for (const auto& row : tblData) {
-		for (const auto& col : row) {
-			cout << col << " ";
-		}
-		cout << endl;
-	}
-	cout << endl;
-
-	// Display sys/err messages if the vector is not empty.
-	if (!(msg.empty())) {
-		for (auto& i : msg) {
-			cout << i << endl;
-		}
-		cout << endl;
-	}
+	displayTable(msg, tblData);
 
 	// Display menu options.
 	for (auto& i : menu) {
 		cout << i << endl;
 	}
 }
+
 
 // Returns the number correspoding to the current menu being displayed in the terminal.
 char Menus::getCurrMenu() const {
@@ -182,6 +221,7 @@ char Menus::getCurrMenu() const {
 char Menus::getPrevMenu() const {
 	return prevMenu;
 }
+
 
 // SCREEN: Welcome screen
 void Menus::SCRN_start(vector<string> msg) {

@@ -3,7 +3,7 @@
 * 
 * Author: Paul M. Oram
 * Date Started: 2024-04-22
-* Last Updated: 2024-07-05
+* Last Updated: 2024-07-06
 * Purpose: Sample terminal program to demonstrate how to use the <mysqlx/xdevapi.h> library which allows interaction with a MySQL server/database.
 * 
 */
@@ -21,7 +21,7 @@ using namespace std;
 * 
 * 2. [Global_Functions.cpp] Provide search function for large tables (i.e., tables with 50+ entries).
 	 Should be available in both "Display Tables" menu/UI and during "add new movie" process which is why this function exists in the 'Global_Functions.cpp' class.
-* 3. Improve how tables are displayed.
+* 3.	Improve how tables are displayed.
 * 4. [main.cpp] "char usrInput" -> Can only hold 1 value (0-9) (A-Z). What if UI has two digits (i.e., 10, 11, 12, etc...)? Change from char to int or string?
 	- Also, need to have two default values for this var: one value for ERROR (i.e, 'X'), and one neutral value (i.e., '*').
 * 5. Add functionality -> when user chooses to close app, close window and remove closing text from terminal.
@@ -63,7 +63,6 @@ DB_CustData cust;			// Allows for manipulation of "tbl_custdata".
 vector<string> msgs = {};	// Stores all SYS/ERR notifications: to be displayed below the header.
 char currUI = '1';			// Value corresponds to the current UI being displayed. Default is '1' to display the greeting screen.
 char usrInput = 'X';		// Stores value entered by user. Used for navigating through the menus. Default is 'X' -> this value throws an error if returned.
-bool running = true;		// Used by loops in main(): true = loop | false = don't loop.
 bool conn = false;			// Indicates status of connection to MySQL Server/Database: true = connection | false = no connection.
 bool edit_mode = false;		// Used in Admin_Actions menu when user is presented with INSERT/UPDATE/DELETE options. Set to FALSE immediately after those options are no longer displayed.
 string User = "";
@@ -335,6 +334,7 @@ int main() {
 				* Now that [tbl] has been created and initialized, I can reference this object from anywhere in this try-catch block.
 				*/
 				mysqlx::Table tbl = db.getTable("NULL");
+				vector<string> message = {};
 
 				switch (currUI) {
 					// Close the connection the the MySQL server.
@@ -357,7 +357,8 @@ int main() {
 						* If it exists, then [tbl] is updated. If not, then [tbl] is NOT updated and an error is thrown.
 						*/
 						tbl = db.getTable(currTbl, true);
-						fct.getTableData(tbl, &tableData, &msgs);
+						fct.getTableData(tbl, &tableData, &message);
+						addMsg(message);
 						break;
 					default:
 						break;
