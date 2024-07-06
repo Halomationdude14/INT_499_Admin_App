@@ -7,6 +7,7 @@ using namespace std;
 
 #include "EZTechMovie_Admin_App.h"
 
+
 /*
 * Program UI Outline --> (~ indicates an active process; no unique UI ID)
 * 
@@ -47,6 +48,17 @@ using namespace std;
 Menus::Menus() {
 	currMenu = '1'; // Default value is '1' for the welcome screen.
 	prevMenu = '1'; // Stores identifier of the last menu displayed for regression.
+
+	header = "\n##############################################################################\n"
+			   "####### Welcome to the EZTechMovie Database Administration Application #######\n"
+			   "##############################################################################\n\n";
+
+	nav_main = "##### [ Main Menu ] #####";
+	nav_dispTbl = "##### [ Main Menu > Display Tables ] #####";
+	nav_admAct = "##### [ Main Menu > Admin Actions ] #####";
+	nav_modMovie = "##### [ Main Menu > Admin Actions > Modify Movie Data ] #####";
+	nav_modCust = "##### [ Main Menu > Admin Actions > Modify Customer Data ] #####";
+
 	base_Menu = {" [0] Previous Menu"};
 	start_Menu = {" [1] Sign In"," [0] Exit Application"};
 	main_Menu = {" [1] Display Tables", " [2] Admin Actions", " [0] Sign Out"};
@@ -58,13 +70,15 @@ Menus::Menus() {
 	modifyCust_Menu = {" [1] Add New Customer*"," [2] Update Customer Info*"," [3] Delete Customer*"," [0] Previous Menu"};
 }
 
-// Displays partial UI: header + message (if not empty*)
-void Menus::displayMenu(vector<string> msg) {
+// Displays base UI: header
+void Menus::displayMenu() {
 	fct.clearScreen();
+	cout << header;
+}
 
-	cout << "\n##############################################################################" << endl;
-	cout << "####### Welcome to the EZTechMovie Database Administration Application #######" << endl;
-	cout << "##############################################################################" << endl << endl;
+// Displays partial UI: header + message
+void Menus::displayMenu(vector<string> msg) {
+	displayMenu();
 
 	// Display sys/err messages if the vector is not empty.
 	if (!(msg.empty())) {
@@ -75,13 +89,21 @@ void Menus::displayMenu(vector<string> msg) {
 	}
 }
 
-// Displays full UI: header + message (if not empty*) + menu
-void Menus::displayMenu(vector<string> msg, vector<string> menu) {
-	fct.clearScreen();
-
-	cout << "\n##############################################################################" << endl;
-	cout << "####### Welcome to the EZTechMovie Database Administration Application #######" << endl;
-	cout << "##############################################################################" << endl << endl;
+// Displays partial UI: header + message + nav
+void Menus::displayMenu(vector<string> msg, string nav) {
+	displayMenu();
+	
+	if (!nav.empty()) {
+		int space = (78-nav.size())/2;
+		for (int i = 0; i < space; i++) {
+			cout << " ";
+		}
+		cout << nav;
+		for (int i = 0; i < space; i++) {
+			cout << " ";
+		}
+		cout << endl << endl;
+	}
 
 	// Display sys/err messages if the vector is not empty.
 	if (!(msg.empty())) {
@@ -90,6 +112,11 @@ void Menus::displayMenu(vector<string> msg, vector<string> menu) {
 		}
 		cout << endl;
 	}
+}
+
+// Displays full UI: header + nav + message + menu
+void Menus::displayMenu(vector<string> msg, string nav, vector<string> menu) {
+	displayMenu(msg, nav);
 
 	// Display menu options.
 	for (auto& i : menu) {
@@ -99,11 +126,7 @@ void Menus::displayMenu(vector<string> msg, vector<string> menu) {
 
 // Displays partial UI: header + message + selected table from the database
 void Menus::displayTable(vector<string> msg, vector<vector<string>> tblData) {
-	fct.clearScreen();
-
-	cout << "\n##############################################################################" << endl;
-	cout << "####### Welcome to the EZTechMovie Database Administration Application #######" << endl;
-	cout << "##############################################################################" << endl << endl;
+	displayMenu();
 
 	// Display table data
 	for (const auto& row : tblData) {
@@ -125,11 +148,7 @@ void Menus::displayTable(vector<string> msg, vector<vector<string>> tblData) {
 
 // Displays full UI w/a selected table from the database
 void Menus::displayTable(vector<string> msg, vector<string> menu, vector<vector<string>> tblData) {
-	fct.clearScreen();
-
-	cout << "\n##############################################################################" << endl;
-	cout << "####### Welcome to the EZTechMovie Database Administration Application #######" << endl;
-	cout << "##############################################################################" << endl << endl;
+	displayMenu();
 
 	// Display table data
 	for (const auto& row : tblData) {
@@ -159,20 +178,21 @@ char Menus::getCurrMenu() const {
 	return currMenu;
 }
 
+// Returns the number correspoding to the previous menu that was displayed in the terminal.
 char Menus::getPrevMenu() const {
 	return prevMenu;
 }
 
-// SCREEN: Start screen
+// SCREEN: Welcome screen
 void Menus::SCRN_start(vector<string> msg) {
-	displayMenu(msg, start_Menu);
+	displayMenu(msg, "", start_Menu);
 	if (!(currMenu == '1')) {
 		prevMenu = currMenu;
 		currMenu = '1';
 	}
 }
 
-// SELECTION: Start screen
+// SELECTION: Welcome screen
 char Menus::SLCT_start(char input) {
 	switch (input) {
 		case '0':
@@ -195,7 +215,7 @@ void Menus::SCRN_login(vector<string> msg) {
 
 // SCREEN: Main Menu
 void Menus::SCRN_mainMenu(vector<string> msg) {
-	displayMenu(msg, main_Menu);
+	displayMenu(msg, nav_main, main_Menu);
 	if (!(currMenu == '3')) {
 		prevMenu = currMenu;
 		currMenu = '3';
@@ -220,16 +240,16 @@ char Menus::SLCT_mainMenu(char input) {
 	}
 }
 
-// SCREEN: Display menu
+// SCREEN: Display Tables menu
 void Menus::SCRN_displayMenu(vector<string> msg) {
-	displayMenu(msg, displayTables_Menu);
+	displayMenu(msg, nav_dispTbl, displayTables_Menu);
 	if (!(currMenu == '4')) {
 		prevMenu = currMenu;
 		currMenu = '4';
 	}
 }
 
-// SELECTION: Display menu
+// SELECTION: Display Tables menu
 char Menus::SLCT_displayMenu(char input) {
 
 	switch (input) {
@@ -254,7 +274,7 @@ char Menus::SLCT_displayMenu(char input) {
 	}
 }
 
-// SCREEN: Display table menu
+// SCREEN: Display Table screen
 void Menus::SCRN_displayTable(vector<string> msg, vector<vector<string>> tblData) {
 	displayTable(msg, base_Menu, tblData);
 	if (!(currMenu == '5')) {
@@ -263,11 +283,11 @@ void Menus::SCRN_displayTable(vector<string> msg, vector<vector<string>> tblData
 	}
 }
 
-// SELECTION: Display table menu
+// SELECTION: Display Table screen
 char Menus::SLCT_displayTable(char input) {
 	switch (input) {
 		case '0':
-			return '4'; //display menu
+			return '4'; //display tables menu
 		default:
 			return 'X';
 	}
@@ -275,7 +295,7 @@ char Menus::SLCT_displayTable(char input) {
 
 // SCREEN: Admin Actions menu
 void Menus::SCRN_adminActions(vector<string> msg) {
-	displayMenu(msg, adminActions_Menu);
+	displayMenu(msg, nav_admAct, adminActions_Menu);
 	if (!(currMenu == '6')) {
 		prevMenu = currMenu;
 		currMenu = '6';
@@ -298,7 +318,7 @@ char Menus::SLCT_adminActions(char input) {
 
 // SCREEN: Modify Movie menu
 void Menus::SCRN_modMovieMenu(vector<string> msg) {
-	displayMenu(msg, modifyMovie_Menu);
+	displayMenu(msg, nav_modMovie, modifyMovie_Menu);
 	if (!(currMenu == '7')) {
 		prevMenu = currMenu;
 		currMenu = '7';
@@ -321,7 +341,7 @@ char Menus::SLCT_modMovieMenu(char input) {
 
 // SCREEN: Modify Customer menu
 void Menus::SCRN_modCustMenu(vector<string> msg) {
-	displayMenu(msg, modifyCust_Menu);
+	displayMenu(msg, nav_modCust, modifyCust_Menu);
 	if (!(currMenu == '8')) {
 		prevMenu = currMenu;
 		currMenu = '8';

@@ -3,8 +3,8 @@
 * 
 * Author: Paul M. Oram
 * Date Started: 2024-04-22
-* Last Updated: 2024-07-03
-* Purpose: Sample terminal program in C++ to demonstrate how to use the <mysqlx/xdevapi.h> library which allows interaction with a MySQL server/database.
+* Last Updated: 2024-07-05
+* Purpose: Sample terminal program to demonstrate how to use the <mysqlx/xdevapi.h> library which allows interaction with a MySQL server/database.
 * 
 */
 
@@ -19,7 +19,6 @@ using namespace std;
 /*
 * Admin App TO-DO List -->
 * 
-* 1. Display name of current UI below header.
 * 2. [Global_Functions.cpp] Provide search function for large tables (i.e., tables with 50+ entries).
 	 Should be available in both "Display Tables" menu/UI and during "add new movie" process which is why this function exists in the 'Global_Functions.cpp' class.
 * 3. Improve how tables are displayed.
@@ -427,7 +426,7 @@ int main() {
 	}
 	
 	if (currUI == '0') {
-		menu.displayMenu({});
+		menu.displayMenu();
 	}
 
 	return 0;

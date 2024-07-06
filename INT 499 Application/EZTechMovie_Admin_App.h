@@ -30,8 +30,10 @@ class Menus {
 
 	public:
 		Menus();
+		void displayMenu();
 		void displayMenu(vector<string>);
-		void displayMenu(vector<string>, vector<string>);
+		void displayMenu(vector<string>, string);
+		void displayMenu(vector<string>, string, vector<string>);
 		void displayTable(vector<string>, vector<vector<string>>);
 		void displayTable(vector<string>, vector<string>, vector<vector<string>>);
 		char getCurrMenu() const;
@@ -65,6 +67,12 @@ class Menus {
 		Global_Functions fct;
 		char currMenu;
 		char prevMenu;
+		string header;
+		string nav_main;
+		string nav_dispTbl;
+		string nav_admAct;
+		string nav_modMovie;
+		string nav_modCust;
 		vector<string> base_Menu;
 		vector<string> start_Menu;
 		vector<string> main_Menu;
