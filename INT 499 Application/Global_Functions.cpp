@@ -21,6 +21,7 @@ Global_Functions::Global_Functions() {
 	c = 'X';
 }
 
+
 // Clear the terminal screen.
 void Global_Functions::clearScreen() {
 	system("cls");
@@ -50,7 +51,7 @@ char Global_Functions::getUsrInput() {
 
 	cout << "\nUser Input: ";
 #ifdef _WIN32
-	c = _getch(); // Get a character without requiring ENTER
+	c = _getch(); // Get a character without requiring <ENTER>.
 #else
 	getline(cin, tempStr);
 	if (!tempStr.empty()) {
@@ -63,67 +64,6 @@ char Global_Functions::getUsrInput() {
 	c = charToUpperCase(c);
 	return c;
 }
-
-// Converts the data stored in a <mysqlx::Table> object to vector<vector<string>> format.
-/*
-vector<vector<string>> Global_Functions::getTableData(mysqlx::Table table) {
-	vector<string> msgs = {}; // Vector to hold all sys/err messages.
-	vector<vector<string>> tableData = {}; // Holds table data in <std> format to be sent to Menus object for display.
-
-	try {
-		mysqlx::RowResult result = table.select("*").execute();
-
-		for (mysqlx::Row row : result) {
-			vector<string> rowData;
-
-			for (int i = 0; i < row.colCount(); ++i) {
-				mysqlx::Value val = row[i];
-				tempStr = "";
-
-				switch (val.getType()) {
-					case mysqlx::Value::Type::UINT64:
-						tempStr = to_string(val.get<uint64_t>());
-						break;
-					case mysqlx::Value::Type::INT64:
-						tempStr = to_string(val.get<int64_t>());
-						break;
-					case mysqlx::Value::Type::FLOAT:
-						tempStr = to_string(val.get<float>());
-						break;
-					case mysqlx::Value::Type::DOUBLE:
-						tempStr = to_string(val.get<double>());
-						break;
-					case mysqlx::Value::Type::BOOL:
-						tempStr = to_string(val.get<bool>());
-						break;
-					case mysqlx::Value::Type::STRING:
-						tempStr = val.get<string>();
-						break;
-					case mysqlx::Value::Type::VNULL:
-						tempStr = "NULL";
-						break;
-					default:
-						tempStr = "<ERROR>";
-						break;
-				}
-
-				rowData.push_back(tempStr);
-			}
-
-			tableData.push_back(rowData);
-		}
-	}
-
-	catch (const mysqlx::Error& err) {
-		cout << "MYSQLX_ERROR [getTableData()]: " + string(err.what());
-	}
-	catch (exception& ex) {
-		cout << "ERROR [getTableData()]: " + string(ex.what());
-	}
-
-	return tableData;
-}
-*/
 
 // NOTE: This function returns two vars using pointers!
 void Global_Functions::getTableData(mysqlx::Table table, vector<vector<string>>* tableData, vector<string>* msgs) {

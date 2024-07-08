@@ -1,12 +1,17 @@
 
 /*
 * 
-* Author: Paul M. Oram
+* Author: Paul Oram
 * Date Started: 2024-04-22
-* Last Updated: 2024-07-06
+* Last Updated: 2024-07-08
 * Purpose: Sample terminal program to demonstrate how to use the <mysqlx/xdevapi.h> library which allows interaction with a MySQL server/database.
 * 
 */
+
+#ifdef _WIN32
+#include <conio.h>
+#include <windows.h>
+#endif
 
 #include <iostream>
 #include <vector>
@@ -19,23 +24,13 @@ using namespace std;
 /*
 * Admin App TO-DO List -->
 * 
-* 2. [Global_Functions.cpp] Provide search function for large tables (i.e., tables with 50+ entries).
+* 1. [Global_Functions.cpp] Provide search function for large tables (i.e., tables with 50+ entries).
 	 Should be available in both "Display Tables" menu/UI and during "add new movie" process which is why this function exists in the 'Global_Functions.cpp' class.
-* 3.	Improve how tables are displayed.
-* 4. [main.cpp] "char usrInput" -> Can only hold 1 value (0-9) (A-Z). What if UI has two digits (i.e., 10, 11, 12, etc...)? Change from char to int or string?
-	- Also, need to have two default values for this var: one value for ERROR (i.e, 'X'), and one neutral value (i.e., '*').
-* 5. Add functionality -> when user chooses to close app, close window and remove closing text from terminal.
-* 6. In places where the user is NOT required to press the <ENTER> key to submit their input, remove the text "User Input: " to avoid confusion. Ensure that this text is kept in places where manual entry via <ENTER> key is required.
-* 7. At the login screen, when user is entering password, DON'T display the password as they type. Instead, display an asterisk for each char typed (*).
-* 8. For any user entry line that takes in a value automatically, if user presses <ENTER> without entering any other values, the error msg is displayed weird " ] is invalid!nput [ ".
 * 
 * 
 * Admin App Considerations -->
 * 
-* 1. In places where the user is NOT required to press the <ENTER> key to submit their input, remove the text "User Input: " to avoid confusion.
-Ensure that this text is kept in places where manual entry via <ENTER> key is required.
-* 2. Instead of typing a single character to navigate through the menus, use arrow keys to select different menu options.
-* 3. Add color/decoration to text to make app more vivid.
+* 1. Add color/decoration to text to make app more vivid.
 * 
 * 
 * Other TO-DO Items -->
@@ -87,15 +82,49 @@ void static addMsg(string message) {
 	}
 }
 
+// Overrides the default settings for Console Mode and Echo Input while obtaining the user's password for the database.
+void static getPassword() {
+	HANDLE hStdin = GetStdHandle(STD_INPUT_HANDLE);
+	DWORD mode = 0;
+	GetConsoleMode(hStdin, &mode);
+
+	// Disable echo input
+	SetConsoleMode(hStdin, mode & ~(ENABLE_ECHO_INPUT));
+
+	Pass = "";
+	char ch = 0;
+	cout << "Password: ";
+
+	while (true) {
+		ch = _getch(); // Use _getch() to get character without echoing it
+		if (ch == '\r') { // Enter key
+			std::cout << endl;
+			break;
+		}
+		else if (ch == 8) { // Backspace key
+			if (!Pass.empty()) {
+				Pass.pop_back();
+				std::cout << "\b \b"; // Erase the asterisk
+			}
+		}
+		else {
+			Pass += ch;
+			std::cout << '*';
+		}
+	}
+
+	// Restore original console mode
+	SetConsoleMode(hStdin, mode);
+}
+
 // Performs a check to see if the username and password are valid for a connection to the MySQL server.
 bool static verifyLogin() {
-	
+
 	try {
 		cout << "Login to the EZTechMovie MySQL Server -->\n\n";
 		cout << "Username: ";
 		getline(cin, User);
-		cout << "Password: ";
-		getline(cin, Pass);
+		getPassword();
 
 		/*
 		* Create a 'Session' object that attempts to establish a connection to a locally stored MySQL server.
@@ -228,8 +257,8 @@ void static callDisplayMethod() {
 			usrInput = fct.getUsrInput();
 			break;
 		default:
-			string s(1, currUI);
-			addMsg("CRITICAL ERROR: CODE MALFUNCTION! Program tried to call non-existent UI with ID = [" + s + "]. Displaying previous UI!");
+			string str(1, currUI);
+			addMsg("CRITICAL ERROR: Program tried to call non-existent UI with ID = [" + str + "]. Displaying previous UI!");
 			currUI = menu.getCurrMenu(); //may need to change this to menu.getPrevMenu() eventually...
 			break;
 	}
@@ -287,8 +316,13 @@ void static processUserInput() {
 
 	// Error handling + data processing.
 	if (c == 'X') {
-		string s(1, usrInput);
-		addMsg("ERROR [processUserInput()]: User input [" + s + "] is invalid!");
+		if (usrInput == '\r') { // Enter key
+			addMsg("ERROR [processUserInput()]: User input is empty! Please enter a value this time...");
+		}
+		else {
+			string str(1, usrInput);
+			addMsg("ERROR [processUserInput()]: User input [" + str + "] is invalid!");
+		}
 	}
 	else {
 		if (currUI == '4') {
@@ -427,7 +461,7 @@ int main() {
 	}
 	
 	if (currUI == '0') {
-		menu.displayMenu();
+		fct.clearScreen();
 	}
 
 	return 0;
