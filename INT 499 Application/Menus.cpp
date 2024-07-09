@@ -45,29 +45,108 @@ using namespace std;
 */
 
 
+// Define ANSI color codes
+constexpr auto RESET =		"\033[0m";
+constexpr auto RED =		"\033[91m";
+constexpr auto GREEN =		"\033[92m";
+constexpr auto YELLOW =		"\033[93m";
+constexpr auto DarkYELLOW = "\033[33m";
+constexpr auto BLUE =		"\033[94m";
+constexpr auto MAGENTA =	"\033[95m";
+constexpr auto CYAN =		"\033[96m";
+constexpr auto WHITE =		"\033[97m";
+constexpr auto GREY =		"\033[37m";
+
+// Background colors
+constexpr auto bRED =		"\033[41m";
+constexpr auto bGREEN =		"\033[42m";
+constexpr auto bYELLOW =	"\033[43m";
+constexpr auto bBLUE =		"\033[44m";
+constexpr auto bMAGENTA =	"\033[45m";
+constexpr auto bCYAN =		"\033[46m";
+constexpr auto bWHITE =		"\033[47m";
+
+
 Menus::Menus() {
 	currMenu = '1'; // Default value is '1' for the welcome screen.
 	prevMenu = '1'; // Stores identifier of the last menu displayed for regression.
 
-	header = "\n##############################################################################\n"
-			   "####### Welcome to the EZTechMovie Database Administration Application #######\n"
-			   "##############################################################################\n\n";
+	header_text = string(GREY) + "Welcome to the EZTechMovie Database Administration Application" + RESET;
+	header = string(BLUE) + "\n##############################################################################\n" +
+			string(BLUE) + "####### " + header_text + string(BLUE) + " #######\n" +
+			string(BLUE) + "##############################################################################\n\n" + RESET;
 
-	nav_main = "##### [ Main Menu ] #####";
-	nav_dispTbl = "##### [ Main Menu > Display Tables ] #####";
-	nav_admAct = "##### [ Main Menu > Admin Actions ] #####";
-	nav_modMovie = "##### [ Main Menu > Admin Actions > Modify Movie Data ] #####";
-	nav_modCust = "##### [ Main Menu > Admin Actions > Modify Customer Data ] #####";
+	nav_main = string(BLUE) + "##### [ " + string(WHITE) + "Main Menu" + string(BLUE) + " ] #####" + RESET;
+	nav_dispTbl = string(BLUE) + "##### [ Main Menu > Display Tables ] #####" + RESET;
+	nav_admAct = string(BLUE) + "##### [ Main Menu > Admin Actions ] #####" + RESET;
+	nav_modMovie = string(BLUE) + "##### [ Main Menu > Admin Actions > Modify Movie Data ] #####" + RESET;
+	nav_modCust = string(BLUE) + "##### [ Main Menu > Admin Actions > Modify Customer Data ] #####" + RESET;
 
-	base_Menu = {" [0] Previous Menu"};
-	start_Menu = {" [1] Sign In"," [0] Exit Application"};
-	main_Menu = {" [1] Display Tables", " [2] Admin Actions", " [0] Sign Out"};
-	displayTables_Menu = {" [A] tbl_plans"," [B] tbl_moviedata"," [C] tbl_actors"," [D] tbl_directors"," [E] tbl_genredata",
-		" [F] tbl_moviecast"," [G] tbl_moviedirectors"," [H] tbl_moviegenres"," [I] tbl_custdata"," [J] tbl_paymentinfo",
-		" [K] tbl_custactivity_stream"," [L] tbl_custactivity_dvd"," [M] tbl_dvdrentalhistory"," [0] Previous Menu"};
-	adminActions_Menu = {" [1] Modify Movie Data"," [2] Modify Customer Data"," [0] Previous Menu"};
-	modifyMovie_Menu = {" [1] Add New Movie"," [2] Update Movie Info*"," [3] Delete Movie*"," [0] Previous Menu"};
-	modifyCust_Menu = {" [1] Add New Customer*"," [2] Update Customer Info*"," [3] Delete Customer*"," [0] Previous Menu"};
+	/*
+	base_Menu = { string(DarkYELLOW) + " [0] Previous Menu" + RESET };
+	start_Menu = { string(DarkYELLOW) + " [1] Sign In",
+		string(DarkYELLOW) + " [0] Exit Application" + RESET };
+	main_Menu = { string(DarkYELLOW) + " [1] Display Tables",
+		string(DarkYELLOW) + " [2] Admin Actions",
+		string(DarkYELLOW) + " [0] Sign Out" + RESET };
+	displayTables_Menu = { string(DarkYELLOW) + " [A] tbl_plans",
+		string(DarkYELLOW) + " [B] tbl_moviedata",
+		string(DarkYELLOW) + " [C] tbl_actors",
+		string(DarkYELLOW) + " [D] tbl_directors",
+		string(DarkYELLOW) + " [E] tbl_genredata",
+		string(DarkYELLOW) + " [F] tbl_moviecast",
+		string(DarkYELLOW) + " [G] tbl_moviedirectors",
+		string(DarkYELLOW) + " [H] tbl_moviegenres",
+		string(DarkYELLOW) + " [I] tbl_custdata",
+		string(DarkYELLOW) + " [J] tbl_paymentinfo",
+		string(DarkYELLOW) + " [K] tbl_custactivity_stream",
+		string(DarkYELLOW) + " [L] tbl_custactivity_dvd",
+		string(DarkYELLOW) + " [M] tbl_dvdrentalhistory",
+		string(DarkYELLOW) + " [0] Previous Menu" + RESET };
+	adminActions_Menu = { string(DarkYELLOW) + " [1] Modify Movie Data",
+		string(DarkYELLOW) + " [2] Modify Customer Data",
+		string(DarkYELLOW) + " [0] Previous Menu" + RESET };
+	modifyMovie_Menu = { string(DarkYELLOW) + " [1] Add New Movie",
+		string(DarkYELLOW) + " [2] Update Movie Info*",
+		string(DarkYELLOW) + " [3] Delete Movie*",
+		string(DarkYELLOW) + " [0] Previous Menu" + RESET };
+	modifyCust_Menu = { string(DarkYELLOW) + " [1] Add New Customer*",
+		string(DarkYELLOW) + " [2] Update Customer Info*",
+		string(DarkYELLOW) + " [3] Delete Customer*",
+		string(DarkYELLOW) + " [0] Previous Menu" + RESET };
+	*/
+
+	base_Menu = { string(YELLOW) + " [0] Previous Menu" + RESET };
+	start_Menu = { string(YELLOW) + " [1] Sign In",
+		string(YELLOW) + " [0] Exit Application" + RESET };
+	main_Menu = { string(YELLOW) + " [1] Display Tables",
+		string(YELLOW) + " [2] Admin Actions",
+		string(YELLOW) + " [0] Sign Out" + RESET };
+	displayTables_Menu = { string(YELLOW) + " [A] tbl_plans",
+		string(YELLOW) + " [B] tbl_moviedata",
+		string(YELLOW) + " [C] tbl_actors",
+		string(YELLOW) + " [D] tbl_directors",
+		string(YELLOW) + " [E] tbl_genredata",
+		string(YELLOW) + " [F] tbl_moviecast",
+		string(YELLOW) + " [G] tbl_moviedirectors",
+		string(YELLOW) + " [H] tbl_moviegenres",
+		string(YELLOW) + " [I] tbl_custdata",
+		string(YELLOW) + " [J] tbl_paymentinfo",
+		string(YELLOW) + " [K] tbl_custactivity_stream",
+		string(YELLOW) + " [L] tbl_custactivity_dvd",
+		string(YELLOW) + " [M] tbl_dvdrentalhistory",
+		string(YELLOW) + " [0] Previous Menu" + RESET };
+	adminActions_Menu = { string(YELLOW) + " [1] Modify Movie Data",
+		string(YELLOW) + " [2] Modify Customer Data",
+		string(YELLOW) + " [0] Previous Menu" + RESET };
+	modifyMovie_Menu = { string(YELLOW) + " [1] Add New Movie",
+		string(YELLOW) + " [2] Update Movie Info*",
+		string(YELLOW) + " [3] Delete Movie*",
+		string(YELLOW) + " [0] Previous Menu" + RESET };
+	modifyCust_Menu = { string(YELLOW) + " [1] Add New Customer*",
+		string(YELLOW) + " [2] Update Customer Info*",
+		string(YELLOW) + " [3] Delete Customer*",
+		string(YELLOW) + " [0] Previous Menu" + RESET };
 }
 
 

@@ -67,6 +67,7 @@ class Menus {
 		Global_Functions fct;
 		char currMenu;
 		char prevMenu;
+		string header_text;
 		string header;
 		string nav_main;
 		string nav_dispTbl;

@@ -30,7 +30,7 @@ using namespace std;
 * 
 * Admin App Considerations -->
 * 
-* 1. Add color/decoration to text to make app more vivid.
+* 1.	Add color/decoration to text to make app more vivid.
 * 
 * 
 * Other TO-DO Items -->
@@ -65,10 +65,30 @@ string Pass = "";
 string currTbl = "NULL";	// Stores the name of the table that is either currently being displayed or will be displayed next.
 vector<vector<string>> tableData = {}; // vector<vector<string>> var that stores converted table data from the database; can be sent to Menus object for display.
 
+// Define ANSI color codes
+constexpr auto RESET =		"\033[0m";
+constexpr auto RED =		"\033[91m";
+constexpr auto GREEN =		"\033[92m";
+constexpr auto YELLOW =		"\033[93m";
+constexpr auto BLUE =		"\033[94m";
+constexpr auto MAGENTA =	"\033[95m";
+constexpr auto CYAN =		"\033[96m";
+constexpr auto WHITE =		"\033[97m";
 
 
 
-// Adds any messages in [message] to the end of [msgs].
+
+// Enables the use of ANSI escape codes in the terminal.
+// NOTE: Should work with Unix-liek system as well, but this has not been tested!!!
+void static EnableVirtualTerminalProcessing() {
+	HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+	DWORD dwMode = 0;
+	GetConsoleMode(hOut, &dwMode);
+	dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+	SetConsoleMode(hOut, dwMode);
+}
+
+// Adds any messages from [message] to the end of [msgs].
 void static addMsg(vector<string> message) {
 	if (message.size() > 0) {
 		msgs.insert(msgs.end(), message.begin(), message.end());
@@ -83,6 +103,7 @@ void static addMsg(string message) {
 }
 
 // Overrides the default settings for Console Mode and Echo Input while obtaining the user's password for the database.
+// NOTE: This will only work with Windows systems!
 void static getPassword() {
 	HANDLE hStdin = GetStdHandle(STD_INPUT_HANDLE);
 	DWORD mode = 0;
@@ -124,7 +145,14 @@ bool static verifyLogin() {
 		cout << "Login to the EZTechMovie MySQL Server -->\n\n";
 		cout << "Username: ";
 		getline(cin, User);
-		getPassword();
+
+		#ifdef _WIN32
+			getPassword();
+		#else
+			cout << "Password: ";
+			getline(cin, Pass);
+		#endif
+		
 
 		/*
 		* Create a 'Session' object that attempts to establish a connection to a locally stored MySQL server.
@@ -337,6 +365,9 @@ void static processUserInput() {
 
 int main() {
 
+	// Enable the use of ANSI escape codes to add some color to the terminal.
+	EnableVirtualTerminalProcessing();
+
 	// MAIN PROGRAM LOOP!
 	while (currUI != '0') {
 		usrInput = 'X'; // Reset user input to avoid possible mis-inputs/errors.
@@ -373,7 +404,8 @@ int main() {
 				switch (currUI) {
 					// Close the connection the the MySQL server.
 					case '1':
-						addMsg("SYS: Connection to MySQL server closed.");
+						//addMsg("SYS: Connection to MySQL server closed.");
+						addMsg(string(YELLOW) + "SYS: Connection to MySQL server closed." + RESET);
 						User = "";
 						Pass = "";
 						currTbl = "NULL";
