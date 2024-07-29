@@ -10,27 +10,19 @@ using namespace std;
 #include "EZTechMovie_Admin_App.h"
 
 
+// Define ANSI color codes
+constexpr auto RESET =		"\033[0m";
+constexpr auto RED =		"\033[91m";
+constexpr auto GREEN =		"\033[92m";
+constexpr auto YELLOW =		"\033[93m";
+constexpr auto MAGENTA =	"\033[95m";
+
+
 /*
 * TO-DO -->
 * 
-* 1. Update how program sets actors/directors. If this was a real database, those tables would be VERY large! It would be unreasonable to have the user scroll through hundreds/thousands of people to select.
-*    A better approach would be to implement a search feature -->
-*		1. User may search by first, middle, and/or last names.
-*		2. Special formatting is required since user entry is obtained from a single line.
-*			[2.1] Use a SPACE to separate each name for the search.
-				  For example, entering "John Wayne Patrick" would search for a first name of "John", middle name of "Wayne", and last name of "Patrick".
-				  NOTE: User may skip searching for either first/middle/last name by simply pressing SPACE twice. For example, entering "John  " would only search for people with the first name of "John".
-*			[2.2] Use an UNDERSCORE to indicate that there is a space in a single name for special cases where a person may have 2+ words as their first/middle/last name.
-				  For example, entering "John_Vann D. Goh" searches for any first names that match "John Vann".
-*			[2.3] User may enter a short name to get a list of people with those characters in their name.
-				  For example, entering "Mar D B" would display a list of people who's first names start with "Mar", who's middle names start with "D", and who's last names start with "B".
-*		3. Program must ignore possible input errors: entering more than 3 names for one person, entering too many spaces, entering too many underscores, etc.
-*		4. If the table contains 50+ entries, use search function automatically.
-* 
-* 2. Add a title to the header indicating that the user in in the process of "adding a new movie" to the database.
-* 3. Improve functionality for detecting duplicate entries when attempting to add new Actors/Directors to the database.
-	- Program currently prevents entries if first, mid, and last names all match.
-	- Program SHOULD prioritize first and last names too. If first+last names match, prompt the user to update existing person/record.
+* 1. Add a title to the header indicating that the user in in the process of "adding a new movie" to the database.
+* 2. Convert all "msgs.push_back()" instances to "addMsg()".
 * 
 */
 
@@ -94,11 +86,11 @@ void DB_MovieData::addMsg(string message) {
 // Takes in a string and verifies it is not empty, and contains no spaces prior to first char.
 bool DB_MovieData::validInput() {
 	if (input.empty()) {
-		msgs.push_back("ERROR [validInput()]: User input is empty! Please enter a value this time...");
+		msgs.push_back(string(RED) + "ERROR [validInput()]:" + RESET + " User input is empty! Please enter a value this time...");
 		return false;
 	}
 	else if (isspace(input[0])) {
-		msgs.push_back("ERROR [validInput()]: User input [" + input + "] is invalid! Input cannot begin with a space.");
+		msgs.push_back(string(RED) + "ERROR [validInput()]:" + RESET + " User input [" + string(YELLOW) + input + RESET + "] is invalid! Input cannot begin with a space.");
 		return false;
 	}
 	else {
@@ -126,7 +118,7 @@ vector<string> DB_MovieData::newPerson() {
 			}
 		}
 		catch (exception& ex) {
-			msgs.push_back("EXCEPTION [newPerson()]: " + string(ex.what()));
+			msgs.push_back(string(MAGENTA) + "EXCEPTION [newPerson()]: " + RESET + string(ex.what()));
 		}
 	}
 
@@ -154,7 +146,7 @@ vector<string> DB_MovieData::newPerson() {
 			}
 		}
 		catch (exception& ex) {
-			msgs.push_back("EXCEPTION [newPerson()]: " + string(ex.what()));
+			msgs.push_back(string(MAGENTA) + "EXCEPTION [newPerson()]: " + RESET + string(ex.what()));
 		}
 	}
 
@@ -184,7 +176,7 @@ vector<string> DB_MovieData::newPerson() {
 			}
 		}
 		catch (exception& ex) {
-			msgs.push_back("EXCEPTION [newPerson()]: " + string(ex.what()));
+			msgs.push_back(string(MAGENTA) + "EXCEPTION [newPerson()]: " + RESET + string(ex.what()));
 		}
 	}
 
@@ -237,7 +229,7 @@ void DB_MovieData::setTitle(mysqlx::Schema db) {
 				}
 
 				while (duplicate == true) { // If duplicate...
-					msgs.push_back("WARNING: Duplicate found! A movie title [" + input + "] already exists in the database.");
+					msgs.push_back(string(YELLOW) + "WARNING:" + RESET + " Duplicate found! A movie title [" + string(YELLOW) + input + RESET + "] already exists in the database.");
 					menu.displayMenu(msgs);
 					msgs.clear();
 
@@ -260,7 +252,7 @@ void DB_MovieData::setTitle(mysqlx::Schema db) {
 							duplicate = false; // Send back to [insertMovieData()] to reprompt the user for a different movie title.
 						}
 						else {
-							msgs.push_back("ERROR [setTitle()]: User input [" + input + "] is invalid!");
+							msgs.push_back(string(RED) + "ERROR [setTitle()]:" + RESET + " User input [" + string(YELLOW) + input + RESET + "] is invalid!");
 						}
 					}
 				}
@@ -269,10 +261,10 @@ void DB_MovieData::setTitle(mysqlx::Schema db) {
 		}
 
 		catch (exception& ex) {
-			msgs.push_back("EXCEPTION [setTitle()]: " + string(ex.what()));
+			msgs.push_back(string(MAGENTA) + "EXCEPTION [setTitle()]: " + RESET + string(ex.what()));
 		}
 		catch (const mysqlx::Error& err) {
-			msgs.push_back("MYSQLX_ERROR [setTitle()]: " + string(err.what()));
+			msgs.push_back(string(MAGENTA) + "MYSQLX_ERROR [setTitle()]: " + RESET + string(err.what()));
 		}
 	}
 }
@@ -296,19 +288,19 @@ void DB_MovieData::setYear() {
 			// Error handling + data processing
 			if (validInput()) {
 				if ( !(fct.strIsInt(input)) ) { // Verify input is type int.
-					msgs.push_back("ERROR [setYear()]: User input [" + input + "] is invalid! Contains non-numerical characters.");
+					msgs.push_back(string(RED) + "ERROR [setYear()]:" + RESET + " User input [" + string(YELLOW) + input + RESET + "] is invalid! Contains non-numerical characters.");
 				}
 				else if ( (1888 <= stoi(input)) && (stoi(input) <= currYear) ) { // Verify date range.
 					movieYear = stoi(input);
 				}
 				else {
-					msgs.push_back("ERROR [setYear()]: User input [" + input + "] is invalid! Year is not within allowed range.");
+					msgs.push_back(string(RED) + "ERROR [setYear()]:" + RESET + " User input [" + string(YELLOW) + input + RESET + "] is invalid! Year is not within allowed range.");
 				}
 			}
 		}
 
 		catch (exception& ex) {
-			msgs.push_back("EXCEPTION [setYear()]: " + string(ex.what()));
+			msgs.push_back(string(MAGENTA) + "EXCEPTION [setYear()]: " + RESET + string(ex.what()));
 		}
 	}
 }
@@ -347,13 +339,13 @@ void DB_MovieData::setRating() {
 				}
 
 				if (movieRating.empty()) { // If user input not in vector [ratings].
-					msgs.push_back("ERROR [setRating()]: User input [" + input + "] is not a valid rating!");
+					msgs.push_back(string(RED) + "ERROR [setRating()]:" + RESET + " User input [" + string(YELLOW) + input + RESET + "] is not a valid rating!");
 				}
 			}
 		}
 
 		catch (exception& ex) {
-			msgs.push_back("EXCEPTION [setRating()]: " + string(ex.what()));
+			msgs.push_back(string(MAGENTA) + "EXCEPTION [setRating()]: " + RESET + string(ex.what()));
 		}
 	}
 }
@@ -375,21 +367,21 @@ void DB_MovieData::setNumCast() {
 			// Error handling + data processing
 			if (validInput()) {
 				if ( !(fct.strIsInt(input)) ) { // If not a number...
-					msgs.push_back("ERROR [setNumCast()]: User input [" + input + "] is not a number! Please enter a number [1-5].");
+					msgs.push_back(string(RED) + "ERROR [setNumCast()]:" + RESET + " User input [" + string(YELLOW) + input + RESET + "] is not a number! Please enter a number [1-5].");
 				}
 				else {
 					if (((stoi(input) - 1) | (5 - stoi(input))) >= 0) { // If number is between 1-5 (bit opperation).
 						movieNumCast = stoi(input);
 					}
 					else {
-						msgs.push_back("ERROR [setNumCast()]: User input [" + input + "] is not within the allowed numerical range! Please enter a number [1-5].");
+						msgs.push_back(string(RED) + "ERROR [setNumCast()]:" + RESET + " User input [" + string(YELLOW) + input + RESET + "] is not within the allowed numerical range! Please enter a number [1-5].");
 					}
 				}
 			}
 		}
 
 		catch (exception& ex) {
-			msgs.push_back("EXCEPTION [setNumCast()]: " + string(ex.what()));
+			msgs.push_back(string(MAGENTA) + "EXCEPTION [setNumCast()]: " + RESET + string(ex.what()));
 		}
 	}
 }
@@ -413,7 +405,7 @@ void DB_MovieData::addNewCast(mysqlx::Table tbl) {
 			}
 			name.append(" " + newActor[2]);
 
-			msgs.push_back("ERROR [addNewCast()]: Duplication error! The actor [" + name + "] already exists in the database.");
+			msgs.push_back(string(RED) + "ERROR [addNewCast()]:" + RESET + " Duplication error! The actor [" + string(YELLOW) + name + RESET + "] already exists in the database.");
 		}
 	}
 
@@ -430,10 +422,10 @@ void DB_MovieData::addNewCast(mysqlx::Table tbl) {
 				tblInsertStmt.values(newActor[0], newActor[1], newActor[2]).execute();
 			}
 
-			msgs.push_back("SYS: Actor successfully added to the database!");
+			msgs.push_back(string(GREEN) + "SYS:" + RESET + " Actor successfully added to the database!");
 		}
 		catch (const mysqlx::Error& err) {
-			msgs.push_back("MYSQLX_ERROR [addNewCast()]: " + string(err.what()));
+			msgs.push_back(string(MAGENTA) + "MYSQLX_ERROR [addNewCast()]: " + RESET + string(err.what()));
 		}
 	}
 }
@@ -479,7 +471,7 @@ void DB_MovieData::setCast(mysqlx::Schema db) {
 
 						// Verify that the chosen actor has not already been selected previously by the user.
 						if (find(movieCastMembers.begin(), movieCastMembers.end(), person) != movieCastMembers.end()) {
-							msgs.push_back("ERROR [setCast()]: Actor with ID [" + input + "] has already been selected! Cannot be added twice.");
+							msgs.push_back(string(RED) + "ERROR [setCast()]:" + RESET + " Actor with ID [" + string(YELLOW) + input + RESET + "] has already been selected! Cannot be added twice.");
 						}
 						else if (!person.empty()) {
 							movieCastMembers.push_back(person); // Add user selection if no duplicates exist.
@@ -487,7 +479,7 @@ void DB_MovieData::setCast(mysqlx::Schema db) {
 						}
 					}
 					else {
-						msgs.push_back("ERROR [setCast()]: User input [" + input + "] is invalid! Input does not correlate to any Actor IDs in the database.");
+						msgs.push_back(string(RED) + "ERROR [setCast()]:" + RESET + " User input [" + string(YELLOW) + input + RESET + "] is invalid! Input does not correlate to any Actor IDs in the database.");
 					}
 				}
 
@@ -498,18 +490,18 @@ void DB_MovieData::setCast(mysqlx::Schema db) {
 						addNewCast(actorTbl);
 					}
 					else {
-						msgs.push_back("ERROR [setCast()]: User input [" + input + "] is invalid!");
+						msgs.push_back(string(RED) + "ERROR [setCast()]:" + RESET + " User input [" + string(YELLOW) + input + RESET + "] is invalid!");
 					}
 				}
 			}
 		}
 
 		catch (exception& ex) {
-			msgs.push_back("EXCEPTION [setCast()]: " + string(ex.what()));
+			msgs.push_back(string(MAGENTA) + "EXCEPTION [setCast()]: " + RESET + string(ex.what()));
 			break;
 		}
 		catch (const mysqlx::Error& err) {
-			msgs.push_back("MYSQLX_ERROR [setCast()]: " + string(err.what()));
+			msgs.push_back(string(MAGENTA) + "MYSQLX_ERROR [setCast()]: " + RESET + string(err.what()));
 			break;
 		}
 	}
@@ -532,21 +524,21 @@ void DB_MovieData::setNumDir() {
 			// Error handling + data processing
 			if (validInput()) {
 				if (!(fct.strIsInt(input))) { // If not a number...
-					msgs.push_back("ERROR [setNumDir()]: User input [" + input + "] is not a number! Please enter a number [1-3].");
+					msgs.push_back(string(RED) + "ERROR [setNumDir()]:" + RESET + " User input [" + string(YELLOW) + input + RESET + "] is not a number! Please enter a number [1-3].");
 				}
 				else {
 					if (((stoi(input) - 1) | (3 - stoi(input))) >= 0) { // If number is between 1-3 (bit opperation).
 						movieNumDir = stoi(input);
 					}
 					else {
-						msgs.push_back("ERROR [setNumDir()]: User input [" + input + "] is not within the allowed numberical range! Please enter a number [1-3].");
+						msgs.push_back(string(RED) + "ERROR [setNumDir()]:" + RESET + " User input [" + string(YELLOW) + input + RESET + "] is not within the allowed numberical range! Please enter a number [1-3].");
 					}
 				}
 			}
 		}
 
 		catch (exception& ex) {
-			msgs.push_back("EXCEPTION [setNumDir()]: " + string(ex.what()));
+			msgs.push_back(string(MAGENTA) + "EXCEPTION [setNumDir()]: " + RESET + string(ex.what()));
 		}
 	}
 }
@@ -570,7 +562,7 @@ void DB_MovieData::addNewDir(mysqlx::Table tbl) {
 			}
 			name.append(" " + newDir[2]);
 
-			msgs.push_back("ERROR [addNewDir()]: Duplication error! The director [" + name + "] already exists in the database.");
+			msgs.push_back(string(RED) + "ERROR [addNewDir()]:" + RESET + " Duplication error! The director [" + string(YELLOW) + name + RESET + "] already exists in the database.");
 		}
 	}
 
@@ -587,10 +579,10 @@ void DB_MovieData::addNewDir(mysqlx::Table tbl) {
 				tblInsertStmt.values(newDir[0], newDir[1], newDir[2]).execute();
 			}
 
-			msgs.push_back("SYS: Director successfully added to the database!");
+			msgs.push_back(string(GREEN) + "SYS:" + RESET + " Director successfully added to the database!");
 		}
 		catch (const mysqlx::Error& err) {
-			msgs.push_back("MYSQLX_ERROR [addNewDir()]: " + string(err.what()));
+			msgs.push_back(string(MAGENTA) + "MYSQLX_ERROR [addNewDir()]: " + RESET + string(err.what()));
 		}
 	}
 }
@@ -636,7 +628,7 @@ void DB_MovieData::setDir(mysqlx::Schema db) {
 
 						// Verify that the chosen director has not already been selected previously by the user.
 						if (find(movieDirectors.begin(), movieDirectors.end(), person) != movieDirectors.end()) {
-							msgs.push_back("ERROR [setDir()]: Director with ID [" + input + "] has already been selected! Cannot be added twice.");
+							msgs.push_back(string(RED) + "ERROR [setDir()]:" + RESET + " Director with ID [" + string(YELLOW) + input + RESET + "] has already been selected! Cannot be added twice.");
 						}
 						else if (!person.empty()) {
 							movieDirectors.push_back(person); // Add user selection if no duplicates exist.
@@ -644,7 +636,7 @@ void DB_MovieData::setDir(mysqlx::Schema db) {
 						}
 					}
 					else {
-						msgs.push_back("ERROR [setDir()]: User input [" + input + "] is invalid! Input does not correlate to any director IDs in the database.");
+						msgs.push_back(string(RED) + "ERROR [setDir()]:" + RESET + " User input [" + string(YELLOW) + input + RESET + "] is invalid! Input does not correlate to any director IDs in the database.");
 					}
 				}
 
@@ -655,18 +647,18 @@ void DB_MovieData::setDir(mysqlx::Schema db) {
 						addNewDir(directorTbl);
 					}
 					else {
-						msgs.push_back("ERROR [setDir()]: User input [" + input + "] is invalid!");
+						msgs.push_back(string(RED) + "ERROR [setDir()]:" + RESET + " User input [" + string(YELLOW) + input + RESET + "] is invalid!");
 					}
 				}
 			}
 		}
 
 		catch (exception& ex) {
-			msgs.push_back("EXCEPTION [setDir()]: " + string(ex.what()));
+			msgs.push_back(string(MAGENTA) + "EXCEPTION [setDir()]: " + RESET + string(ex.what()));
 			break;
 		}
 		catch (const mysqlx::Error& err) {
-			msgs.push_back("MYSQLX_ERROR [setDir()]: " + string(err.what()));
+			msgs.push_back(string(MAGENTA) + "MYSQLX_ERROR [setDir()]: " + RESET + string(err.what()));
 			break;
 		}
 	}
@@ -702,7 +694,7 @@ void DB_MovieData::addNewGenre(mysqlx::Table tbl) {
 
 				if (duplicate == true) {
 					duplicate = false; // Keep loop active.
-					msgs.push_back("ERROR [addNewGenre()]: Duplication error! The genre [" + input + "] exists in the database.");
+					msgs.push_back(string(RED) + "ERROR [addNewGenre()]:" + RESET + " Duplication error! The genre [" + string(YELLOW) + input + RESET + "] exists in the database.");
 				}
 				else {
 					genre = input;
@@ -712,7 +704,7 @@ void DB_MovieData::addNewGenre(mysqlx::Table tbl) {
 		}
 
 		catch (exception& ex) {
-			msgs.push_back("EXCEPTION [addNewGenre()]: " + string(ex.what()));
+			msgs.push_back(string(MAGENTA) + "EXCEPTION [addNewGenre()]: " + RESET + string(ex.what()));
 		}
 	}
 
@@ -722,7 +714,7 @@ void DB_MovieData::addNewGenre(mysqlx::Table tbl) {
 		tblInsertStmt.execute();
 	}
 	catch (const mysqlx::Error& err) {
-		msgs.push_back("MYSQLX_ERROR [addNewGenre()]: " + string(err.what()));
+		msgs.push_back(string(MAGENTA) + "MYSQLX_ERROR [addNewGenre()]: " + RESET + string(err.what()));
 	}
 	
 }
@@ -783,7 +775,7 @@ void DB_MovieData::setGenre(mysqlx::Schema db) {
 
 							// Verify that the user cannot select the same genre more than once.
 							if ( find(genreIDs.begin(), genreIDs.end(), stoi(input)) != genreIDs.end() ) {
-								msgs.push_back("ERROR [setGenre()]: Genre with index [" + input + "] has already been selected! Cannot be added twice.");
+								msgs.push_back(string(RED) + "ERROR [setGenre()]:" + RESET + " Genre with index [" + string(YELLOW) + input + RESET + "] has already been selected! Cannot be added twice.");
 							}
 							else {
 								genreIDs.push_back(stoi(input));
@@ -793,7 +785,7 @@ void DB_MovieData::setGenre(mysqlx::Schema db) {
 					}
 
 					if (validIndex == false) { // If input is NOT in the table {tbl_genredata}...
-						msgs.push_back("ERROR [setGenre()]: User input [" + input + "] is not within the allowed numerical range! Please enter a number between[1-" + to_string(tableData.size()) + "].");
+						msgs.push_back(string(RED) + "ERROR [setGenre()]:" + RESET + " User input [" + string(YELLOW) + input + RESET + "] is not within the allowed numerical range! Please enter a number between[1-" + to_string(tableData.size()) + "].");
 					}
 				}
 
@@ -805,32 +797,32 @@ void DB_MovieData::setGenre(mysqlx::Schema db) {
 					}
 					else if (input == "~") { // Clear genre selection.
 						if (genreIDs.empty()) {
-							msgs.push_back("ERROR [setGenre()]: Cannot clear genre selection! No genres have been selected.");
+							msgs.push_back(string(RED) + "ERROR [setGenre()]:" + RESET + " Cannot clear genre selection! No genres have been selected.");
 						}
 						else {
 							genreIDs.clear();
 							genreNames.clear();
-							msgs.push_back("SYS: Genre selection cleared.");
+							msgs.push_back(string(GREEN) + "SYS:" + RESET + " Genre selection cleared.");
 						}
 					}
 					else if (input == "C") { // Close loop and continue with process.
 						if (genreIDs.size() == 0) {
 							input = ""; // Reset [input] to keep loop active.
-							msgs.push_back("ERROR [setGenre()]: No genres selected! Please select at least 1 genre for the movie before continuing.");
+							msgs.push_back(string(RED) + "ERROR [setGenre()]:" + RESET + " No genres selected! Please select at least 1 genre for the movie before continuing.");
 						}
 					}
 					else {
-						msgs.push_back("ERROR [setGenre()]: User input [" + input + "] is invalid!");
+						msgs.push_back(string(RED) + "ERROR [setGenre()]:" + RESET + " User input [" + string(YELLOW) + input + RESET + "] is invalid!");
 					}
 				}
 			}
 		}
 
 		catch (exception& ex) {
-			msgs.push_back("EXCEPTION [setGenre()]: " + string(ex.what()));
+			msgs.push_back(string(MAGENTA) + "EXCEPTION [setGenre()]: " + RESET + string(ex.what()));
 		}
 		catch (const mysqlx::Error& err) {
-			msgs.push_back("MYSQLX_ERROR [setGenre()]: " + string(err.what()));
+			msgs.push_back(string(MAGENTA) + "MYSQLX_ERROR [setGenre()]: " + RESET + string(err.what()));
 		}
 	}
 
@@ -962,10 +954,10 @@ void DB_MovieData::modifyNewMovie(mysqlx::Schema db) {
 				else { // If input is invalid (contains chars but not valid ones) keep loop going.
 					notValid = true;
 					if (fct.strIsInt(input)) { // [Input] contains invalid number(s).
-						msgs.push_back("ERROR [modifyNewMovie()]: User input [" + input + "] is not within the allowed numerical range!");
+						msgs.push_back(string(RED) + "ERROR [modifyNewMovie()]:" + RESET + " User input [" + string(YELLOW) + input + RESET + "] is not within the allowed numerical range!");
 					}
 					else { // [Input] contains invalid alphanumerical character(s).
-						msgs.push_back("ERROR [modifyNewMovie()]: User input [" + input + "] is invalid!");
+						msgs.push_back(string(RED) + "ERROR [modifyNewMovie()]:" + RESET + " User input [" + string(YELLOW) + input + RESET + "] is invalid!");
 					}
 					
 				}
@@ -977,10 +969,10 @@ void DB_MovieData::modifyNewMovie(mysqlx::Schema db) {
 		}
 
 		catch (exception& ex) {
-			msgs.push_back("EXCEPTION [modifyNewMovie()]: " + string(ex.what()));
+			msgs.push_back(string(MAGENTA) + "EXCEPTION [modifyNewMovie()]: " + RESET + string(ex.what()));
 		}
 		catch (const mysqlx::Error& err) {
-			msgs.push_back("MYSQLX_ERROR [modifyNewMovie()]: " + string(err.what()));
+			msgs.push_back(string(MAGENTA) + "MYSQLX_ERROR [modifyNewMovie()]: " + RESET + string(err.what()));
 		}
 	}
 }
@@ -1016,24 +1008,24 @@ void DB_MovieData::validationSCRN(mysqlx::Schema db) {
 				}
 				else if (input == "C") { // Continue (send to database)
 					sendMovieToDB(db);
-					msgs.push_back("SYS: New movie successfully added to the database!");
+					msgs.push_back(string(GREEN) + "SYS:" + RESET + " New movie successfully added to the database!");
 				}
 				else if (input == "~") { // Abort (don't send to database)
 					msgs.clear();
-					msgs.push_back("SYS: Process aborted! Movie not added to database.");
+					msgs.push_back(string(GREEN) + "SYS:" + RESET + " Process aborted! Movie not added to database.");
 				}
 				else {
-					msgs.push_back("ERROR [validationSCRN()]: User input [" + input + "] is invalid!");
+					msgs.push_back(string(RED) + "ERROR [validationSCRN()]:" + RESET + " User input [" + string(YELLOW) + input + RESET + "] is invalid!");
 				}
 			}
 		}
 
 		catch (exception& ex) {
-			msgs.push_back("EXCEPTION [validationSCRN()]: " + string(ex.what()));
+			msgs.push_back(string(MAGENTA) + "EXCEPTION [validationSCRN()]: " + RESET + string(ex.what()));
 			break;
 		}
 		catch (const mysqlx::Error& err) {
-			msgs.push_back("MYSQLX_ERROR [validationSCRN()]: " + string(err.what()));
+			msgs.push_back(string(MAGENTA) + "MYSQLX_ERROR [validationSCRN()]: " + RESET + string(err.what()));
 			break;
 		}
 	}
@@ -1144,10 +1136,10 @@ void DB_MovieData::sendMovieToDB(mysqlx::Schema db) {
 	}
 
 	catch (exception& ex) {
-		msgs.push_back("EXCEPTION [sendMovieToDB()]: " + string(ex.what()));
+		msgs.push_back(string(MAGENTA) + "EXCEPTION [sendMovieToDB()]: " + RESET + string(ex.what()));
 	}
 	catch (const mysqlx::Error& err) {
-		msgs.push_back("MYSQLX_ERROR [sendMovieToDB()]: " + string(err.what()));
+		msgs.push_back(string(MAGENTA) + "MYSQLX_ERROR [sendMovieToDB()]: " + RESET + string(err.what()));
 	}
 }
 
@@ -1182,7 +1174,7 @@ vector<string> DB_MovieData::updateMovieData(mysqlx::Schema db) {
 	setDefaultValues(); // Reset global variables to default values.
 	// do something...
 
-	return { "SYS: Functionality not implemented yet! Will be added in a future release." };
+	return { string(GREEN) + "SYS:" + RESET + " Functionality not implemented yet! Will be added in a future release." };
 }
 
 // Processes user requests to DELETE data from the database. [*NOT IMPLEMENTED*]
@@ -1190,6 +1182,6 @@ vector<string> DB_MovieData::deleteMovieData(mysqlx::Schema db) {
 	setDefaultValues(); // Reset global variables to default values.
 	// do something...
 
-	return { "SYS: Functionality not implemented yet! Will be added in a future release." };
+	return { string(GREEN) + "SYS:" + RESET + " Functionality not implemented yet! Will be added in a future release." };
 }
 

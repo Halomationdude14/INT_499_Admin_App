@@ -15,6 +15,14 @@ using namespace std;
 #include "EZTechMovie_Admin_App.h"
 
 
+// Define ANSI color codes
+constexpr auto RESET =		"\033[0m";
+constexpr auto RED =		"\033[91m";
+constexpr auto GREEN =		"\033[92m";
+constexpr auto YELLOW =		"\033[93m";
+constexpr auto MAGENTA =	"\033[95m";
+
+
 // Default Constructor
 Global_Functions::Global_Functions() {
 	tempStr = "";
@@ -115,10 +123,10 @@ void Global_Functions::getTableData(mysqlx::Table table, vector<vector<string>>*
 	}
 
 	catch (const mysqlx::Error& err) {
-		message.push_back("MYSQLX_ERROR [getTableData()]: " + string(err.what()));
+		message.push_back(string(MAGENTA) + "MYSQLX_ERROR [getTableData()]: " + RESET + string(err.what()));
 	}
 	catch (exception& ex) {
-		message.push_back("EXCEPTION [getTableData()]: " + string(ex.what()));
+		message.push_back(string(MAGENTA) + "EXCEPTION [getTableData()]: " + RESET + string(ex.what()));
 	}
 
 	tempStr.clear();
@@ -134,7 +142,7 @@ void Global_Functions::getRow(vector<vector<string>> tableData, int ID, vector<s
 
 	try {
 		if (tableData.empty()) {
-			message.push_back("ERROR [getRow()]: No table data to process! Cannot retrieve row data.");
+			message.push_back(string(RED) + "ERROR [getRow()]:" + RESET + " No table data to process! Cannot retrieve row data.");
 		}
 		else {
 			for (auto& i : tableData) {
@@ -144,7 +152,7 @@ void Global_Functions::getRow(vector<vector<string>> tableData, int ID, vector<s
 					}
 				}
 				else { // In case the wrong table is put through this function (i.e., tables with a first column that is not of type [int]).
-					message.push_back("ERROR [getRow()]: First column of table is not of type [int]! Aborting process.");
+					message.push_back(string(RED) + "ERROR [getRow()]:" + RESET + " First column of table is not of type [int]! Aborting process.");
 					break;
 				}
 			}
@@ -152,7 +160,7 @@ void Global_Functions::getRow(vector<vector<string>> tableData, int ID, vector<s
 	}
 
 	catch (exception& ex) {
-		message.push_back("EXCEPTION [getRow()]: " + string(ex.what()));
+		message.push_back(string(MAGENTA) + "EXCEPTION [getRow()]: " + RESET + string(ex.what()));
 	}
 
 	*rowData = row;

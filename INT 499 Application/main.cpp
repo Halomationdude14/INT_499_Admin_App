@@ -3,7 +3,7 @@
 * 
 * Author: Paul Oram
 * Date Started: 2024-04-22
-* Last Updated: 2024-07-08
+* Last Updated: 2024-07-29
 * Purpose: Sample terminal program to demonstrate how to use the <mysqlx/xdevapi.h> library which allows interaction with a MySQL server/database.
 * 
 */
@@ -30,7 +30,8 @@ using namespace std;
 * 
 * Admin App Considerations -->
 * 
-* 1.	Add color/decoration to text to make app more vivid.
+* 1. New bug found: when program takes in user input automatically, the <ENTER> was previously fixed, but now the <BACKSPACE> is causing problems.
+*	 The same for <SPACE> and <TAB>.
 * 
 * 
 * Other TO-DO Items -->
@@ -70,16 +71,13 @@ constexpr auto RESET =		"\033[0m";
 constexpr auto RED =		"\033[91m";
 constexpr auto GREEN =		"\033[92m";
 constexpr auto YELLOW =		"\033[93m";
-constexpr auto BLUE =		"\033[94m";
 constexpr auto MAGENTA =	"\033[95m";
-constexpr auto CYAN =		"\033[96m";
-constexpr auto WHITE =		"\033[97m";
 
 
 
 
 // Enables the use of ANSI escape codes in the terminal.
-// NOTE: Should work with Unix-liek system as well, but this has not been tested!!!
+// NOTE: Should work with Unix-like system as well, but this has not been tested!!!
 void static EnableVirtualTerminalProcessing() {
 	HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
 	DWORD dwMode = 0;
@@ -161,7 +159,7 @@ bool static verifyLogin() {
 		*/
 		mysqlx::Session sess = mysqlx::getSession("localhost", 33060, User, Pass);
 
-		addMsg("SYS: Connection to MySQL server successful!");
+		addMsg(string(GREEN) + "SYS:" + RESET + " Connection to MySQL server successful!");
 		
 		sess.close(); // Close the connection to avoid errors.
 
@@ -169,11 +167,11 @@ bool static verifyLogin() {
 	}
 
 	catch (const mysqlx::Error& err) {
-		addMsg("MYSQLX_ERROR [verifyLogin()]: " + string(err.what()));
+		addMsg(string(MAGENTA) + "MYSQLX_ERROR [verifyLogin()]: " + RESET + string(err.what()));
 		return false;
 	}
 	catch (exception& ex) {
-		addMsg("EXCEPTION [verifyLogin()]: " + string(ex.what()));
+		addMsg(string(MAGENTA) + "EXCEPTION [verifyLogin()]: " + RESET + string(ex.what()));
 		return false;
 	}
 }
@@ -245,7 +243,7 @@ void static callDisplayMethod() {
 			msgs.clear();
 			conn = verifyLogin();
 			if (conn == false) {
-				addMsg("SYS: Could not establish connection to MySQL server!");
+				addMsg(string(GREEN) + "SYS:" + RESET + " Could not establish connection to MySQL server!");
 			}
 			break;
 		case '3': // Main Menu
@@ -261,7 +259,7 @@ void static callDisplayMethod() {
 		case '5': // Display Table
 			// Verify that [tableData] is not empty before attempting to display it.
 			if (tableData.empty()) {
-				addMsg("SYS: Table [" + currTbl + "] is empty. No data to display.");
+				addMsg(string(GREEN) + "SYS:" + RESET + " Table [" + string(YELLOW) + currTbl + RESET + "] is empty. No data to display.");
 			}
 			else {
 				menu.SCRN_displayTable(msgs, tableData);
@@ -345,11 +343,11 @@ void static processUserInput() {
 	// Error handling + data processing.
 	if (c == 'X') {
 		if (usrInput == '\r') { // Enter key
-			addMsg("ERROR [processUserInput()]: User input is empty! Please enter a value this time...");
+			addMsg(string(RED) + "ERROR [processUserInput()]:" + RESET + " User input is empty! Please enter a value this time...");
 		}
 		else {
 			string str(1, usrInput);
-			addMsg("ERROR [processUserInput()]: User input [" + str + "] is invalid!");
+			addMsg(string(RED) + "ERROR [processUserInput()]:" + RESET + " User input [" + string(YELLOW) + str + RESET + "] is invalid!");
 		}
 	}
 	else {
@@ -404,8 +402,7 @@ int main() {
 				switch (currUI) {
 					// Close the connection the the MySQL server.
 					case '1':
-						//addMsg("SYS: Connection to MySQL server closed.");
-						addMsg(string(YELLOW) + "SYS: Connection to MySQL server closed." + RESET);
+						addMsg(string(GREEN) + "SYS:" + RESET + " Connection to MySQL server closed.");
 						User = "";
 						Pass = "";
 						currTbl = "NULL";
@@ -482,11 +479,11 @@ int main() {
 			}
 
 			catch (const mysqlx::Error& err) {
-				addMsg("MYSQLX_ERROR [main()]: " + string(err.what()));
+				addMsg(string(MAGENTA) + "MYSQLX_ERROR [main()]: " + RESET + string(err.what()));
 				break;
 			}
 			catch (exception& ex) {
-				addMsg("EXCEPTION [main()]: " + string(ex.what()));
+				addMsg(string(MAGENTA) + "EXCEPTION [main()]: " + RESET + string(ex.what()));
 				break;
 			}
 		}
