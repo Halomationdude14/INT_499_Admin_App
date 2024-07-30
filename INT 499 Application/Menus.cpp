@@ -50,7 +50,7 @@ using namespace std;
 */
 
 
-// Define ANSI color codes based on Dracula theme
+// Define ANSI color codes
 constexpr auto BG =		"\033[48;2;50;52;64m";
 constexpr auto TEXT =	"\033[38;2;248;248;242m";
 constexpr auto PURPLE = "\033[38;2;255;121;198m";

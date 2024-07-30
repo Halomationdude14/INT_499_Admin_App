@@ -10,7 +10,7 @@ using namespace std;
 #include "EZTechMovie_Admin_App.h"
 
 
-// Define ANSI color codes based on Dracula theme
+// Define ANSI color codes
 constexpr auto BOLD = "\033[1m";
 constexpr auto TEXT = "\033[38;2;248;248;242m";
 constexpr auto BLACK = "\033[38;2;33;34;44m";

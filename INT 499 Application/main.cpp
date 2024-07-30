@@ -30,6 +30,7 @@ using namespace std;
 * 3. Improve the efficiency of the colorization of text in this program.
 *		- SYS/ERROR/EXCEPTION messages -> create a function for each message that is similar to the [addMsg()] function.
 * 4. Delete the [addMsg(vector<string> message)] function. I don't believe it's being used at all.
+* 5. Continue work on color scheme and OS version detection. Need to centralize the color scheme and apply it to the other .cpp files.
 * 
 * MAJOR BUG!!! -> In the released version, when I attempt to login to the MySQL server, the program crashes.
 * 
@@ -52,6 +53,7 @@ Global_Functions fct;		// Object assists in generic processes throughout program
 Menus menu;					// Object assists in displaying information to the terminal screen.
 DB_MovieData movie;			// Allows for manipulation of "tbl_moviedata".
 DB_CustData cust;			// Allows for manipulation of "tbl_custdata".
+bool isWin10OrLater = false;
 vector<string> msgs = {};	// Stores all SYS/ERR notifications: to be displayed below the header.
 char currUI = '1';			// Value corresponds to the current UI being displayed. Default is '1' to display the greeting screen.
 char usrInput = 'X';		// Stores value entered by user. Used for navigating through the menus. Default is 'X' -> this value throws an error if returned.
@@ -63,18 +65,18 @@ string currTbl = "NULL";	// Stores the name of the table that is either currentl
 vector<vector<string>> tableData = {}; // vector<vector<string>> var that stores converted table data from the database; can be sent to Menus object for display.
 
 
-// Define ANSI color codes based on Dracula theme
-constexpr auto RESET =		 "\033[0m";
-constexpr auto BG =			 "\033[48;2;50;52;64m";
-constexpr auto BOLD =		 "\033[1m";
-constexpr auto TEXT =		 "\033[38;2;248;248;242m";
-constexpr auto BLACK =		 "\033[38;2;33;34;44m";
-constexpr auto BLUE =		 "\033[38;2;189;147;249m";
-constexpr auto CYAN =		 "\033[38;2;139;233;253m";
-constexpr auto GREEN =		 "\033[38;2;80;250;123m";
-constexpr auto PURPLE =		 "\033[38;2;255;121;198m";
-constexpr auto RED =		 "\033[38;2;255;85;85m";
-constexpr auto YELLOW =		 "\033[38;2;241;250;140m";
+// Define ANSI color codes
+constexpr auto RESET =		"\033[0m";
+constexpr auto BOLD =		"\033[1m";
+constexpr auto BG =			"\033[40m";
+constexpr auto TEXT =		"\033[37m";
+constexpr auto BLACK =		"\033[40m";
+constexpr auto BLUE =		"\033[34m";
+constexpr auto CYAN =		"\033[36m";
+constexpr auto GREEN =		"\033[32m";
+constexpr auto PURPLE =		"\033[35m";
+constexpr auto RED =		"\033[31m";
+constexpr auto YELLOW =		"\033[33m";
 
 
 // Enables the use of ANSI escape codes in the terminal.
@@ -85,6 +87,32 @@ void static enableVirtualTerminalProcessing() {
 	GetConsoleMode(hOut, &dwMode);
 	dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
 	SetConsoleMode(hOut, dwMode);
+}
+
+// Checks to see if the OS is for Windows 10 or later.
+bool static isWindows10OrLater() {
+	OSVERSIONINFOEXW osvi = { sizeof(OSVERSIONINFOEXW) };
+
+	// Use VerSetConditionMask to check for Windows 10 or later
+	DWORD dwConditionMask = 0;
+	VerSetConditionMask(osvi.dwMajorVersion, VER_MAJORVERSION, VER_GREATER_EQUAL);
+	osvi.dwMajorVersion = 10; // Set the major version to 10 for comparison
+
+	// Check if the system meets the specified version criteria
+	return VerifyVersionInfoW(&osvi, VER_MAJORVERSION, NULL);
+}
+
+// Update color vars from default ANSI values to 24-bit supported "True Color" values (if OS is Windows 10 or later*).
+void static setDraculaTheme() {
+	constexpr auto BG = "\033[48;2;50;52;64m";
+	constexpr auto TEXT = "\033[38;2;248;248;242m";
+	constexpr auto BLACK = "\033[38;2;33;34;44m";
+	constexpr auto BLUE = "\033[38;2;189;147;249m";
+	constexpr auto CYAN = "\033[38;2;139;233;253m";
+	constexpr auto GREEN = "\033[38;2;80;250;123m";
+	constexpr auto PURPLE = "\033[38;2;255;121;198m";
+	constexpr auto RED = "\033[38;2;255;85;85m";
+	constexpr auto YELLOW = "\033[38;2;241;250;140m";
 }
 
 // Establishes the color scheme of the whole program. Called once at the start of the program.
@@ -371,6 +399,14 @@ int main() {
 
 	// Enable the use of ANSI escape codes to add some color to the terminal.
 	enableVirtualTerminalProcessing();
+
+	// If the OS is Windows 10 or later, then the color scheme is updated to a 24-bit color pallete for a more improved visual display.
+	if (isWindows10OrLater()) {
+		isWin10OrLater = true;
+		setDraculaTheme();
+	}
+
+	// Establishes a color scheme/theme for the program.
 	setColorScheme();
 
 	// MAIN PROGRAM LOOP!
