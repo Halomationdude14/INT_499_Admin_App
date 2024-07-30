@@ -54,16 +54,22 @@ using namespace std;
 constexpr auto RESET =		"\033[0m";
 constexpr auto BOLD =		"\033[1m";
 constexpr auto TEXT =		"\033[38;2;248;248;242m";
-constexpr auto RED =		"\033[91m";
-constexpr auto GREEN =		"\033[92m";
-constexpr auto YELLOW =		"\033[93m";
+//constexpr auto RED =		"\033[91m";
+//constexpr auto GREEN =		"\033[92m";
+//constexpr auto YELLOW =		"\033[93m";
 constexpr auto MAGENTA =	"\033[95m";
 
 // Dracula theme
-//constexpr auto BG = "\033[48;2;40;42;54m";
-//constexpr auto BG = "\033[48;2;255;0;0m";
-constexpr auto BG = "\033[48;2;50;52;64m";
-
+constexpr auto BG =			"\033[48;2;50;52;64m";
+constexpr auto BLACK =		"\033[38;2;33;34;44m";
+constexpr auto BLUE =		"\033[38;2;189;147;249m";
+constexpr auto CYAN =		"\033[38;2;139;233;253m";
+constexpr auto GREEN =		"\033[38;2;80;250;123m";
+constexpr auto PURPLE =		"\033[38;2;255;121;198m";
+constexpr auto RED =		"\033[38;2;255;85;85m";
+constexpr auto WHITE =		"\033[38;2;248;248;242m";
+constexpr auto YELLOW =		"\033[38;2;241;250;140m";
+constexpr auto BRIGHTBLACK = "\033[38;2;98;114;164m";
 
 
 Menus::Menus() {
@@ -123,36 +129,7 @@ Menus::Menus() {
 // Displays base UI: header
 void Menus::displayMenu() {
 	fct.clearScreen();
-
-
-	cout << BG << "sample text" << endl;
-
-	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-	DWORD dwMode = 0;
-
-	// Get the current console mode
-	if (!GetConsoleMode(hConsole, &dwMode)) {
-		std::cerr << "GetConsoleMode failed: " << GetLastError() << std::endl;
-	}
-	else {
-		std::cerr << "GetConsoleMode obtained ->" << GetConsoleMode(hConsole, &dwMode) << std::endl;
-	}
-
-	// Enable or disable specific modes (replace with desired flags)
-	dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING; // Enable ANSI escape codes
-
-	// Set the new console mode
-	if (!SetConsoleMode(hConsole, dwMode)) {
-		std::cerr << "SetConsoleMode failed: " << GetLastError() << std::endl;
-	}
-	else {
-		std::cerr << "Console Mode set successfully ->" << GetConsoleMode(hConsole, &dwMode) << std::endl;
-	}
-
-
-
-
-
+	cout << BG;
 	cout << header;
 }
 

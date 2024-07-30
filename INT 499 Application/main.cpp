@@ -31,7 +31,9 @@ using namespace std;
 *		- SYS/ERROR/EXCEPTION messages -> create a function for each message that is similar to the [addMsg()] function.
 * 4. Delete the [addMsg(vector<string> message)] function. I don't believe it's being used at all.
 * 
-* NOTE --> MAJOR BUG DISCOVERED! In the released version, when I attempt to login to the MySQL server, the program crashes.
+* MAJOR BUG!!! -> In the released version, when I attempt to login to the MySQL server, the program crashes.
+* MINOR BUG -> When program starts, only outputted text has correct background color. The open space is the default black.
+			   This is until an update is pushed through and then the background updates to the correct color.
 * 
 */
 
