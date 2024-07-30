@@ -15,12 +15,10 @@ using namespace std;
 #include "EZTechMovie_Admin_App.h"
 
 
-// Define ANSI color codes
-constexpr auto RESET =		"\033[0m";
-constexpr auto RED =		"\033[91m";
-constexpr auto GREEN =		"\033[92m";
-constexpr auto YELLOW =		"\033[93m";
-constexpr auto MAGENTA =	"\033[95m";
+// Define ANSI color codes based on Dracula theme
+constexpr auto TEXT =	"\033[38;2;248;248;242m";
+constexpr auto RED =	"\033[38;2;255;85;85m";
+constexpr auto PURPLE = "\033[38;2;255;121;198m";
 
 
 // Default Constructor
@@ -123,10 +121,10 @@ void Global_Functions::getTableData(mysqlx::Table table, vector<vector<string>>*
 	}
 
 	catch (const mysqlx::Error& err) {
-		message.push_back(string(MAGENTA) + "MYSQLX_ERROR [getTableData()]: " + RESET + string(err.what()));
+		message.push_back(string(PURPLE) + "MYSQLX_ERROR [getTableData()]: " + TEXT + string(err.what()));
 	}
 	catch (exception& ex) {
-		message.push_back(string(MAGENTA) + "EXCEPTION [getTableData()]: " + RESET + string(ex.what()));
+		message.push_back(string(PURPLE) + "EXCEPTION [getTableData()]: " + TEXT + string(ex.what()));
 	}
 
 	tempStr.clear();
@@ -142,7 +140,7 @@ void Global_Functions::getRow(vector<vector<string>> tableData, int ID, vector<s
 
 	try {
 		if (tableData.empty()) {
-			message.push_back(string(RED) + "ERROR [getRow()]:" + RESET + " No table data to process! Cannot retrieve row data.");
+			message.push_back(string(RED) + "ERROR [getRow()]:" + TEXT + " No table data to process! Cannot retrieve row data.");
 		}
 		else {
 			for (auto& i : tableData) {
@@ -152,7 +150,7 @@ void Global_Functions::getRow(vector<vector<string>> tableData, int ID, vector<s
 					}
 				}
 				else { // In case the wrong table is put through this function (i.e., tables with a first column that is not of type [int]).
-					message.push_back(string(RED) + "ERROR [getRow()]:" + RESET + " First column of table is not of type [int]! Aborting process.");
+					message.push_back(string(RED) + "ERROR [getRow()]:" + TEXT + " First column of table is not of type [int]! Aborting process.");
 					break;
 				}
 			}
@@ -160,7 +158,7 @@ void Global_Functions::getRow(vector<vector<string>> tableData, int ID, vector<s
 	}
 
 	catch (exception& ex) {
-		message.push_back(string(MAGENTA) + "EXCEPTION [getRow()]: " + RESET + string(ex.what()));
+		message.push_back(string(PURPLE) + "EXCEPTION [getRow()]: " + TEXT + string(ex.what()));
 	}
 
 	*rowData = row;

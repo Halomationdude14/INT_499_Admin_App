@@ -32,8 +32,6 @@ using namespace std;
 * 4. Delete the [addMsg(vector<string> message)] function. I don't believe it's being used at all.
 * 
 * MAJOR BUG!!! -> In the released version, when I attempt to login to the MySQL server, the program crashes.
-* MINOR BUG -> When program starts, only outputted text has correct background color. The open space is the default black.
-			   This is until an update is pushed through and then the background updates to the correct color.
 * 
 */
 
@@ -65,14 +63,18 @@ string currTbl = "NULL";	// Stores the name of the table that is either currentl
 vector<vector<string>> tableData = {}; // vector<vector<string>> var that stores converted table data from the database; can be sent to Menus object for display.
 
 
-// Define ANSI color codes
-constexpr auto RESET =		"\033[0m";
-constexpr auto BOLD =		"\033[1m";
-constexpr auto TEXT =		"\033[38;2;248;248;242m";
-constexpr auto RED =		"\033[91m";
-constexpr auto GREEN =		"\033[92m";
-constexpr auto YELLOW =		"\033[93m";
-constexpr auto MAGENTA =	"\033[95m";
+// Define ANSI color codes based on Dracula theme
+constexpr auto RESET =		 "\033[0m";
+constexpr auto BG =			 "\033[48;2;50;52;64m";
+constexpr auto BOLD =		 "\033[1m";
+constexpr auto TEXT =		 "\033[38;2;248;248;242m";
+constexpr auto BLACK =		 "\033[38;2;33;34;44m";
+constexpr auto BLUE =		 "\033[38;2;189;147;249m";
+constexpr auto CYAN =		 "\033[38;2;139;233;253m";
+constexpr auto GREEN =		 "\033[38;2;80;250;123m";
+constexpr auto PURPLE =		 "\033[38;2;255;121;198m";
+constexpr auto RED =		 "\033[38;2;255;85;85m";
+constexpr auto YELLOW =		 "\033[38;2;241;250;140m";
 
 
 // Enables the use of ANSI escape codes in the terminal.
@@ -83,6 +85,11 @@ void static enableVirtualTerminalProcessing() {
 	GetConsoleMode(hOut, &dwMode);
 	dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
 	SetConsoleMode(hOut, dwMode);
+}
+
+// Establishes the color scheme of the whole program. Called once at the start of the program.
+void static setColorScheme() {
+	cout << BG << TEXT;
 }
 
 // Adds any messages from [message] to the end of [msgs].
@@ -166,11 +173,11 @@ bool static verifyLogin() {
 	}
 
 	catch (const mysqlx::Error& err) {
-		addMsg(string(MAGENTA) + "MYSQLX_ERROR [verifyLogin()]: " + TEXT + string(err.what()));
+		addMsg(string(PURPLE) + "MYSQLX_ERROR [verifyLogin()]: " + TEXT + string(err.what()));
 		return false;
 	}
 	catch (exception& ex) {
-		addMsg(string(MAGENTA) + "EXCEPTION [verifyLogin()]: " + TEXT + string(ex.what()));
+		addMsg(string(PURPLE) + "EXCEPTION [verifyLogin()]: " + TEXT + string(ex.what()));
 		return false;
 	}
 }
@@ -258,7 +265,7 @@ void static callDisplayMethod() {
 		case '5': // Display Table
 			// Verify that [tableData] is not empty before attempting to display it.
 			if (tableData.empty()) {
-				addMsg(string(GREEN) + "SYS:" + TEXT + " Table [" + string(MAGENTA) + currTbl + TEXT + "] is empty. No data to display.");
+				addMsg(string(GREEN) + "SYS:" + TEXT + " Table [" + string(PURPLE) + currTbl + TEXT + "] is empty. No data to display.");
 			}
 			else {
 				menu.SCRN_displayTable(msgs, tableData);
@@ -346,7 +353,7 @@ void static processUserInput() {
 		}
 		else {
 			string str(1, usrInput);
-			addMsg(string(RED) + "ERROR [processUserInput()]:" + TEXT + " User input [" + string(YELLOW) + str + TEXT + "] is invalid!");
+			addMsg(string(RED) + "ERROR [processUserInput()]:" + TEXT + " User input [" + string(CYAN) + str + TEXT + "] is invalid!");
 		}
 	}
 	else {
@@ -364,6 +371,7 @@ int main() {
 
 	// Enable the use of ANSI escape codes to add some color to the terminal.
 	enableVirtualTerminalProcessing();
+	setColorScheme();
 
 	// MAIN PROGRAM LOOP!
 	while (currUI != '0') {
@@ -478,19 +486,19 @@ int main() {
 			}
 
 			catch (const mysqlx::Error& err) {
-				addMsg(string(MAGENTA) + "MYSQLX_ERROR [main()]: " + TEXT + string(err.what()));
+				addMsg(string(PURPLE) + "MYSQLX_ERROR [main()]: " + TEXT + string(err.what()));
 				break;
 			}
 			catch (exception& ex) {
-				addMsg(string(MAGENTA) + "EXCEPTION [main()]: " + TEXT + string(ex.what()));
+				addMsg(string(PURPLE) + "EXCEPTION [main()]: " + TEXT + string(ex.what()));
 				break;
 			}
 		}
 	}
 	
 	if (currUI == '0') {
+		cout << RESET; // Reset all ANSI configuration changes to default values.
 		fct.clearScreen(); // Clear terminal screen.
-		cout << RESET; // Reset all ANSI color applications to default values.
 	}
 
 	return 0;

@@ -50,26 +50,11 @@ using namespace std;
 */
 
 
-// Define ANSI color codes
-constexpr auto RESET =		"\033[0m";
-constexpr auto BOLD =		"\033[1m";
-constexpr auto TEXT =		"\033[38;2;248;248;242m";
-//constexpr auto RED =		"\033[91m";
-//constexpr auto GREEN =		"\033[92m";
-//constexpr auto YELLOW =		"\033[93m";
-constexpr auto MAGENTA =	"\033[95m";
-
-// Dracula theme
-constexpr auto BG =			"\033[48;2;50;52;64m";
-constexpr auto BLACK =		"\033[38;2;33;34;44m";
-constexpr auto BLUE =		"\033[38;2;189;147;249m";
-constexpr auto CYAN =		"\033[38;2;139;233;253m";
-constexpr auto GREEN =		"\033[38;2;80;250;123m";
-constexpr auto PURPLE =		"\033[38;2;255;121;198m";
-constexpr auto RED =		"\033[38;2;255;85;85m";
-constexpr auto WHITE =		"\033[38;2;248;248;242m";
-constexpr auto YELLOW =		"\033[38;2;241;250;140m";
-constexpr auto BRIGHTBLACK = "\033[38;2;98;114;164m";
+// Define ANSI color codes based on Dracula theme
+constexpr auto BG =		"\033[48;2;50;52;64m";
+constexpr auto TEXT =	"\033[38;2;248;248;242m";
+constexpr auto PURPLE = "\033[38;2;255;121;198m";
+constexpr auto YELLOW = "\033[38;2;241;250;140m";
 
 
 Menus::Menus() {
@@ -129,7 +114,6 @@ Menus::Menus() {
 // Displays base UI: header
 void Menus::displayMenu() {
 	fct.clearScreen();
-	cout << BG;
 	cout << header;
 }
 
@@ -227,12 +211,12 @@ void Menus::displayTable(vector<string> msg, vector<vector<string>> tblData) {
 		}
 
 
-		cout << string(MAGENTA) + encase + RESET;
+		cout << string(PURPLE) + encase + TEXT;
 
 		// Display table data.
 		for (int i = 0; i < tblData.size(); i++) {
 			for (int k = 0; k < tblData[i].size(); k++) {
-				cout << string(MAGENTA) + "| " + RESET << tblData[i][k];
+				cout << string(PURPLE) + "| " + TEXT << tblData[i][k];
 				for (int j = tblData[i][k].size(); j < colSizes[k]; j++) {
 					cout << " ";
 				}
@@ -241,12 +225,12 @@ void Menus::displayTable(vector<string> msg, vector<vector<string>> tblData) {
 					cout << " ";
 				}
 				else {
-					cout << string(MAGENTA) + " |" + RESET << endl;
+					cout << string(PURPLE) + " |" + TEXT << endl;
 				}
 			}
 		}
 
-		cout << string(MAGENTA) + encase + RESET << endl;
+		cout << string(PURPLE) + encase + TEXT << endl;
 	}
 
 	// Display sys/err messages if the vector is not empty.
