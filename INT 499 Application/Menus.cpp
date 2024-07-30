@@ -1,4 +1,8 @@
 
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
 #include <iostream>
 #include <string>
 #include <vector>
@@ -48,10 +52,18 @@ using namespace std;
 
 // Define ANSI color codes
 constexpr auto RESET =		"\033[0m";
+constexpr auto BOLD =		"\033[1m";
+constexpr auto TEXT =		"\033[38;2;248;248;242m";
 constexpr auto RED =		"\033[91m";
 constexpr auto GREEN =		"\033[92m";
 constexpr auto YELLOW =		"\033[93m";
 constexpr auto MAGENTA =	"\033[95m";
+
+// Dracula theme
+//constexpr auto BG = "\033[48;2;40;42;54m";
+//constexpr auto BG = "\033[48;2;255;0;0m";
+constexpr auto BG = "\033[48;2;50;52;64m";
+
 
 
 Menus::Menus() {
@@ -62,46 +74,46 @@ Menus::Menus() {
 
 	header_text = "Welcome to the EZTechMovie Database Administration Application";
 	header = string(YELLOW) + "\n##############################################################################\n" +
-			"####### " + RESET + header_text + string(YELLOW) + " #######\n" +
-			"##############################################################################\n\n" + RESET;
+			"####### " + TEXT + header_text + YELLOW + " #######\n" +
+			"##############################################################################\n\n" + TEXT;
 
-	nav_main = string(YELLOW) + "##### [ " + RESET + "Main Menu" + string(YELLOW) + " ] #####" + RESET;
-	nav_dispTbl = string(YELLOW) + "##### [ " + RESET + "Main Menu > Display Tables" + string(YELLOW) + " ] #####" + RESET;
-	nav_admAct = string(YELLOW) + "##### [ " + RESET + "Main Menu > Admin Actions" + string(YELLOW) + " ] #####" + RESET;
-	nav_modMovie = string(YELLOW) + "##### [ " + RESET + "Main Menu > Admin Actions > Modify Movie Data" + string(YELLOW) + " ] #####" + RESET;
-	nav_modCust = string(YELLOW) + "##### [ " + RESET + "Main Menu > Admin Actions > Modify Customer Data" + string(YELLOW) + " ] #####" + RESET;
+	nav_main = string(YELLOW) + "##### [ " + TEXT + "Main Menu" + YELLOW + " ] #####" + TEXT;
+	nav_dispTbl = string(YELLOW) + "##### [ " + TEXT + "Main Menu > Display Tables" + YELLOW + " ] #####" + TEXT;
+	nav_admAct = string(YELLOW) + "##### [ " + TEXT + "Main Menu > Admin Actions" + YELLOW + " ] #####" + TEXT;
+	nav_modMovie = string(YELLOW) + "##### [ " + TEXT + "Main Menu > Admin Actions > Modify Movie Data" + YELLOW + " ] #####" + TEXT;
+	nav_modCust = string(YELLOW) + "##### [ " + TEXT + "Main Menu > Admin Actions > Modify Customer Data" + YELLOW + " ] #####" + TEXT;
 
-	base_Menu = { string(YELLOW) + " [0] " + RESET + "Previous Menu" };
-	start_Menu = { string(YELLOW) + " [1] " + RESET + "Sign In",
-		string(YELLOW) + " [0] " + RESET + "Exit Application" };
-	main_Menu = { string(YELLOW) + " [1] " + RESET + "Display Tables",
-		string(YELLOW) + " [2] " + RESET + "Admin Actions",
-		string(YELLOW) + " [0] " + RESET + "Sign Out" };
-	displayTables_Menu = { string(YELLOW) + " [A] " + RESET + "tbl_plans",
-		string(YELLOW) + " [B] " + RESET + "tbl_moviedata",
-		string(YELLOW) + " [C] " + RESET + "tbl_actors",
-		string(YELLOW) + " [D] " + RESET + "tbl_directors",
-		string(YELLOW) + " [E] " + RESET + "tbl_genredata",
-		string(YELLOW) + " [F] " + RESET + "tbl_moviecast",
-		string(YELLOW) + " [G] " + RESET + "tbl_moviedirectors",
-		string(YELLOW) + " [H] " + RESET + "tbl_moviegenres",
-		string(YELLOW) + " [I] " + RESET + "tbl_custdata",
-		string(YELLOW) + " [J] " + RESET + "tbl_paymentinfo",
-		string(YELLOW) + " [K] " + RESET + "tbl_custactivity_stream",
-		string(YELLOW) + " [L] " + RESET + "tbl_custactivity_dvd",
-		string(YELLOW) + " [M] " + RESET + "tbl_dvdrentalhistory",
-		string(YELLOW) + " [0] " + RESET + "Previous Menu" };
-	adminActions_Menu = { string(YELLOW) + " [1] " + RESET + "Modify Movie Data",
-		string(YELLOW) + " [2] " + RESET + "Modify Customer Data",
-		string(YELLOW) + " [0] " + RESET + "Previous Menu" };
-	modifyMovie_Menu = { string(YELLOW) + " [1] " + RESET + "Add New Movie",
-		string(YELLOW) + " [2] " + RESET + "Update Movie Info*",
-		string(YELLOW) + " [3] " + RESET + "Delete Movie*",
-		string(YELLOW) + " [0] " + RESET + "Previous Menu" };
-	modifyCust_Menu = { string(YELLOW) + " [1] " + RESET + "Add New Customer*",
-		string(YELLOW) + " [2] " + RESET + "Update Customer Info*",
-		string(YELLOW) + " [3] " + RESET + "Delete Customer*",
-		string(YELLOW) + " [0] " + RESET + "Previous Menu" };
+	base_Menu = { string(YELLOW) + " [0] " + TEXT + "Previous Menu" };
+	start_Menu = { string(YELLOW) + " [1] " + TEXT + "Sign In",
+		string(YELLOW) + " [0] " + TEXT + "Exit Application" };
+	main_Menu = { string(YELLOW) + " [1] " + TEXT + "Display Tables",
+		string(YELLOW) + " [2] " + TEXT + "Admin Actions",
+		string(YELLOW) + " [0] " + TEXT + "Sign Out" };
+	displayTables_Menu = { string(YELLOW) + " [A] " + TEXT + "tbl_plans",
+		string(YELLOW) + " [B] " + TEXT + "tbl_moviedata",
+		string(YELLOW) + " [C] " + TEXT + "tbl_actors",
+		string(YELLOW) + " [D] " + TEXT + "tbl_directors",
+		string(YELLOW) + " [E] " + TEXT + "tbl_genredata",
+		string(YELLOW) + " [F] " + TEXT + "tbl_moviecast",
+		string(YELLOW) + " [G] " + TEXT + "tbl_moviedirectors",
+		string(YELLOW) + " [H] " + TEXT + "tbl_moviegenres",
+		string(YELLOW) + " [I] " + TEXT + "tbl_custdata",
+		string(YELLOW) + " [J] " + TEXT + "tbl_paymentinfo",
+		string(YELLOW) + " [K] " + TEXT + "tbl_custactivity_stream",
+		string(YELLOW) + " [L] " + TEXT + "tbl_custactivity_dvd",
+		string(YELLOW) + " [M] " + TEXT + "tbl_dvdrentalhistory",
+		string(YELLOW) + " [0] " + TEXT + "Previous Menu" };
+	adminActions_Menu = { string(YELLOW) + " [1] " + TEXT + "Modify Movie Data",
+		string(YELLOW) + " [2] " + TEXT + "Modify Customer Data",
+		string(YELLOW) + " [0] " + TEXT + "Previous Menu" };
+	modifyMovie_Menu = { string(YELLOW) + " [1] " + TEXT + "Add New Movie",
+		string(YELLOW) + " [2] " + TEXT + "Update Movie Info*",
+		string(YELLOW) + " [3] " + TEXT + "Delete Movie*",
+		string(YELLOW) + " [0] " + TEXT + "Previous Menu" };
+	modifyCust_Menu = { string(YELLOW) + " [1] " + TEXT + "Add New Customer*",
+		string(YELLOW) + " [2] " + TEXT + "Update Customer Info*",
+		string(YELLOW) + " [3] " + TEXT + "Delete Customer*",
+		string(YELLOW) + " [0] " + TEXT + "Previous Menu" };
 }
 
 
@@ -111,6 +123,36 @@ Menus::Menus() {
 // Displays base UI: header
 void Menus::displayMenu() {
 	fct.clearScreen();
+
+
+	cout << BG << "sample text" << endl;
+
+	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+	DWORD dwMode = 0;
+
+	// Get the current console mode
+	if (!GetConsoleMode(hConsole, &dwMode)) {
+		std::cerr << "GetConsoleMode failed: " << GetLastError() << std::endl;
+	}
+	else {
+		std::cerr << "GetConsoleMode obtained ->" << GetConsoleMode(hConsole, &dwMode) << std::endl;
+	}
+
+	// Enable or disable specific modes (replace with desired flags)
+	dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING; // Enable ANSI escape codes
+
+	// Set the new console mode
+	if (!SetConsoleMode(hConsole, dwMode)) {
+		std::cerr << "SetConsoleMode failed: " << GetLastError() << std::endl;
+	}
+	else {
+		std::cerr << "Console Mode set successfully ->" << GetConsoleMode(hConsole, &dwMode) << std::endl;
+	}
+
+
+
+
+
 	cout << header;
 }
 
@@ -207,12 +249,13 @@ void Menus::displayTable(vector<string> msg, vector<vector<string>> tblData) {
 			}
 		}
 
-		cout << encase;
+
+		cout << string(MAGENTA) + encase + RESET;
 
 		// Display table data.
 		for (int i = 0; i < tblData.size(); i++) {
 			for (int k = 0; k < tblData[i].size(); k++) {
-				cout << "| " << tblData[i][k];
+				cout << string(MAGENTA) + "| " + RESET << tblData[i][k];
 				for (int j = tblData[i][k].size(); j < colSizes[k]; j++) {
 					cout << " ";
 				}
@@ -221,12 +264,12 @@ void Menus::displayTable(vector<string> msg, vector<vector<string>> tblData) {
 					cout << " ";
 				}
 				else {
-					cout << " |\n";
+					cout << string(MAGENTA) + " |" + RESET << endl;
 				}
 			}
 		}
 
-		cout << encase << endl;
+		cout << string(MAGENTA) + encase + RESET << endl;
 	}
 
 	// Display sys/err messages if the vector is not empty.

@@ -3,7 +3,7 @@
 * 
 * Author: Paul Oram
 * Date Started: 2024-04-22
-* Last Updated: 2024-07-29
+* Last Updated: 2024-07-30
 * Purpose: Sample terminal program to demonstrate how to use the <mysqlx/xdevapi.h> library which allows interaction with a MySQL server/database.
 * 
 */
@@ -24,19 +24,14 @@ using namespace std;
 /*
 * Admin App TO-DO List -->
 * 
-* 1. [Global_Functions.cpp] Provide search function for large tables (i.e., tables with 50+ entries).
-	 Should be available in both "Display Tables" menu/UI and during "add new movie" process which is why this function exists in the 'Global_Functions.cpp' class.
-* 
-* 
-* Admin App Considerations -->
-* 
 * 1. New bug found: when program takes in user input automatically, the <ENTER> was previously fixed, but now the <BACKSPACE> is causing problems.
 *	 The same for <SPACE> and <TAB>.
+* 2. Need to add VIEWs to the MySQL database. These views would drastically improve the readability of all relational tables.
+* 3. Improve the efficiency of the colorization of text in this program.
+*		- SYS/ERROR/EXCEPTION messages -> create a function for each message that is similar to the [addMsg()] function.
+* 4. Delete the [addMsg(vector<string> message)] function. I don't believe it's being used at all.
 * 
-* 
-* Other TO-DO Items -->
-* 
-* 1. Need to add VIEWs to the MySQL database. These views would drastically improve the readability of all relational tables.
+* NOTE --> MAJOR BUG DISCOVERED! In the released version, when I attempt to login to the MySQL server, the program crashes.
 * 
 */
 
@@ -48,6 +43,7 @@ using namespace std;
 * 3. [xdevapi.h] File: https://github.com/mysql/mysql-connector-cpp/blob/trunk/include/mysqlx/xdevapi.h
 * 4. DevApi Reference text file from author (code examples included in this repo): https://github.com/mysql/mysql-connector-cpp/blob/trunk/doc/devapi_ref.txt
 * 5. Sample code demonstrating how to use the modern version of the <xdevapi> library: https://stackoverflow.com/questions/75135560/x-devapi-batch-insert-extremely-slow
+* 6. ANSI Color Codes: https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797#rgb-colors
 * 
 */
 
@@ -66,19 +62,20 @@ string Pass = "";
 string currTbl = "NULL";	// Stores the name of the table that is either currently being displayed or will be displayed next.
 vector<vector<string>> tableData = {}; // vector<vector<string>> var that stores converted table data from the database; can be sent to Menus object for display.
 
+
 // Define ANSI color codes
 constexpr auto RESET =		"\033[0m";
+constexpr auto BOLD =		"\033[1m";
+constexpr auto TEXT =		"\033[38;2;248;248;242m";
 constexpr auto RED =		"\033[91m";
 constexpr auto GREEN =		"\033[92m";
 constexpr auto YELLOW =		"\033[93m";
 constexpr auto MAGENTA =	"\033[95m";
 
 
-
-
 // Enables the use of ANSI escape codes in the terminal.
 // NOTE: Should work with Unix-like system as well, but this has not been tested!!!
-void static EnableVirtualTerminalProcessing() {
+void static enableVirtualTerminalProcessing() {
 	HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
 	DWORD dwMode = 0;
 	GetConsoleMode(hOut, &dwMode);
@@ -159,7 +156,7 @@ bool static verifyLogin() {
 		*/
 		mysqlx::Session sess = mysqlx::getSession("localhost", 33060, User, Pass);
 
-		addMsg(string(GREEN) + "SYS:" + RESET + " Connection to MySQL server successful!");
+		addMsg(string(GREEN) + "SYS:" + TEXT + " Connection to MySQL server successful!");
 		
 		sess.close(); // Close the connection to avoid errors.
 
@@ -167,11 +164,11 @@ bool static verifyLogin() {
 	}
 
 	catch (const mysqlx::Error& err) {
-		addMsg(string(MAGENTA) + "MYSQLX_ERROR [verifyLogin()]: " + RESET + string(err.what()));
+		addMsg(string(MAGENTA) + "MYSQLX_ERROR [verifyLogin()]: " + TEXT + string(err.what()));
 		return false;
 	}
 	catch (exception& ex) {
-		addMsg(string(MAGENTA) + "EXCEPTION [verifyLogin()]: " + RESET + string(ex.what()));
+		addMsg(string(MAGENTA) + "EXCEPTION [verifyLogin()]: " + TEXT + string(ex.what()));
 		return false;
 	}
 }
@@ -243,7 +240,7 @@ void static callDisplayMethod() {
 			msgs.clear();
 			conn = verifyLogin();
 			if (conn == false) {
-				addMsg(string(GREEN) + "SYS:" + RESET + " Could not establish connection to MySQL server!");
+				addMsg(string(GREEN) + "SYS:" + TEXT + " Could not establish connection to MySQL server!");
 			}
 			break;
 		case '3': // Main Menu
@@ -259,7 +256,7 @@ void static callDisplayMethod() {
 		case '5': // Display Table
 			// Verify that [tableData] is not empty before attempting to display it.
 			if (tableData.empty()) {
-				addMsg(string(GREEN) + "SYS:" + RESET + " Table [" + string(YELLOW) + currTbl + RESET + "] is empty. No data to display.");
+				addMsg(string(GREEN) + "SYS:" + TEXT + " Table [" + string(MAGENTA) + currTbl + TEXT + "] is empty. No data to display.");
 			}
 			else {
 				menu.SCRN_displayTable(msgs, tableData);
@@ -343,11 +340,11 @@ void static processUserInput() {
 	// Error handling + data processing.
 	if (c == 'X') {
 		if (usrInput == '\r') { // Enter key
-			addMsg(string(RED) + "ERROR [processUserInput()]:" + RESET + " User input is empty! Please enter a value this time...");
+			addMsg(string(RED) + "ERROR [processUserInput()]:" + TEXT + " User input is empty! Please enter a value this time...");
 		}
 		else {
 			string str(1, usrInput);
-			addMsg(string(RED) + "ERROR [processUserInput()]:" + RESET + " User input [" + string(YELLOW) + str + RESET + "] is invalid!");
+			addMsg(string(RED) + "ERROR [processUserInput()]:" + TEXT + " User input [" + string(YELLOW) + str + TEXT + "] is invalid!");
 		}
 	}
 	else {
@@ -364,7 +361,7 @@ void static processUserInput() {
 int main() {
 
 	// Enable the use of ANSI escape codes to add some color to the terminal.
-	EnableVirtualTerminalProcessing();
+	enableVirtualTerminalProcessing();
 
 	// MAIN PROGRAM LOOP!
 	while (currUI != '0') {
@@ -402,7 +399,7 @@ int main() {
 				switch (currUI) {
 					// Close the connection the the MySQL server.
 					case '1':
-						addMsg(string(GREEN) + "SYS:" + RESET + " Connection to MySQL server closed.");
+						addMsg(string(GREEN) + "SYS:" + TEXT + " Connection to MySQL server closed.");
 						User = "";
 						Pass = "";
 						currTbl = "NULL";
@@ -479,18 +476,19 @@ int main() {
 			}
 
 			catch (const mysqlx::Error& err) {
-				addMsg(string(MAGENTA) + "MYSQLX_ERROR [main()]: " + RESET + string(err.what()));
+				addMsg(string(MAGENTA) + "MYSQLX_ERROR [main()]: " + TEXT + string(err.what()));
 				break;
 			}
 			catch (exception& ex) {
-				addMsg(string(MAGENTA) + "EXCEPTION [main()]: " + RESET + string(ex.what()));
+				addMsg(string(MAGENTA) + "EXCEPTION [main()]: " + TEXT + string(ex.what()));
 				break;
 			}
 		}
 	}
 	
 	if (currUI == '0') {
-		fct.clearScreen();
+		fct.clearScreen(); // Clear terminal screen.
+		cout << RESET; // Reset all ANSI color applications to default values.
 	}
 
 	return 0;
