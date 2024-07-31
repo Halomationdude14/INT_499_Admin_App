@@ -11,6 +11,7 @@
 #ifdef _WIN32
 #include <conio.h>
 #include <windows.h>
+#include <versionhelpers.h>
 #endif
 
 #include <iostream>
@@ -76,7 +77,7 @@ string CYAN =		"\033[36m";
 string BLUE =		"\033[34m";
 string BLACK =		"\033[40m";
 
-
+bool a = false;
 
 
 // Enables the use of ANSI escape codes in the terminal.
@@ -89,17 +90,32 @@ void static enableVirtualTerminalProcessing() {
 	SetConsoleMode(hOut, dwMode);
 }
 
+// https://stackoverflow.com/questions/1963992/check-windows-version
+
 // Checks to see if the OS is for Windows 10 or later.
 bool static isWindows10OrLater() {
 	OSVERSIONINFOEXW osvi = { sizeof(OSVERSIONINFOEXW) };
+	GetVersionExW((OSVERSIONINFO*)&osvi);
+
+	printf("OS Version: %d.%d\n", osvi.dwMajorVersion, osvi.dwMinorVersion);
+
+#ifdef _WIN32
+	// Check for Windows 10 or later
+	return IsWindowsVersionOrGreater(10, 0, 0);
+#else
+	// For all other platforms
+	return false;
+#endif
 
 	// Use VerSetConditionMask to check for Windows 10 or later
+	/*
 	DWORD dwConditionMask = 0;
 	VerSetConditionMask(osvi.dwMajorVersion, VER_MAJORVERSION, VER_GREATER_EQUAL);
 	osvi.dwMajorVersion = 10; // Set the major version to 10 for comparison
+	*/
 
 	// Check if the system meets the specified version criteria
-	return VerifyVersionInfoW(&osvi, VER_MAJORVERSION, NULL);
+	//return VerifyVersionInfoW(&osvi, VER_MAJORVERSION, NULL);
 }
 
 /*
@@ -340,6 +356,8 @@ void static callDisplayMethod() {
 			currUI = menu.getCurrMenu(); //may need to change this to menu.getPrevMenu() eventually...
 			break;
 	}
+
+	cout << "TEST: " << to_string(a) << endl;
 }
 
 // Processes a char through [Menus.cpp] and updates the current UI based on the user's selection.
@@ -421,6 +439,7 @@ int main() {
 	// If the OS is Windows 10 or newer, then the color scheme is updated to a 24-bit color pallete based on the "Dracula" theme.
 	if (isWindows10OrLater()) {
 		setDraculaTheme();
+		a = true;
 	}
 
 	// Establishes a color scheme/theme for the program.
