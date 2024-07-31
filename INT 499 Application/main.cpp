@@ -3,7 +3,7 @@
 * 
 * Author: Paul Oram
 * Date Started: 2024-04-22
-* Last Updated: 2024-07-30
+* Last Updated: 2024-07-31
 * Purpose: Sample terminal program to demonstrate how to use the <mysqlx/xdevapi.h> library which allows interaction with a MySQL server/database.
 * 
 */
@@ -53,7 +53,6 @@ Global_Functions fct;		// Object assists in generic processes throughout program
 Menus menu;					// Object assists in displaying information to the terminal screen.
 DB_MovieData movie;			// Allows for manipulation of "tbl_moviedata".
 DB_CustData cust;			// Allows for manipulation of "tbl_custdata".
-bool isWin10OrLater = false;
 vector<string> msgs = {};	// Stores all SYS/ERR notifications: to be displayed below the header.
 char currUI = '1';			// Value corresponds to the current UI being displayed. Default is '1' to display the greeting screen.
 char usrInput = 'X';		// Stores value entered by user. Used for navigating through the menus. Default is 'X' -> this value throws an error if returned.
@@ -64,19 +63,20 @@ string Pass = "";
 string currTbl = "NULL";	// Stores the name of the table that is either currently being displayed or will be displayed next.
 vector<vector<string>> tableData = {}; // vector<vector<string>> var that stores converted table data from the database; can be sent to Menus object for display.
 
-
 // Define ANSI color codes
-constexpr auto RESET =		"\033[0m";
-constexpr auto BOLD =		"\033[1m";
-constexpr auto BG =			"\033[40m";
-constexpr auto TEXT =		"\033[37m";
-constexpr auto BLACK =		"\033[40m";
-constexpr auto BLUE =		"\033[34m";
-constexpr auto CYAN =		"\033[36m";
-constexpr auto GREEN =		"\033[32m";
-constexpr auto PURPLE =		"\033[35m";
-constexpr auto RED =		"\033[31m";
-constexpr auto YELLOW =		"\033[33m";
+const string RESET =	"\033[0m";
+const string BOLD =		"\033[1m";
+string BG =			"\033[40m";
+string TEXT =		"\033[37m";
+string YELLOW =		"\033[33m";
+string GREEN =		"\033[32m";
+string RED =		"\033[31m";
+string PURPLE =		"\033[35m";
+string CYAN =		"\033[36m";
+string BLUE =		"\033[34m";
+string BLACK =		"\033[40m";
+
+
 
 
 // Enables the use of ANSI escape codes in the terminal.
@@ -102,23 +102,41 @@ bool static isWindows10OrLater() {
 	return VerifyVersionInfoW(&osvi, VER_MAJORVERSION, NULL);
 }
 
-// Update color vars from default ANSI values to 24-bit supported "True Color" values (if OS is Windows 10 or later*).
+/*
+* If the OS is Windows 10 or newer, update ANSI color vars with 24 - bit colors.
+* Color scheme is based on the popular "Dracula" theme.
+* Shares the updated color scheme with all other associated classes.
+*/
 void static setDraculaTheme() {
-	constexpr auto BG = "\033[48;2;50;52;64m";
-	constexpr auto TEXT = "\033[38;2;248;248;242m";
-	constexpr auto BLACK = "\033[38;2;33;34;44m";
-	constexpr auto BLUE = "\033[38;2;189;147;249m";
-	constexpr auto CYAN = "\033[38;2;139;233;253m";
-	constexpr auto GREEN = "\033[38;2;80;250;123m";
-	constexpr auto PURPLE = "\033[38;2;255;121;198m";
-	constexpr auto RED = "\033[38;2;255;85;85m";
-	constexpr auto YELLOW = "\033[38;2;241;250;140m";
+	BG =		"\033[48;2;50;52;64m";
+	TEXT =		"\033[38;2;248;248;242m";
+	YELLOW =	"\033[38;2;241;250;140m";
+	GREEN =		"\033[38;2;80;250;123m";
+	RED =		"\033[38;2;255;85;85m";
+	PURPLE =	"\033[38;2;255;121;198m";
+	CYAN =		"\033[38;2;139;233;253m";
+	BLUE =		"\033[38;2;189;147;249m";
+	BLACK =		"\033[38;2;33;34;44m";
+
+	// Shares these color changes with the other classes.
+	fct.TEXT = menu.TEXT = movie.TEXT = cust.TEXT = TEXT;
+	fct.YELLOW = menu.YELLOW = movie.YELLOW = cust.YELLOW = YELLOW;
+	fct.GREEN = menu.GREEN = movie.GREEN = cust.GREEN = GREEN;
+	fct.RED = menu.RED = movie.RED = cust.RED = RED;
+	fct.PURPLE = menu.PURPLE = movie.PURPLE = cust.PURPLE = PURPLE;
+	fct.CYAN = menu.CYAN = movie.CYAN = cust.CYAN = CYAN;
+	fct.BLUE = menu.BLUE = movie.BLUE = cust.BLUE = BLUE;
+	fct.BLACK = menu.BLACK = movie.BLACK = cust.BLACK = BLACK;
 }
 
-// Establishes the color scheme of the whole program. Called once at the start of the program.
-void static setColorScheme() {
+/*
+* Called once at the start of the program once a color scheme has been finalized.
+* It configures the program with a background and foreground color (text).
+*/
+void static establishColorScheme() {
 	cout << BG << TEXT;
 }
+
 
 // Adds any messages from [message] to the end of [msgs].
 void static addMsg(vector<string> message) {
@@ -400,14 +418,14 @@ int main() {
 	// Enable the use of ANSI escape codes to add some color to the terminal.
 	enableVirtualTerminalProcessing();
 
-	// If the OS is Windows 10 or later, then the color scheme is updated to a 24-bit color pallete for a more improved visual display.
+	// If the OS is Windows 10 or newer, then the color scheme is updated to a 24-bit color pallete based on the "Dracula" theme.
 	if (isWindows10OrLater()) {
-		isWin10OrLater = true;
 		setDraculaTheme();
 	}
 
 	// Establishes a color scheme/theme for the program.
-	setColorScheme();
+	establishColorScheme();
+
 
 	// MAIN PROGRAM LOOP!
 	while (currUI != '0') {
@@ -533,7 +551,7 @@ int main() {
 	}
 	
 	if (currUI == '0') {
-		cout << RESET; // Reset all ANSI configuration changes to default values.
+		cout << RESET; // Reset all ANSI color configuration changes to their default values.
 		fct.clearScreen(); // Clear terminal screen.
 	}
 

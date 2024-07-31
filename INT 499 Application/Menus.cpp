@@ -1,8 +1,4 @@
 
-#ifdef _WIN32
-#include <windows.h>
-#endif
-
 #include <iostream>
 #include <string>
 #include <vector>
@@ -50,18 +46,20 @@ using namespace std;
 */
 
 
-// Define ANSI color codes
-constexpr auto BG =		"\033[48;2;50;52;64m";
-constexpr auto TEXT =	"\033[38;2;248;248;242m";
-constexpr auto PURPLE = "\033[38;2;255;121;198m";
-constexpr auto YELLOW = "\033[38;2;241;250;140m";
-
-
 Menus::Menus() {
+	// Define ANSI color codes
+	pattern =	"\x1B\[[;\\d]*m"; // Regular expression for ANSI escape codes.
+	TEXT =		"\033[37m";
+	YELLOW =	"\033[33m";
+	GREEN =		"\033[32m";
+	RED =		"\033[31m";
+	PURPLE =	"\033[35m";
+	CYAN =		"\033[36m";
+	BLUE =		"\033[34m";
+	BLACK =		"\033[40m";
+	
 	currMenu = '1'; // Default value is '1' for the welcome screen.
 	prevMenu = '1'; // Stores identifier of the last menu displayed for regression.
-
-	pattern = "\x1B\[[;\\d]*m"; // Regular expression for ANSI escape codes.
 
 	header_text = "Welcome to the EZTechMovie Database Administration Application";
 	header = string(YELLOW) + "\n##############################################################################\n" +
@@ -106,7 +104,6 @@ Menus::Menus() {
 		string(YELLOW) + " [3] " + TEXT + "Delete Customer*",
 		string(YELLOW) + " [0] " + TEXT + "Previous Menu" };
 }
-
 
 
 

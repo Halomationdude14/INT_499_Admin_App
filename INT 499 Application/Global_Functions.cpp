@@ -1,6 +1,7 @@
 
 #ifdef _WIN32
 #include <conio.h>
+#include <windows.h>
 #endif
 
 #include <iostream>
@@ -15,17 +16,23 @@ using namespace std;
 #include "EZTechMovie_Admin_App.h"
 
 
-// Define ANSI color codes
-constexpr auto TEXT =	"\033[38;2;248;248;242m";
-constexpr auto RED =	"\033[38;2;255;85;85m";
-constexpr auto PURPLE = "\033[38;2;255;121;198m";
 
-
-// Default Constructor
 Global_Functions::Global_Functions() {
+	// Define ANSI color codes
+	TEXT =		"\033[37m";
+	YELLOW =	"\033[33m";
+	GREEN =		"\033[32m";
+	RED =		"\033[31m";
+	PURPLE =	"\033[35m";
+	CYAN =		"\033[36m";
+	BLUE =		"\033[34m";
+	BLACK =		"\033[40m";
+
 	tempStr = "";
 	c = 'X';
 }
+
+
 
 
 // Clear the terminal screen.

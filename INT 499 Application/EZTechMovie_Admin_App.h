@@ -18,6 +18,15 @@ class Global_Functions {
 		string strToUpperCase(string);
 		char charToUpperCase(char);
 		bool strIsInt(string&);
+		// ANSI color vars
+		string TEXT;
+		string YELLOW;
+		string GREEN;
+		string RED;
+		string PURPLE;
+		string CYAN;
+		string BLUE;
+		string BLACK;
 
 	protected:
 		string tempStr;
@@ -30,6 +39,18 @@ class Menus {
 
 	public:
 		Menus();
+
+		// ANSI color vars
+		string pattern;
+		string TEXT;
+		string YELLOW;
+		string GREEN;
+		string RED;
+		string PURPLE;
+		string CYAN;
+		string BLUE;
+		string BLACK;
+
 		void displayMenu();
 		void displayMenu(vector<string>);
 		void displayMenu(vector<string>, string);
@@ -38,11 +59,6 @@ class Menus {
 		void displayTable(vector<string>, vector<string>, vector<vector<string>>);
 		char getCurrMenu() const;
 		char getPrevMenu() const;
-
-		/*
-		* [SCRN] = Functions that display a specific UI and update the currMenu variable.
-		* [SLCT] = Functions that take in user input intended for navigating the menues. Returns char to indicate what the next UI shall be.
-		*/
 
 		// SCOPE: Basic functions to handle displaying the first 3 UIs and processing user input for each one.
 		void SCRN_start(vector<string>);
@@ -67,7 +83,6 @@ class Menus {
 		Global_Functions fct;
 		char currMenu;
 		char prevMenu;
-		string pattern;
 		string header_text;
 		string header;
 		string nav_main;
@@ -93,12 +108,22 @@ class DB_MovieData {
 	
 	public:
 		DB_MovieData();
+
+		// ANSI color vars
+		string TEXT;
+		string YELLOW;
+		string GREEN;
+		string RED;
+		string PURPLE;
+		string CYAN;
+		string BLUE;
+		string BLACK;
+
 		void setDefaultValues();
 		void addMsg(vector<string>);
 		void addMsg(string);
 		bool validInput();
 		vector<string> newPerson();
-
 		void setTitle(mysqlx::Schema);
 		void setYear();
 		void setRating();
@@ -114,7 +139,6 @@ class DB_MovieData {
 		void modifyNewMovie(mysqlx::Schema);
 		void validationSCRN(mysqlx::Schema);
 		void sendMovieToDB(mysqlx::Schema);
-
 		vector<string> insertMovieData(mysqlx::Schema);
 		vector<string> updateMovieData(mysqlx::Schema);
 		vector<string> deleteMovieData(mysqlx::Schema);
@@ -146,6 +170,16 @@ class DB_CustData {
 
 	public:
 		DB_CustData();
+
+		// ANSI color vars
+		string TEXT;
+		string YELLOW;
+		string GREEN;
+		string RED;
+		string PURPLE;
+		string CYAN;
+		string BLUE;
+		string BLACK;
 
 		vector<string> insertCustData(mysqlx::Schema);
 		vector<string> updateCustData(mysqlx::Schema);

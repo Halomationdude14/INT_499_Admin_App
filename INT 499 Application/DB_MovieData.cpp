@@ -10,18 +10,6 @@ using namespace std;
 #include "EZTechMovie_Admin_App.h"
 
 
-// Define ANSI color codes
-constexpr auto BOLD = "\033[1m";
-constexpr auto TEXT = "\033[38;2;248;248;242m";
-constexpr auto BLACK = "\033[38;2;33;34;44m";
-constexpr auto BLUE = "\033[38;2;189;147;249m";
-constexpr auto CYAN = "\033[38;2;139;233;253m";
-constexpr auto GREEN = "\033[38;2;80;250;123m";
-constexpr auto PURPLE = "\033[38;2;255;121;198m";
-constexpr auto RED = "\033[38;2;255;85;85m";
-constexpr auto YELLOW = "\033[38;2;241;250;140m";
-
-
 /*
 * TO-DO -->
 * 
@@ -32,6 +20,16 @@ constexpr auto YELLOW = "\033[38;2;241;250;140m";
 
 
 DB_MovieData::DB_MovieData() {
+	// Define ANSI color codes
+	TEXT =		"\033[37m";
+	YELLOW =	"\033[33m";
+	GREEN =		"\033[32m";
+	RED =		"\033[31m";
+	PURPLE =	"\033[35m";
+	CYAN =		"\033[36m";
+	BLUE =		"\033[34m";
+	BLACK =		"\033[40m";
+	
 	msgs = {};				// Stores all sys/err messages.
 	tableData = {};			// vector<vector<string>> var that stores converted table data from the database; can be sent to Menus object for display.
 	tblIndexes = {};		// Stores list of indexes (i.e. 1, 2, 3, etc...) from a given table.
