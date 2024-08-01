@@ -80,7 +80,23 @@ string BLACK =		"\033[40m";
 bool a = false;
 
 
-// Enables the use of ANSI escape codes in the terminal.
+// Adds any messages from [message] to the end of [msgs].
+void static addMsg(vector<string> message) {
+	if (message.size() > 0) {
+		msgs.insert(msgs.end(), message.begin(), message.end());
+	}
+}
+
+// Adds a string to the end of [msgs].
+void static addMsg(string message) {
+	if (message.size() > 0) {
+		msgs.push_back(message);
+	}
+}
+
+
+
+// Enables the use of ANSI escape codes for the Windows Terminal.
 // NOTE: Should work with Unix-like system as well, but this has not been tested!!!
 void static enableVirtualTerminalProcessing() {
 	HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -93,29 +109,25 @@ void static enableVirtualTerminalProcessing() {
 // https://stackoverflow.com/questions/1963992/check-windows-version
 
 // Checks to see if the OS is for Windows 10 or later.
+// NOTE: See Windows 10 (Build 16257)!
+// Link: https://blogs.windows.com/windows-insider/2017/08/02/announcing-windows-10-insider-preview-build-16257-pc-build-15237-mobile/
 bool static isWindows10OrLater() {
-	OSVERSIONINFOEXW osvi = { sizeof(OSVERSIONINFOEXW) };
-	GetVersionExW((OSVERSIONINFO*)&osvi);
-
-	printf("OS Version: %d.%d\n", osvi.dwMajorVersion, osvi.dwMinorVersion);
 
 #ifdef _WIN32
-	// Check for Windows 10 or later
-	return IsWindowsVersionOrGreater(10, 0, 0);
-#else
-	// For all other platforms
-	return false;
+	// Verify not using a Windows Server OS
+	if (!IsWindowsServer()) {
+		addMsg("TEST: OS is not a Windows Server.");
+		if (IsWindows10OrGreater()) {
+			addMsg("TEST: OS version is Windows 10 or greater!");
+			return true;
+		}
+	}
+	else {
+		addMsg("TEST: OS is a Windows Server!");
+	}
 #endif
-
-	// Use VerSetConditionMask to check for Windows 10 or later
-	/*
-	DWORD dwConditionMask = 0;
-	VerSetConditionMask(osvi.dwMajorVersion, VER_MAJORVERSION, VER_GREATER_EQUAL);
-	osvi.dwMajorVersion = 10; // Set the major version to 10 for comparison
-	*/
-
-	// Check if the system meets the specified version criteria
-	//return VerifyVersionInfoW(&osvi, VER_MAJORVERSION, NULL);
+	
+	return false;
 }
 
 /*
@@ -154,19 +166,7 @@ void static establishColorScheme() {
 }
 
 
-// Adds any messages from [message] to the end of [msgs].
-void static addMsg(vector<string> message) {
-	if (message.size() > 0) {
-		msgs.insert(msgs.end(), message.begin(), message.end());
-	}
-}
 
-// Adds a string to the end of [msgs].
-void static addMsg(string message) {
-	if (message.size() > 0) {
-		msgs.push_back(message);
-	}
-}
 
 // Overrides the default settings for Console Mode and Echo Input while obtaining the user's password for the database.
 // NOTE: This will only work with Windows systems!
@@ -356,8 +356,6 @@ void static callDisplayMethod() {
 			currUI = menu.getCurrMenu(); //may need to change this to menu.getPrevMenu() eventually...
 			break;
 	}
-
-	cout << "TEST: " << to_string(a) << endl;
 }
 
 // Processes a char through [Menus.cpp] and updates the current UI based on the user's selection.
@@ -441,6 +439,7 @@ int main() {
 		setDraculaTheme();
 		a = true;
 	}
+	addMsg("Bool TEST: " + to_string(a) + "\n");
 
 	// Establishes a color scheme/theme for the program.
 	establishColorScheme();
