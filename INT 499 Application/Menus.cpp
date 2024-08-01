@@ -49,14 +49,14 @@ using namespace std;
 Menus::Menus() {
 	// Define ANSI color codes
 	pattern =	"\x1B\[[;\\d]*m"; // Regular expression for ANSI escape codes.
-	TEXT =		"\033[37m";
-	YELLOW =	"\033[33m";
-	GREEN =		"\033[32m";
-	RED =		"\033[31m";
-	PURPLE =	"\033[35m";
-	CYAN =		"\033[36m";
-	BLUE =		"\033[34m";
-	BLACK =		"\033[40m";
+	TEXT =		"\033[97m";
+	YELLOW =	"\033[93m";
+	GREEN =		"\033[92m";
+	RED =		"\033[91m";
+	PURPLE =	"\033[95m";
+	CYAN =		"\033[96m";
+	BLUE =		"\033[94m";
+	BLACK =		"\033[90m";
 	
 	currMenu = '1'; // Default value is '1' for the welcome screen.
 	prevMenu = '1'; // Stores identifier of the last menu displayed for regression.

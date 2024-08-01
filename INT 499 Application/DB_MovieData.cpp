@@ -21,14 +21,14 @@ using namespace std;
 
 DB_MovieData::DB_MovieData() {
 	// Define ANSI color codes
-	TEXT =		"\033[37m";
-	YELLOW =	"\033[33m";
-	GREEN =		"\033[32m";
-	RED =		"\033[31m";
-	PURPLE =	"\033[35m";
-	CYAN =		"\033[36m";
-	BLUE =		"\033[34m";
-	BLACK =		"\033[40m";
+	TEXT =		"\033[97m";
+	YELLOW =	"\033[93m";
+	GREEN =		"\033[92m";
+	RED =		"\033[91m";
+	PURPLE =	"\033[95m";
+	CYAN =		"\033[96m";
+	BLUE =		"\033[94m";
+	BLACK =		"\033[90m";
 	
 	msgs = {};				// Stores all sys/err messages.
 	tableData = {};			// vector<vector<string>> var that stores converted table data from the database; can be sent to Menus object for display.

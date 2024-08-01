@@ -1,7 +1,6 @@
 
 #ifdef _WIN32
 #include <conio.h>
-#include <windows.h>
 #endif
 
 #include <iostream>
@@ -19,14 +18,14 @@ using namespace std;
 
 Global_Functions::Global_Functions() {
 	// Define ANSI color codes
-	TEXT =		"\033[37m";
-	YELLOW =	"\033[33m";
-	GREEN =		"\033[32m";
-	RED =		"\033[31m";
-	PURPLE =	"\033[35m";
-	CYAN =		"\033[36m";
-	BLUE =		"\033[34m";
-	BLACK =		"\033[40m";
+	TEXT =		"\033[97m";
+	YELLOW =	"\033[93m";
+	GREEN =		"\033[92m";
+	RED =		"\033[91m";
+	PURPLE =	"\033[95m";
+	CYAN =		"\033[96m";
+	BLUE =		"\033[94m";
+	BLACK =		"\033[90m";
 
 	tempStr = "";
 	c = 'X';

@@ -3,7 +3,7 @@
 * 
 * Author: Paul Oram
 * Date Started: 2024-04-22
-* Last Updated: 2024-07-31
+* Last Updated: 2024-08-01
 * Purpose: Sample terminal program to demonstrate how to use the <mysqlx/xdevapi.h> library which allows interaction with a MySQL server/database.
 * 
 */
@@ -31,7 +31,7 @@ using namespace std;
 * 3. Improve the efficiency of the colorization of text in this program.
 *		- SYS/ERROR/EXCEPTION messages -> create a function for each message that is similar to the [addMsg()] function.
 * 4. Delete the [addMsg(vector<string> message)] function. I don't believe it's being used at all.
-* 5. Continue work on color scheme and OS version detection. Need to centralize the color scheme and apply it to the other .cpp files.
+* 5. Work on providing support for other OS's -> Color schemes, getPassword(), and getUserInput() only support Windows systems currently.
 * 
 * MAJOR BUG!!! -> In the released version, when I attempt to login to the MySQL server, the program crashes.
 * 
@@ -46,6 +46,8 @@ using namespace std;
 * 4. DevApi Reference text file from author (code examples included in this repo): https://github.com/mysql/mysql-connector-cpp/blob/trunk/doc/devapi_ref.txt
 * 5. Sample code demonstrating how to use the modern version of the <xdevapi> library: https://stackoverflow.com/questions/75135560/x-devapi-batch-insert-extremely-slow
 * 6. ANSI Color Codes: https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797#rgb-colors
+* 7. Determine Windows OS Version: https://learn.microsoft.com/en-us/windows/win32/sysinfo/operating-system-version?redirectedfrom=MSDN
+* 8. How to Target your app for Windows: https://learn.microsoft.com/en-us/windows/win32/sysinfo/targeting-your-application-at-windows-8-1
 * 
 */
 
@@ -67,17 +69,15 @@ vector<vector<string>> tableData = {}; // vector<vector<string>> var that stores
 // Define ANSI color codes
 const string RESET =	"\033[0m";
 const string BOLD =		"\033[1m";
-string BG =			"\033[40m";
-string TEXT =		"\033[37m";
-string YELLOW =		"\033[33m";
-string GREEN =		"\033[32m";
-string RED =		"\033[31m";
-string PURPLE =		"\033[35m";
-string CYAN =		"\033[36m";
-string BLUE =		"\033[34m";
-string BLACK =		"\033[40m";
-
-bool a = false;
+string BG =			"\033[90m";
+string TEXT =		"\033[97m";
+string YELLOW =		"\033[93m";
+string GREEN =		"\033[92m";
+string RED =		"\033[91m";
+string PURPLE =		"\033[95m";
+string CYAN =		"\033[96m";
+string BLUE =		"\033[94m";
+string BLACK =		"\033[90m";
 
 
 // Adds any messages from [message] to the end of [msgs].
@@ -95,7 +95,6 @@ void static addMsg(string message) {
 }
 
 
-
 // Enables the use of ANSI escape codes for the Windows Terminal.
 // NOTE: Should work with Unix-like system as well, but this has not been tested!!!
 void static enableVirtualTerminalProcessing() {
@@ -106,32 +105,32 @@ void static enableVirtualTerminalProcessing() {
 	SetConsoleMode(hOut, dwMode);
 }
 
-// https://stackoverflow.com/questions/1963992/check-windows-version
+// Verifies the OS type and version to see if they are compatible with "True Colors" (24-bit spectrum).
+bool static doesOSSupportTrueColor() {
 
-// Checks to see if the OS is for Windows 10 or later.
-// NOTE: See Windows 10 (Build 16257)!
-// Link: https://blogs.windows.com/windows-insider/2017/08/02/announcing-windows-10-insider-preview-build-16257-pc-build-15237-mobile/
-bool static isWindows10OrLater() {
-
+	/*
+	* If OS is "Windows": verify it is not a "Windows Server" and that the version is 10 or greater.
+	* NOTE: "True Color" was not supported in the Windows Terminal until an early build for Windows 10 (back in 2016).
+	*		"True Color" is not supported by any version of Windows Server.
+	*/
 #ifdef _WIN32
-	// Verify not using a Windows Server OS
 	if (!IsWindowsServer()) {
-		addMsg("TEST: OS is not a Windows Server.");
 		if (IsWindows10OrGreater()) {
-			addMsg("TEST: OS version is Windows 10 or greater!");
+			addMsg("SYS: a");
 			return true;
 		}
 	}
 	else {
-		addMsg("TEST: OS is a Windows Server!");
+		addMsg("SYS: a");
 	}
 #endif
 	
+	// For all other OS's not directly handled in here, use the default ANSI color scheme.
 	return false;
 }
 
 /*
-* If the OS is Windows 10 or newer, update ANSI color vars with 24 - bit colors.
+* If the OS supports "True Color", update ANSI color vars with 24-bit colors.
 * Color scheme is based on the popular "Dracula" theme.
 * Shares the updated color scheme with all other associated classes.
 */
@@ -164,8 +163,6 @@ void static setDraculaTheme() {
 void static establishColorScheme() {
 	cout << BG << TEXT;
 }
-
-
 
 
 // Overrides the default settings for Console Mode and Echo Input while obtaining the user's password for the database.
@@ -434,14 +431,12 @@ int main() {
 	// Enable the use of ANSI escape codes to add some color to the terminal.
 	enableVirtualTerminalProcessing();
 
-	// If the OS is Windows 10 or newer, then the color scheme is updated to a 24-bit color pallete based on the "Dracula" theme.
-	if (isWindows10OrLater()) {
+	// If the OS supports "True Color", then the color scheme is updated.
+	if (doesOSSupportTrueColor()) {
 		setDraculaTheme();
-		a = true;
 	}
-	addMsg("Bool TEST: " + to_string(a) + "\n");
 
-	// Establishes a color scheme/theme for the program.
+	// Establishes the color scheme for the program.
 	establishColorScheme();
 
 
