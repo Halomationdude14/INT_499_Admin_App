@@ -3,7 +3,7 @@
 * 
 * Author: Paul Oram
 * Date Started: 2024-04-22
-* Last Updated: 2024-08-01
+* Last Updated: 2024-08-04
 * Purpose: Sample terminal program to demonstrate how to use the <mysqlx/xdevapi.h> library which allows interaction with a MySQL server/database.
 * 
 */
@@ -28,10 +28,9 @@ using namespace std;
 * 1. New bug found: when program takes in user input automatically, the <ENTER> was previously fixed, but now the <BACKSPACE> is causing problems.
 *	 The same for <SPACE> and <TAB>.
 * 2. Need to add VIEWs to the MySQL database. These views would drastically improve the readability of all relational tables.
-* 3. Improve the efficiency of the colorization of text in this program.
-*		- SYS/ERROR/EXCEPTION messages -> create a function for each message that is similar to the [addMsg()] function.
-* 4. Delete the [addMsg(vector<string> message)] function. I don't believe it's being used at all.
-* 5. Work on providing support for other OS's -> Color schemes, getPassword(), and getUserInput() only support Windows systems currently.
+* 3. Work on providing support for other OS's -> Color schemes and getUserInput() only support Windows systems currently.
+* 4. Migrate [validInput()] from DB_MovieData.cpp to Global_Functions.cpp and make universal.
+*	 This may not work though. Might be better to simply keep the function in DB_MovieData.cpp as is and just implement something similar into the rest of the code.
 * 
 * MAJOR BUG!!! -> In the released version, when I attempt to login to the MySQL server, the program crashes.
 * 
@@ -80,16 +79,16 @@ string BLUE =		"\033[94m";
 string BLACK =		"\033[90m";
 
 
-// Adds any messages from [message] to the end of [msgs].
+// Adds any strings from [message] to the end of [msgs].
 void static addMsg(vector<string> message) {
-	if (message.size() > 0) {
+	if (!message.empty()) {
 		msgs.insert(msgs.end(), message.begin(), message.end());
 	}
 }
 
 // Adds a string to the end of [msgs].
 void static addMsg(string message) {
-	if (message.size() > 0) {
+	if (!message.empty()) {
 		msgs.push_back(message);
 	}
 }
@@ -116,16 +115,17 @@ bool static doesOSSupportTrueColor() {
 #ifdef _WIN32
 	if (!IsWindowsServer()) {
 		if (IsWindows10OrGreater()) {
-			addMsg("SYS: a");
+			addMsg(fct.addSys("Windows system detected. Version is 10 or newer. Applying advanced color scheme."));
 			return true;
 		}
 	}
 	else {
-		addMsg("SYS: a");
+		addMsg(fct.addSys("Windows server detected. Does not support \"True Color\" mode. Default color scheme applied."));
 	}
+#else
+	addMsg(fct.addWarn("OS is not directly supported. Program may not function properly. Applying default color scheme."));
 #endif
 	
-	// For all other OS's not directly handled in here, use the default ANSI color scheme.
 	return false;
 }
 
@@ -215,7 +215,6 @@ bool static verifyLogin() {
 			cout << "Password: ";
 			getline(cin, Pass);
 		#endif
-		
 
 		/*
 		* Create a 'Session' object that attempts to establish a connection to a locally stored MySQL server.
@@ -223,20 +222,18 @@ bool static verifyLogin() {
 		*		Currently, this program is designed to only connect to locally stored MySQL servers.
 		*/
 		mysqlx::Session sess = mysqlx::getSession("localhost", 33060, User, Pass);
-
-		addMsg(string(GREEN) + "SYS:" + TEXT + " Connection to MySQL server successful!");
-		
+		addMsg(fct.addSys("Connection to MySQL server successful!"));
 		sess.close(); // Close the connection to avoid errors.
 
 		return true;
 	}
 
 	catch (const mysqlx::Error& err) {
-		addMsg(string(PURPLE) + "MYSQLX_ERROR [verifyLogin()]: " + TEXT + string(err.what()));
+		addMsg(fct.addExc(string(err.what()), "MYSQLX_ERROR"));
 		return false;
 	}
 	catch (exception& ex) {
-		addMsg(string(PURPLE) + "EXCEPTION [verifyLogin()]: " + TEXT + string(ex.what()));
+		addMsg(fct.addExc(string(ex.what()), "EXCEPTION"));
 		return false;
 	}
 }
@@ -284,9 +281,6 @@ void static setTableName() {
 		case 'M':
 			currTbl = "tbl_dvdrentalhistory";
 			break;
-		case '0':
-			currTbl = "NULL";
-			break;
 		default:
 			currTbl = "NULL";
 			break;
@@ -308,7 +302,7 @@ void static callDisplayMethod() {
 			msgs.clear();
 			conn = verifyLogin();
 			if (conn == false) {
-				addMsg(string(GREEN) + "SYS:" + TEXT + " Could not establish connection to MySQL server!");
+				addMsg(fct.addSys("Could not establish connection to MySQL server!"));
 			}
 			break;
 		case '3': // Main Menu
@@ -324,7 +318,7 @@ void static callDisplayMethod() {
 		case '5': // Display Table
 			// Verify that [tableData] is not empty before attempting to display it.
 			if (tableData.empty()) {
-				addMsg(string(GREEN) + "SYS:" + TEXT + " Table [" + string(PURPLE) + currTbl + TEXT + "] is empty. No data to display.");
+				addMsg(fct.addSys("Table [" + string(PURPLE) + currTbl + TEXT + "] is empty. No data to display."));
 			}
 			else {
 				menu.SCRN_displayTable(msgs, tableData);
@@ -348,8 +342,7 @@ void static callDisplayMethod() {
 			usrInput = fct.getUsrInput();
 			break;
 		default:
-			string str(1, currUI);
-			addMsg("CRITICAL ERROR: Program tried to call non-existent UI with ID = [" + str + "]. Displaying previous UI!");
+			addMsg(fct.addErr("Program tried to call a non-existent UI with ID = [" + fct.inptClr(currUI) + "]. Displaying previous UI!"));
 			currUI = menu.getCurrMenu(); //may need to change this to menu.getPrevMenu() eventually...
 			break;
 	}
@@ -408,11 +401,11 @@ void static processUserInput() {
 	// Error handling + data processing.
 	if (c == 'X') {
 		if (usrInput == '\r') { // Enter key
-			addMsg(string(RED) + "ERROR [processUserInput()]:" + TEXT + " User input is empty! Please enter a value this time...");
+			addMsg(fct.addErr("User input is empty! Please enter a value this time..."));
 		}
 		else {
 			string str(1, usrInput);
-			addMsg(string(RED) + "ERROR [processUserInput()]:" + TEXT + " User input [" + string(CYAN) + str + TEXT + "] is invalid!");
+			addMsg(fct.addErr("User input [" + fct.inptClr(str) + "] is invalid!"));
 		}
 	}
 	else {
@@ -427,18 +420,16 @@ void static processUserInput() {
 
 
 int main() {
+	vector<string> message = {}; // A temporary container for potential messages.
 
 	// Enable the use of ANSI escape codes to add some color to the terminal.
 	enableVirtualTerminalProcessing();
-
 	// If the OS supports "True Color", then the color scheme is updated.
 	if (doesOSSupportTrueColor()) {
 		setDraculaTheme();
 	}
-
 	// Establishes the color scheme for the program.
 	establishColorScheme();
-
 
 	// MAIN PROGRAM LOOP!
 	while (currUI != '0') {
@@ -446,9 +437,10 @@ int main() {
 		callDisplayMethod();
 		processUserInput();
 
-		// This loop handles all opperations beyond the Login screen once a connection has been successfully established with the MySQL server.
+		// This loop handles all opperations beyond the Login screen.
 		while (conn) {
 			usrInput = 'X'; // Reset user input to avoid possible mis-inputs/errors.
+			message = {};
 
 			try {
 				mysqlx::Session sess = mysqlx::getSession("localhost", 33060, User, Pass);
@@ -471,12 +463,12 @@ int main() {
 				* Now that [tbl] has been created and initialized, I can reference this object from anywhere in this try-catch block.
 				*/
 				mysqlx::Table tbl = db.getTable("NULL");
-				vector<string> message = {};
+				
 
 				switch (currUI) {
 					// Close the connection the the MySQL server.
 					case '1':
-						addMsg(string(GREEN) + "SYS:" + TEXT + " Connection to MySQL server closed.");
+						addMsg(fct.addSys("Connection to MySQL server closed."));
 						User = "";
 						Pass = "";
 						currTbl = "NULL";
@@ -553,11 +545,11 @@ int main() {
 			}
 
 			catch (const mysqlx::Error& err) {
-				addMsg(string(PURPLE) + "MYSQLX_ERROR [main()]: " + TEXT + string(err.what()));
+				addMsg(fct.addExc(string(err.what()), "MYSQLX_ERROR"));
 				break;
 			}
 			catch (exception& ex) {
-				addMsg(string(PURPLE) + "EXCEPTION [main()]: " + TEXT + string(ex.what()));
+				addMsg(fct.addExc(string(ex.what()), "EXCEPTION"));
 				break;
 			}
 		}

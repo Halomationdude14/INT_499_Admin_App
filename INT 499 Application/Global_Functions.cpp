@@ -56,6 +56,7 @@ int Global_Functions::getCurrYear() {
 	return year;
 }
 
+
 // Obtain the user's input when selecting menu options. Validate's input too.
 char Global_Functions::getUsrInput() {
 	tempStr = "";
@@ -76,6 +77,37 @@ char Global_Functions::getUsrInput() {
 	c = charToUpperCase(c);
 	return c;
 }
+
+// Takes in a char and exports as a string with the color "Cyan".
+string Global_Functions::inptClr(char inpt) {
+	return string(CYAN) + to_string(inpt) + TEXT;
+}
+
+// Takes in a char and exports as a string with the color "Cyan".
+string Global_Functions::inptClr(string inpt) {
+	return string(CYAN) + inpt + TEXT;
+}
+
+// Modifies a string into an system message.
+string Global_Functions::addSys(string message) {
+	return string(GREEN) + "SYS: " + TEXT + message;
+}
+
+// Modifies a string into an error message.
+string Global_Functions::addErr(string message) {
+	return string(RED) + "ERROR: " + TEXT + message;
+}
+
+// Modifies two strings into an exception message.
+string Global_Functions::addExc(string message, string exc_type) {
+	return string(PURPLE) + exc_type + ": " + TEXT + message;
+}
+
+// Modifies a string into a warning message.
+string Global_Functions::addWarn(string message) {
+	return string(YELLOW) + "WARNING: " + TEXT + message;
+}
+
 
 // NOTE: This function returns two vars using pointers!
 void Global_Functions::getTableData(mysqlx::Table table, vector<vector<string>>* tableData, vector<string>* msgs) {
@@ -127,10 +159,13 @@ void Global_Functions::getTableData(mysqlx::Table table, vector<vector<string>>*
 	}
 
 	catch (const mysqlx::Error& err) {
-		message.push_back(string(PURPLE) + "MYSQLX_ERROR [getTableData()]: " + TEXT + string(err.what()));
+		//message.push_back(string(PURPLE) + "MYSQLX_ERROR [getTableData()]: " + TEXT + string(err.what()));
+		message.push_back(addExc(string(err.what()), "MYSQLX_ERROR"));
 	}
 	catch (exception& ex) {
-		message.push_back(string(PURPLE) + "EXCEPTION [getTableData()]: " + TEXT + string(ex.what()));
+		//message.push_back(string(PURPLE) + "EXCEPTION [getTableData()]: " + TEXT + string(ex.what()));
+		message.push_back(addExc(string(ex.what()), "EXCEPTION"));
+
 	}
 
 	tempStr.clear();
@@ -146,7 +181,7 @@ void Global_Functions::getRow(vector<vector<string>> tableData, int ID, vector<s
 
 	try {
 		if (tableData.empty()) {
-			message.push_back(string(RED) + "ERROR [getRow()]:" + TEXT + " No table data to process! Cannot retrieve row data.");
+			message.push_back(addErr("No table data to process! Cannot retrieve row data."));
 		}
 		else {
 			for (auto& i : tableData) {
@@ -156,7 +191,7 @@ void Global_Functions::getRow(vector<vector<string>> tableData, int ID, vector<s
 					}
 				}
 				else { // In case the wrong table is put through this function (i.e., tables with a first column that is not of type [int]).
-					message.push_back(string(RED) + "ERROR [getRow()]:" + TEXT + " First column of table is not of type [int]! Aborting process.");
+					message.push_back(addErr("First column of table is not of type [INT]! Aborting process."));
 					break;
 				}
 			}
@@ -164,12 +199,13 @@ void Global_Functions::getRow(vector<vector<string>> tableData, int ID, vector<s
 	}
 
 	catch (exception& ex) {
-		message.push_back(string(PURPLE) + "EXCEPTION [getRow()]: " + TEXT + string(ex.what()));
+		message.push_back(addExc(string(ex.what()), "EXCEPTION"));
 	}
 
 	*rowData = row;
 	*msgs = message;
 }
+
 
 // Convert all chars in a string to UPPER case.
 string Global_Functions::strToUpperCase(string str) {

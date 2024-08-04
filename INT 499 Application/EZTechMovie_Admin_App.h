@@ -13,6 +13,12 @@ class Global_Functions {
 		void clearScreen();
 		int getCurrYear();
 		char getUsrInput();
+		string inptClr(char);
+		string inptClr(string);
+		string addSys(string);
+		string addErr(string);
+		string addExc(string, string);
+		string addWarn(string);
 		void getTableData(mysqlx::Table, vector<vector<string>>*, vector<string>*);
 		void getRow(vector<vector<string>>, int, vector<string>*, vector<string>*);
 		string strToUpperCase(string);
