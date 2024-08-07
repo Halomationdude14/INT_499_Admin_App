@@ -1,128 +1,51 @@
 
-##################################################################################################
-
-########## Admin App Overview ##########
-
-NOTE: (*) indicates that this feature has not been fully implemented yet in the MySQL database.
-
-[Bootup_Screen] When program is initially started, user is greeted with...
-	a. Company Logo
-	b. Message "EZTechMovie Database Administration Console"
-	c. Message "Enter Admin Credentials to Log Into the Console -->"
-	d. Prompt: {Username/Email: }
-	e. Prompt: {Password: }
-	- NOTE: 1st version will not perform any type of user/pass validation (except to verify that at least 1 char was entered by the user). Will accept any input.
-	- NOTE: Upon pressing <ENTER>, login screen is cleared and Main_Menu is displayed.
-	- NOTE: Add a feature that allows the user to quit the application via a single button at any point in time. Display this on the screen.
-
-[Main_Menu] User is provided with a list of options in numerical format.
-	[1] Display Data
-	[2] Modify Data
-	[3] Admin Account
-	[4] Sign Out
-
-[Display_Data]
-	[1] Movies
-	[2] Plans
-	[3] Customers
-	[4] Error Logs*
-	[\] Back
-
-[Display_Movies] Displays list of each movie by title, year, and genre.
-	[1] Select Movie by ID
-		[`] Swap Mode (Display/Edit)
-		[\] Back
-	[\] Back
-
-[Display_Plans] Display all available plans.
-	[`] Swap Mode (Display/Edit)
-	[\] Back
-
-[Display_Customers] Display customer's ID, full name(*), plan title, and membership start date.
-	[1] Select Customer by ID
-		[`] Swap Mode (Display/Edit)
-		[\] Back
-	[\] Back
-
-[Display_Error_Logs*] Display all error logs with timestamps.
-	[`] Swap Mode (Display/Edit)
-	[\] Back
-
-[Modify_Data]
-	[1] Movies
-	[2] Plans
-	[3] Customers
-	[4] Error Logs*
-	[\] Back
-
-[Modify_Movies] Displays list of each movie by title, year, and genre.
-	[1] Select Movie by ID
-		[1] Edit Movie Info
-		[2] Delete Movie
-		[`] Swap Mode (Display/Edit)
-		[\] Back
-	[2] Add Movie
-	[\] Back
-
-[Modify_Plans] Display all available plans.
-	[1] Select Plan by ID
-		[1] Edit Plan Info
-		[2] Delete Plan
-		[\] Back
-	[2] Add Plan
-	[`] Swap Mode (Display/Edit)
-	[\] Back
-
-[Modify_Customers] Display customer's ID, full name(*), plan title, and membership start date.
-	[1] Select Customer by ID
-		[1] Edit Customer Info
-		[2] Delete Customer
-		[`] Swap Mode (Display/Edit)
-		[\] Back
-	[2] Add Customer
-	[\] Back
-
-[Modify_Error_Logs*] Display all error logs with timestamps.
-	[1] Delete Log by ID
-	[2] Delete All Logs
-		[Confirmation Dialog]
-		[Y] Yes
-		[N] No
-	[`] Swap Mode (Display/Edit)
-	[\] Back
-
-[Admin_Account]
-	[1] Display Account Information
-	[2] Modify Account Information
-	[\] Back
-
-[Account_Display]
-	[Provide Password Again]
-	[Display Account Info]
-	[`] Swap Mode (Display/Edit)
-	[\] Back
-
-[Account_Modify]
-	[Provide Password Again]
-	"What Would You Like to Change?"
-	[1] Username
-	[2] Password
-	[3] Email
-	[`] Swap Mode (Display/Edit)
-	[\] Back
+####################################################################
+#################### INT 499 Admin App Overview ####################
+####################################################################
 
 
-##################################################################################################
+WARNING: App is not complete! Contains partial functionality!
+
+
+########## Introduction ##########
+
+This is a simple terminal application written in C++ that allows users to manipulate data on a locally stored MySQL server.
+The application uses the MySQL Connector/C++ to interact with the database, providing basic CRUD (Create, Read, Update, Delete) functionality.
+There is very little information online on how to use the devxapi library, so this was partially intended to serve as a guide on how to use more recent versions of the MySQL Connector/C++ dependency.
+
+I created this app based on the work done in my capstone course in college.
+I created a simple C++ terminal program that added "movie data" to a fictional database in the first week.
+I spent the next 4 weeks developing a MySQL database for a fictional company called "EZTechMovie".
+During this project, I discovered the MySQL Connector/C++ dependency which is where I got the idea for this application.
+After graduation, I started creating this app just to see if I could. It took much longer than anticipated, but I ended up learning a LOT from it.
+
+To anyone who finds this sandbox/hobby project helpful in any way, let me know!
+Any recommendations for the app are very welcome too!
+
+
+########## Features ##########
+
+    Connect to a local MySQL database
+    Create new records in the database
+    Read and display records from the database
+    (future*) Update existing records
+    (future*) Delete records
+
+
+########## Prerequisites ##########
+
+Before you run the application, you'll need to install and set up a MySQL server locally on your machine.
+Create a database on the MySQL server and name it "eztechmoviedb".
+Use the scripts attached to this repository to configure the newly created database.
+
+
+########## Contributing ##########
+
+Contributions are welcome! Please fork the repository and create a pull request with your changes. For major changes, please open an issue first to discuss what you would like to change.
+
 
 ########## Additional Notes ##########
 
-1. For the MySQL DB scripts, need to add additional triggers.
-	a. Handle the relations of movies, actors, and directors when a movie is removed from the DB.
-	b. Prevent the removal of an actor/director if there is a movie that is linked to them.
-2. May need to add procedures to work in tandem with the C++ code.
-3. Need to create a table to store deleted customers.
-4. IDEA: Provide functionality - Allow user to toggle between Display Mode and Edit Mode.
-	- Could use [`] as the toggle button.
-	- Default mode is "Display".
-	- Display "Confirm Changes?" dialog when modifying data to prevent accidental mistakes.
-5. Add table to store Admin user credentials.
+The app is only designed to work with locally installed MySQL servers, but can easily be reworked to connect to remote MySQL servers.
+The app was developed to support Windows computers but should work on other OSs like Linux or MacOS (not tested*).
+
