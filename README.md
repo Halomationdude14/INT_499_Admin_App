@@ -5,7 +5,7 @@
 **WARNING**: *App is not complete! Contains partial functionality!*
 
 
-# Introduction
+## Introduction
 
 This is a simple terminal application written in C++ that allows users to manipulate data on a locally stored MySQL server.
 The application uses the MySQL Connector/C++ to interact with the database, providing basic CRUD (Create, Read, Update, Delete) functionality.
@@ -21,28 +21,39 @@ To anyone who finds this sandbox/hobby project helpful in any way, let me know!
 Any recommendations for the app are very welcome too!
 
 
-# Features
+## Features
 
 * Connect to a local MySQL database
 * Read and display records from the database
 * Create new records in the database
-* (future*) Update existing records
-* (future*) Delete records
+* (*future**) Update existing records
+* (*future**) Delete records
 
 
-# Prerequisites
+## Prerequisites
 
-Before you run the application, you'll need to install and set up a MySQL server locally on your machine.  
-Create a database on the MySQL server and name it "eztechmoviedb".  
-Use the scripts attached to this repository to configure the newly created database.
+This application requires that a MySQL server/database (*version 8.0 or newer*) be installed on the same machine as the application.  
+After installation of the server, follow the instructions below to configure it for this application.  
 
+MySQL server/database configuration instructions:
+>1. Download the SQL scripts from this repository.
+>2. Open the MySQL Command-Line Client.
+>3. Enter the password used to access the MySQL server.
+>4. Run this command: `CREATE DATABASE eztechmoviedb;`
+>5. Navigate to the directory containing the .sql scripts.
+>6. Run this command for each SQL script: `mysql -u username -p database < script.sql;`
+>    - Replace `username` with the MySQL username
+>    - Replace `database` with "eztechmoviedb"
+>    - Replace `script.sql` with the filename of the SQL script.
 
-# Contributing
+**NOTE**: If the scripts are too large, try increasing the [max_allowed_packet] size.
+
+## Contributing
 
 Contributions are welcome! Please fork the repository and create a pull request with your changes. For major changes, please open an issue first to discuss what you would like to change.
 
 
-# Additional Notes
+## Additional Notes
 
 The app is only designed to work with locally installed MySQL servers, but can easily be reworked to connect to remote MySQL servers.  
 The app was developed to support Windows computers but should work on other OSs like Linux or MacOS (not tested*).
