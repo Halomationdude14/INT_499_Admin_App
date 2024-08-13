@@ -61,10 +61,18 @@ int Global_Functions::getCurrYear() {
 char Global_Functions::getUsrInput() {
 	tempStr = "";
 	c = 'X';
+	int key = -1; // for ANSI codes on Windows systems.
 
 	cout << "\nUser Input: ";
 #ifdef _WIN32
-	c = _getch(); // Get a character without requiring <ENTER>.
+	key = _getch(); // Get a character without requiring <ENTER> key.
+
+	if (key >= 0 && key <= 224) { // If no extended key codes are detected...
+		c = static_cast<char>(key);
+	}
+	else {
+		c = '\r'; // main.cpp will catch this and throw expected error message.
+	}
 #else
 	getline(cin, tempStr);
 	if (!tempStr.empty()) {

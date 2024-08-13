@@ -25,12 +25,7 @@ using namespace std;
 /*
 * Admin App TO-DO List -->
 * 
-* 1. New bug found: when program takes in user input automatically, the <ENTER> was previously fixed, but now the <BACKSPACE> is causing problems.
-*	 The same for <SPACE> and <TAB>.
-* 2. Need to add VIEWs to the MySQL database. These views would drastically improve the readability of all relational tables.
-* 3. Work on providing support for other OS's -> Color schemes and getUserInput() only support Windows systems currently.
-* 4. Migrate [validInput()] from DB_MovieData.cpp to Global_Functions.cpp and make universal.
-*	 This may not work though. Might be better to simply keep the function in DB_MovieData.cpp as is and just implement something similar into the rest of the code.
+* 1. Need to add VIEWs to the MySQL database. These views would drastically improve the readability of all relational tables.
 * 
 * MAJOR BUG!!! -> In the released version, when I attempt to login to the MySQL server, the program crashes.
 * 
@@ -55,6 +50,10 @@ Global_Functions fct;		// Object assists in generic processes throughout program
 Menus menu;					// Object assists in displaying information to the terminal screen.
 DB_MovieData movie;			// Allows for manipulation of "tbl_moviedata".
 DB_CustData cust;			// Allows for manipulation of "tbl_custdata".
+
+// Assists with error handling of user input.
+const std::set<char> specialChars = { '\r', '\n', '\t', '\b', '\f', '\v', '\a' };
+
 vector<string> msgs = {};	// Stores all SYS/ERR notifications: to be displayed below the header.
 char currUI = '1';			// Value corresponds to the current UI being displayed. Default is '1' to display the greeting screen.
 char usrInput = 'X';		// Stores value entered by user. Used for navigating through the menus. Default is 'X' -> this value throws an error if returned.
@@ -400,8 +399,11 @@ void static processUserInput() {
 
 	// Error handling + data processing.
 	if (c == 'X') {
-		if (usrInput == '\r') { // Enter key
-			addMsg(fct.addErr("User input is empty! Please enter a value this time..."));
+		if (specialChars.count(usrInput) > 0) { // If user input contains any special characters.
+			addMsg(fct.addErr("Invalid input! Special character detected."));
+		}
+		else if (usrInput == ' ') { // Handle spaces
+			addMsg(fct.addErr("Invalid input! Spacebar is not an acceptable input."));
 		}
 		else {
 			string str(1, usrInput);
