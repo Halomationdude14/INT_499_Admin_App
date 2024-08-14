@@ -27,8 +27,6 @@ using namespace std;
 * 
 * 1. Need to add VIEWs to the MySQL database. These views would drastically improve the readability of all relational tables.
 * 
-* MAJOR BUG!!! -> In the released version, when I attempt to login to the MySQL server, the program crashes.
-* 
 */
 
 /*
@@ -181,7 +179,6 @@ void static getPassword() {
 	while (true) {
 		ch = _getch(); // Use _getch() to get character without echoing it
 		if (ch == '\r') { // Enter key
-			std::cout << endl;
 			break;
 		}
 		else if (ch == 8) { // Backspace key
